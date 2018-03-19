@@ -430,7 +430,7 @@ class EmployeeTransfer extends React.Component {
         url: _baseUrl + "/hr-masters/vacantpositions/_search?tenantId=" + _tenantId + "&departmentId=" + departmentId + "&designationId=" + designationId + "&asOnDate=" + effectiveFrom,
         type: 'POST',
         dataType: 'json',
-        data: JSON.stringify({}),
+        data: JSON.stringify({ RequestInfo: requestInfo }),
         contentType: 'application/json',
         headers: {
           'auth-token': authToken
@@ -465,7 +465,7 @@ class EmployeeTransfer extends React.Component {
         url: _baseUrl + "/egov-common-masters/departments/_search?tenantId=" + _tenantId + "&pageSize=500",
         type: 'POST',
         dataType: 'json',
-        data: JSON.stringify({}),
+        data: JSON.stringify({ RequestInfo: requestInfo }),
         contentType: 'application/json',
         headers: {
           'auth-token': authToken
@@ -483,7 +483,7 @@ class EmployeeTransfer extends React.Component {
         url: _baseUrl + "/hr-masters/designations/_search?tenantId=" + _tenantId + "&pageSize=500",
         type: 'POST',
         dataType: 'json',
-        data: JSON.stringify({}),
+        data: JSON.stringify({ RequestInfo: requestInfo }),
         contentType: 'application/json',
         headers: {
           'auth-token': authToken
