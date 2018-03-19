@@ -447,7 +447,7 @@ class EmployeeTransfer extends React.Component {
     var _tenantId = ulb ? ulb : tenantId;
 
     $.ajax({
-      url: _baseUrl + "/egov-common-masters/departments/_search?tenantId=" + _tenantId + "pageSize=500",
+      url: _baseUrl + "/egov-common-masters/departments/_search?tenantId=" + _tenantId + "&pageSize=500",
       type: 'POST',
       dataType: 'json',
       data: JSON.stringify({}),
@@ -465,7 +465,7 @@ class EmployeeTransfer extends React.Component {
     });
 
     $.ajax({
-      url: _baseUrl + "/hr-masters/designations/_search?tenantId=" + _tenantId + "pageSize=500",
+      url: _baseUrl + "/hr-masters/designations/_search?tenantId=" + _tenantId + "&pageSize=500",
       type: 'POST',
       dataType: 'json',
       data: JSON.stringify({}),
