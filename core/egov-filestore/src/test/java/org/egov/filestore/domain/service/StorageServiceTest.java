@@ -1,6 +1,18 @@
 package org.egov.filestore.domain.service;
 
 
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.IntStream;
+
 import org.egov.filestore.domain.exception.EmptyFileUploadRequestException;
 import org.egov.filestore.domain.model.Artifact;
 import org.egov.filestore.domain.model.FileInfo;
@@ -16,18 +28,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.IntStream;
-
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @RunWith(MockitoJUnitRunner.class)
 public class StorageServiceTest {
 
@@ -40,8 +40,10 @@ public class StorageServiceTest {
     private final String MODULE = "pgr";
     private final String TAG = "tag";
     private final String TENANTID = "tenantId";
+    private final String FILENAME = "fileName";
     private final String FILE_STORE_ID_1 = "FileStoreID1";
     private final String FILE_STORE_ID_2 = "FileStoreID2";
+    private final String FILE_SOURCE = "diskFileStorage";
     private StorageService storageService;
 
     @Before
@@ -97,25 +99,25 @@ public class StorageServiceTest {
 
     private List<Artifact> getArtifactList(List<MultipartFile> multipartFiles) {
         Artifact artifact1 = new Artifact(multipartFiles.get(0),
-                new FileLocation(FILE_STORE_ID_1, MODULE, TAG,TENANTID));
+                new FileLocation(FILE_STORE_ID_1, MODULE, TAG,TENANTID,FILENAME,FILE_SOURCE));
         Artifact artifact2 = new Artifact(multipartFiles.get(1),
-                new FileLocation(FILE_STORE_ID_2, MODULE, TAG,TENANTID));
+                new FileLocation(FILE_STORE_ID_2, MODULE, TAG,TENANTID,FILENAME,FILE_SOURCE));
 
         return Arrays.asList(artifact1, artifact2);
     }
 
     private List<Artifact> getArtifactList2(List<MultipartFile> multipartFiles) {
         Artifact artifact1 = new Artifact(multipartFiles.get(0),
-                new FileLocation(FILE_STORE_ID_1, MODULE, TAG,TENANTID));
+                new FileLocation(FILE_STORE_ID_1, MODULE, TAG,TENANTID,FILENAME,FILE_SOURCE));
         Artifact artifact2 = new Artifact(multipartFiles.get(1),
-                new FileLocation("", MODULE, TAG,TENANTID));
+                new FileLocation("", MODULE, TAG,TENANTID,FILENAME,FILE_SOURCE));
 
         return Arrays.asList(artifact1, artifact2);
     }
 
     private List<FileInfo> getListOfFileInfo() {
-        FileLocation fileLocation1 = new FileLocation(FILE_STORE_ID_1, MODULE, TAG,TENANTID);
-        FileLocation fileLocation2 = new FileLocation(FILE_STORE_ID_2, MODULE, TAG,TENANTID);
+        FileLocation fileLocation1 = new FileLocation(FILE_STORE_ID_1, MODULE, TAG,TENANTID,FILENAME,FILE_SOURCE);
+        FileLocation fileLocation2 = new FileLocation(FILE_STORE_ID_2, MODULE, TAG,TENANTID,FILENAME,FILE_SOURCE);
 
         return asList(
                 new FileInfo("contentType", fileLocation1,TENANTID),

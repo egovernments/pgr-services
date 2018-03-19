@@ -41,7 +41,10 @@
 package org.egov.filestore.persistence.entity;
 
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.egov.filestore.domain.model.FileLocation;
 import org.hibernate.validator.constraints.NotBlank;
@@ -55,6 +58,9 @@ import static org.egov.filestore.persistence.entity.Artifact.SEQ_FILESTOREMAP;
 @Setter
 @Table(name = "eg_filestoremap")
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @SequenceGenerator(name = SEQ_FILESTOREMAP, sequenceName = SEQ_FILESTOREMAP, allocationSize = 1)
 public class Artifact extends AbstractPersistable<Long> {
     public static final String SEQ_FILESTOREMAP = "SEQ_EG_FILESTOREMAP";
@@ -76,9 +82,12 @@ public class Artifact extends AbstractPersistable<Long> {
     
     @Column(name = "tenantid")
     private String tenantId;
+    
+    @Column(name = "filesource")
+    private String fileSource;
 
     public FileLocation getFileLocation() {
-        return new FileLocation(fileStoreId, module, tag,tenantId);
+        return new FileLocation(fileStoreId, module, tag,tenantId,fileName,fileSource);
     }
 }
 

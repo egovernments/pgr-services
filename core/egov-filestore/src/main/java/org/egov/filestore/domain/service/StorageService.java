@@ -13,7 +13,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,12 +47,21 @@ public class StorageService {
 		}
 	}
 
-	private List<Artifact> mapFilesToArtifacts(List<MultipartFile> files, String module,
-											   String tag, String tenantId) {
+	private List<Artifact> mapFilesToArtifacts(List<MultipartFile> files, String module, String tag, String tenantId) {
+
+		final String folderName = getFolderName(module, tenantId);
 		return files.stream().map(file -> {
-			FileLocation fileLocation = new FileLocation(this.idGeneratorService.getId(), module, tag, tenantId);
+			String fileName = folderName + file.getOriginalFilename();
+			String id = this.idGeneratorService.getId();
+			FileLocation fileLocation = new FileLocation(id, module, tag, tenantId, fileName,null);
 			return new Artifact(file, fileLocation);
 		}).collect(Collectors.toList());
+	}
+
+	private String getFolderName(String module, String tenantId) {
+
+		Calendar calendar = Calendar.getInstance();
+		return getBucketName(tenantId, calendar) + "/" + getFolderName(module,tenantId, calendar);
 	}
 
 	public Resource retrieve(String fileStoreId, String tenantId) throws IOException {
@@ -59,5 +70,15 @@ public class StorageService {
 
 	public List<FileInfo> retrieveByTag(String tag, String tenantId) {
 		return artifactRepository.findByTag(tag, tenantId);
+	}
+	
+	private String getFolderName(String module, String tenantId, Calendar calendar) {
+		return tenantId + "/" + module + "/" + calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.ENGLISH)
+				+ "/" + calendar.get(Calendar.DATE) + "/";
+	}
+	
+	private String getBucketName(String tenantId, Calendar calendar) {
+		// TODO add config filter logic
+		return tenantId.split("\\.")[0] + calendar.get(Calendar.YEAR);
 	}
 }
