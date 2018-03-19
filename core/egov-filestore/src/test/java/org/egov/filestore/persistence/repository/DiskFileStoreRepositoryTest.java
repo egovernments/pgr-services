@@ -1,6 +1,16 @@
 package org.egov.filestore.persistence.repository;
 
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
 import org.egov.filestore.domain.model.Artifact;
 import org.egov.filestore.domain.model.FileLocation;
 import org.junit.Before;
@@ -11,14 +21,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.io.Resource;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DiskFileStoreRepositoryTest {
@@ -31,6 +33,7 @@ public class DiskFileStoreRepositoryTest {
 	private final String TAG = "tag";
 	private final String TENANT_ID = "tenantId";
 	private final String FILENAME = "fileName";
+	private final String FILE_SOURCE = null;
 	private DiskFileStoreRepository diskFileStoreRepository;
 
 	@Before
@@ -46,8 +49,8 @@ public class DiskFileStoreRepositoryTest {
 		String fileStoreId2 = UUID.randomUUID().toString();
 		String fileStoreId1 = UUID.randomUUID().toString();
 		List<Artifact> listOfMockedArtifacts = Arrays.asList(
-				new Artifact(file1, new FileLocation(fileStoreId1, MODULE, TAG, TENANT_ID,FILENAME)),
-				new Artifact(file2, new FileLocation(fileStoreId2, MODULE, TAG, TENANT_ID,FILENAME))
+				new Artifact(file1, new FileLocation(fileStoreId1, MODULE, TAG, TENANT_ID,FILENAME,FILE_SOURCE)),
+				new Artifact(file2, new FileLocation(fileStoreId2, MODULE, TAG, TENANT_ID,FILENAME,FILE_SOURCE))
 		);
 
 		diskFileStoreRepository.write(listOfMockedArtifacts);
@@ -58,7 +61,7 @@ public class DiskFileStoreRepositoryTest {
 
 	@Test
 	public void shouldReturnResourceForGivenPath() {
-		FileLocation fileLocation = new FileLocation("fileStoreId", MODULE, TAG, TENANT_ID,FILENAME);
+		FileLocation fileLocation = new FileLocation("fileStoreId", MODULE, TAG, TENANT_ID,FILENAME,FILE_SOURCE);
 		Resource expectedResource = mock(Resource.class);
 		when(fileRepository.read(Paths.get(FILE_STORAGE_MOUNT_PATH, FILENAME)))
 				.thenReturn(expectedResource);

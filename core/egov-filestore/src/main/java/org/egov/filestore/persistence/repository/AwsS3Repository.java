@@ -40,6 +40,11 @@ public class AwsS3Repository {
 	
 	@Value("${aws.secretkey}")
 	private String secretKey;
+	
+	@Value("${temp.folder.path}")
+	private String tempFolder;
+	
+	private final String TEMP_NAME = "localFile";
 
 	public void writeToS3(MultipartFile file, FileLocation fileLocation) {
 
@@ -96,12 +101,12 @@ public class AwsS3Repository {
 
 		long beforeCalling = new Date().getTime();
 		
-		File localFile = new File("localFilename");
+		File localFile = new File(tempFolder+"/"+TEMP_NAME);
 		s3Client.getObject(getObjectRequest, localFile);
 
 		long afterAws = new Date().getTime();
 		
-		FileSystemResource fileSystemResource = new FileSystemResource(Paths.get("localFilename").toFile());
+		FileSystemResource fileSystemResource = new FileSystemResource(Paths.get(tempFolder+"/"+TEMP_NAME).toFile());
 		
 		long generateResource = new Date().getTime();
 		

@@ -53,7 +53,7 @@ public class StorageService {
 		return files.stream().map(file -> {
 			String fileName = folderName + file.getOriginalFilename();
 			String id = this.idGeneratorService.getId();
-			FileLocation fileLocation = new FileLocation(id, module, tag, tenantId, fileName);
+			FileLocation fileLocation = new FileLocation(id, module, tag, tenantId, fileName,null);
 			return new Artifact(file, fileLocation);
 		}).collect(Collectors.toList());
 	}

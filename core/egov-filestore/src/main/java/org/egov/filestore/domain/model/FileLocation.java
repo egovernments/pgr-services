@@ -4,9 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @AllArgsConstructor
 @Getter
+@Setter
 @NoArgsConstructor
 @Builder
 public class FileLocation {
@@ -15,4 +17,5 @@ public class FileLocation {
     private String tag;
     private String tenantId;
     private String fileName;
+    private String fileSource;
 }
