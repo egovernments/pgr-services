@@ -415,74 +415,89 @@ class EmployeeTransfer extends React.Component {
 
     vacantPositionFun(departmentId, designationId, effectiveFrom, ulb) {
       var _this = this;
-      commonApiPost("hr-masters", "vacantpositions", "_search", {
-        tenantId: ulb ? ulb : tenantId,
-        departmentId: departmentId,
-        designationId: designationId,
-        asOnDate: effectiveFrom
-      }, function(err, res) {
-        if (res) {
+
+      var _baseUrl = baseUrl
+
+      if (ulb) {
+        console.log(baseUrl);
+        _baseUrl = baseUrl.replace(tenantId.split(".")[1], ulb.split(".")[1]);
+        console.log(baseUrl);
+      }
+
+      var _tenantId = ulb ? ulb : tenantId;
+
+      $.ajax({
+        url: _baseUrl + "/hr-masters/vacantpositions/_search?tenantId=" + _tenantId + "&departmentId=" + departmentId + "&designationId=" + designationId + "&asOnDate=" + effectiveFrom,
+        type: 'POST',
+        dataType: 'json',
+        data: JSON.stringify({}),
+        contentType: 'application/json',
+        headers: {
+          'auth-token': authToken
+        },
+        success: function (res) {
+
           _this.setState({
             movement: {
               ..._this.state.movement,
             },
             pNameList: res.Position
           })
+
+        }
+      });
+    }
+
+    getUlbDetails(ulb) {
+
+      var _this = this;
+      var _baseUrl = baseUrl
+
+      if (ulb) {
+        console.log(baseUrl);
+        _baseUrl = baseUrl.replace(tenantId.split(".")[1], ulb.split(".")[1]);
+        console.log(baseUrl);
+      }
+
+      var _tenantId = ulb ? ulb : tenantId;
+
+      $.ajax({
+        url: _baseUrl + "/egov-common-masters/departments/_search?tenantId=" + _tenantId + "&pageSize=500",
+        type: 'POST',
+        dataType: 'json',
+        data: JSON.stringify({}),
+        contentType: 'application/json',
+        headers: {
+          'auth-token': authToken
+        },
+        success: function (res) {
+
+          _this.setState({
+            ..._this.state,
+            ulbDepartmentList: res.Department
+          })
+        }
+      });
+
+      $.ajax({
+        url: _baseUrl + "/hr-masters/designations/_search?tenantId=" + _tenantId + "&pageSize=500",
+        type: 'POST',
+        dataType: 'json',
+        data: JSON.stringify({}),
+        contentType: 'application/json',
+        headers: {
+          'auth-token': authToken
+        },
+        success: function (res) {
+
+          _this.setState({
+            ..._this.state,
+            ulbDesignationList: res.Designation
+          })
         }
       });
 
     }
-
-  getUlbDetails(ulb) {
-
-    var _this = this;
-    var _baseUrl = baseUrl
-
-    if (ulb) {
-      console.log(baseUrl);
-      _baseUrl = baseUrl.replace(tenantId.split(".")[1], ulb.split(".")[1]);
-      console.log(baseUrl);
-    }
-
-    var _tenantId = ulb ? ulb : tenantId;
-
-    $.ajax({
-      url: _baseUrl + "/egov-common-masters/departments/_search?tenantId=" + _tenantId + "&pageSize=500",
-      type: 'POST',
-      dataType: 'json',
-      data: JSON.stringify({}),
-      contentType: 'application/json',
-      headers: {
-        'auth-token': authToken
-      },
-      success: function (res) {
-
-        _this.setState({
-          ..._this.state,
-          ulbDepartmentList: res.Department
-        })
-      }
-    });
-
-    $.ajax({
-      url: _baseUrl + "/hr-masters/designations/_search?tenantId=" + _tenantId + "&pageSize=500",
-      type: 'POST',
-      dataType: 'json',
-      data: JSON.stringify({}),
-      contentType: 'application/json',
-      headers: {
-        'auth-token': authToken
-      },
-      success: function (res) {
-
-        _this.setState({
-          ..._this.state,
-          ulbDesignationList: res.Designation
-        })
-      }
-    });
-
-  }
   
     makeAjaxUpload(file, cb) {
       if (file.constructor == File) {
