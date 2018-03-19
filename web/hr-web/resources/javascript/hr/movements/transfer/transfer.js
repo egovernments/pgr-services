@@ -440,7 +440,7 @@ class EmployeeTransfer extends React.Component {
 
     if (ulb) {
       console.log(baseUrl);
-      _baseUrl = baseUrl.replace(tenantId.split(".")[1], ulb);
+      _baseUrl = baseUrl.replace(tenantId.split(".")[1], ulb.split(".")[1]);
       console.log(baseUrl);
     }
 
