@@ -22,6 +22,7 @@ public class ResponseFactoryTest {
 	private final String CONTENT_TYPE_1 = "contentType1";
 	private final String CONTENT_TYPE_2 = "contentType2";
 	private final String TENANT_ID = "default";
+	private final String FILENAME = "fileName";
 
 	@Before
 	public void setUp() throws Exception {
@@ -30,8 +31,8 @@ public class ResponseFactoryTest {
 
 	@Test
 	public void test_getFilesByTagResponse_from_FileInfo() throws Exception {
-		FileLocation fileLocation1 = new FileLocation(FILE_STORE_ID_1, MODULE, TAG, TENANT_ID);
-		FileLocation fileLocation2 = new FileLocation(FILE_STORE_ID_2, MODULE, TAG, TENANT_ID);
+		FileLocation fileLocation1 = new FileLocation(FILE_STORE_ID_1, MODULE, TAG, TENANT_ID,FILENAME);
+		FileLocation fileLocation2 = new FileLocation(FILE_STORE_ID_2, MODULE, TAG, TENANT_ID,FILENAME);
 		FileInfo fileInfo1 = new FileInfo(CONTENT_TYPE_1, fileLocation1, TENANT_ID);
 		FileInfo fileInfo2 = new FileInfo(CONTENT_TYPE_2, fileLocation2, TENANT_ID);
 		List<FileInfo> listOfFileInfo = asList(fileInfo1, fileInfo2);
