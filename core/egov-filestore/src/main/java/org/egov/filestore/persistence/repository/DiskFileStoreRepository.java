@@ -2,6 +2,7 @@ package org.egov.filestore.persistence.repository;
 
 import org.egov.filestore.domain.model.Artifact;
 import org.egov.filestore.domain.model.FileLocation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,14 @@ import java.util.List;
 @Service
 public class DiskFileStoreRepository {
 
-    private FileRepository fileRepository;
+    @Autowired
+    private AwsS3Repository s3Repository;
+    
+	@Value("${isS3Enabled}")
+	private Boolean isS3Enabled;
+    
+	private FileRepository fileRepository;
+    
     private String fileMountPath;
 
     public DiskFileStoreRepository(FileRepository fileRepository,
@@ -23,24 +31,35 @@ public class DiskFileStoreRepository {
         this.fileMountPath = fileMountPath;
     }
 
-    public void write(List<Artifact> artifacts) {
-        artifacts.forEach(artifact -> {
-            MultipartFile multipartFile = artifact.getMultipartFile();
-            FileLocation fileLocation = artifact.getFileLocation();
-			Path path = getPath(fileLocation);
-			fileRepository.write(multipartFile, path);
-        });
-    }
+	public void write(List<Artifact> artifacts) {
+		artifacts.forEach(artifact -> {
+			MultipartFile multipartFile = artifact.getMultipartFile();
+			FileLocation fileLocation = artifact.getFileLocation();
+			if (isS3Enabled) {
+				s3Repository.writeToS3(multipartFile, fileLocation);
+			} else {
+				Path path = getPath(fileLocation);
+				fileRepository.write(multipartFile, path);
+			}
+		});
+	}
 
 	public Resource read(FileLocation fileLocation) {
+		
+		Resource resource = null;
+		
+		if(!isS3Enabled) {
         Path path = getPath(fileLocation);
-        return fileRepository.read(path);
+        resource = fileRepository.read(path);
+		}else {
+			resource = s3Repository.getObject(fileLocation.getFileName());
+		}
+        
+        return resource;
     }
 
 	private Path getPath(FileLocation fileLocation) {
-		return Paths.get(fileMountPath, fileLocation.getTenantId(),
-				fileLocation.getModule(),
-				fileLocation.getFileStoreId());
+		return Paths.get(fileMountPath, fileLocation.getFileName());
 	}
 
 

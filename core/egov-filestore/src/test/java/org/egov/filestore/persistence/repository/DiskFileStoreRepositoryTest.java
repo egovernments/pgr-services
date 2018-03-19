@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.io.Resource;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Paths;
@@ -29,11 +30,13 @@ public class DiskFileStoreRepositoryTest {
 	private final String MODULE = "module_id";
 	private final String TAG = "tag";
 	private final String TENANT_ID = "tenantId";
+	private final String FILENAME = "fileName";
 	private DiskFileStoreRepository diskFileStoreRepository;
 
 	@Before
 	public void setup() {
 		diskFileStoreRepository = new DiskFileStoreRepository(fileRepository, FILE_STORAGE_MOUNT_PATH);
+		ReflectionTestUtils.setField(diskFileStoreRepository, "isS3Enabled", false);
 	}
 
 	@Test
@@ -43,21 +46,21 @@ public class DiskFileStoreRepositoryTest {
 		String fileStoreId2 = UUID.randomUUID().toString();
 		String fileStoreId1 = UUID.randomUUID().toString();
 		List<Artifact> listOfMockedArtifacts = Arrays.asList(
-				new Artifact(file1, new FileLocation(fileStoreId1, MODULE, TAG, TENANT_ID)),
-				new Artifact(file2, new FileLocation(fileStoreId2, MODULE, TAG, TENANT_ID))
+				new Artifact(file1, new FileLocation(fileStoreId1, MODULE, TAG, TENANT_ID,FILENAME)),
+				new Artifact(file2, new FileLocation(fileStoreId2, MODULE, TAG, TENANT_ID,FILENAME))
 		);
 
 		diskFileStoreRepository.write(listOfMockedArtifacts);
 
-		verify(fileRepository).write(file1, Paths.get(FILE_STORAGE_MOUNT_PATH, TENANT_ID, MODULE, fileStoreId1));
-		verify(fileRepository).write(file2, Paths.get(FILE_STORAGE_MOUNT_PATH, TENANT_ID, MODULE, fileStoreId2));
+		verify(fileRepository).write(file1, Paths.get(FILE_STORAGE_MOUNT_PATH, FILENAME));
+		verify(fileRepository).write(file2, Paths.get(FILE_STORAGE_MOUNT_PATH, FILENAME));
 	}
 
 	@Test
 	public void shouldReturnResourceForGivenPath() {
-		FileLocation fileLocation = new FileLocation("fileStoreId", MODULE, TAG, TENANT_ID);
+		FileLocation fileLocation = new FileLocation("fileStoreId", MODULE, TAG, TENANT_ID,FILENAME);
 		Resource expectedResource = mock(Resource.class);
-		when(fileRepository.read(Paths.get(FILE_STORAGE_MOUNT_PATH, TENANT_ID, MODULE, "fileStoreId")))
+		when(fileRepository.read(Paths.get(FILE_STORAGE_MOUNT_PATH, FILENAME)))
 				.thenReturn(expectedResource);
 
 		Resource actualResource = diskFileStoreRepository.read(fileLocation);

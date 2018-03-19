@@ -40,6 +40,7 @@ public class StorageServiceTest {
     private final String MODULE = "pgr";
     private final String TAG = "tag";
     private final String TENANTID = "tenantId";
+    private final String FILENAME = "fileName";
     private final String FILE_STORE_ID_1 = "FileStoreID1";
     private final String FILE_STORE_ID_2 = "FileStoreID2";
     private StorageService storageService;
@@ -97,25 +98,25 @@ public class StorageServiceTest {
 
     private List<Artifact> getArtifactList(List<MultipartFile> multipartFiles) {
         Artifact artifact1 = new Artifact(multipartFiles.get(0),
-                new FileLocation(FILE_STORE_ID_1, MODULE, TAG,TENANTID));
+                new FileLocation(FILE_STORE_ID_1, MODULE, TAG,TENANTID,FILENAME));
         Artifact artifact2 = new Artifact(multipartFiles.get(1),
-                new FileLocation(FILE_STORE_ID_2, MODULE, TAG,TENANTID));
+                new FileLocation(FILE_STORE_ID_2, MODULE, TAG,TENANTID,FILENAME));
 
         return Arrays.asList(artifact1, artifact2);
     }
 
     private List<Artifact> getArtifactList2(List<MultipartFile> multipartFiles) {
         Artifact artifact1 = new Artifact(multipartFiles.get(0),
-                new FileLocation(FILE_STORE_ID_1, MODULE, TAG,TENANTID));
+                new FileLocation(FILE_STORE_ID_1, MODULE, TAG,TENANTID,FILENAME));
         Artifact artifact2 = new Artifact(multipartFiles.get(1),
-                new FileLocation("", MODULE, TAG,TENANTID));
+                new FileLocation("", MODULE, TAG,TENANTID,FILENAME));
 
         return Arrays.asList(artifact1, artifact2);
     }
 
     private List<FileInfo> getListOfFileInfo() {
-        FileLocation fileLocation1 = new FileLocation(FILE_STORE_ID_1, MODULE, TAG,TENANTID);
-        FileLocation fileLocation2 = new FileLocation(FILE_STORE_ID_2, MODULE, TAG,TENANTID);
+        FileLocation fileLocation1 = new FileLocation(FILE_STORE_ID_1, MODULE, TAG,TENANTID,FILENAME);
+        FileLocation fileLocation2 = new FileLocation(FILE_STORE_ID_2, MODULE, TAG,TENANTID,FILENAME);
 
         return asList(
                 new FileInfo("contentType", fileLocation1,TENANTID),
