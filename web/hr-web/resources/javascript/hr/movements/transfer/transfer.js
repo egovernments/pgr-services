@@ -433,34 +433,57 @@ class EmployeeTransfer extends React.Component {
 
     }
 
-    getUlbDetails(ulb){
-      var _this = this;
-      commonApiPost("egov-common-masters", "departments", "_search", {
-        tenantId: ulb ? ulb : tenantId,
-        pageSize: 500
-      }, function(err, res) {
-        if (res) {
-          _this.setState({
-            ..._this.state,
-            ulbDepartmentList : res.Department
-          })
-        }
-      });
+  getUlbDetails(ulb) {
 
-      commonApiPost("hr-masters", "designations", "_search", {
-        tenantId: ulb ? ulb : tenantId,
-        pageSize: 500
-      }, function(err, res) {
-        if (res) {
-          _this.setState({
-            ..._this.state,
-            ulbDesignationList : res.Designation
-          })
-        }
-      });
+    var _this = this;
+    var _baseUrl = baseUrl
 
+    if (ulb) {
+      console.log(baseUrl);
+      _baseUrl = baseUrl.replace(tenantId.split(".")[1], ulb);
+      console.log(baseUrl);
     }
 
+    var _tenantId = ulb ? ulb : tenantId;
+
+    $.ajax({
+      url: _baseUrl + "/egov-common-masters/departments/_search?tenantId=" + _tenantId + "pageSize=500",
+      type: 'POST',
+      dataType: 'json',
+      data: JSON.stringify({}),
+      contentType: 'application/json',
+      headers: {
+        'auth-token': authToken
+      },
+      success: function (res) {
+
+        _this.setState({
+          ..._this.state,
+          ulbDepartmentList: res.Department
+        })
+      }
+    });
+
+    $.ajax({
+      url: _baseUrl + "/hr-masters/designations/_search?tenantId=" + _tenantId + "pageSize=500",
+      type: 'POST',
+      dataType: 'json',
+      data: JSON.stringify({}),
+      contentType: 'application/json',
+      headers: {
+        'auth-token': authToken
+      },
+      success: function (res) {
+
+        _this.setState({
+          ..._this.state,
+          ulbDesignationList: res.Designation
+        })
+      }
+    });
+
+  }
+  
     makeAjaxUpload(file, cb) {
       if (file.constructor == File) {
         let formData = new FormData();
