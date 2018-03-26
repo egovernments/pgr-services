@@ -13,7 +13,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
@@ -41,17 +40,14 @@ public class AwsS3Repository {
 	@Value("${aws.secretkey}")
 	private String secretKey;
 	
-	@Value("${temp.folder.path}")
-	private String tempFolder;
+	@Value("${aws.region}")
+	private String awsRegion;
 	
-	private final String TEMP_NAME = "localFile";
+	private static final String TEMP_FILE_PATH_NAME = "TempFolder/localFile";
 
 	public void writeToS3(MultipartFile file, FileLocation fileLocation) {
 
-		AWSCredentials credentials = new BasicAWSCredentials(key,secretKey);
-		AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
-				.withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(Regions.AP_SOUTH_1).build();
-
+		AmazonS3 s3Client = getS3Client();
 		
 		String completeName = fileLocation.getFileName();
 		
@@ -89,9 +85,7 @@ public class AwsS3Repository {
 
 		long startTime = new Date().getTime();
 		
-		AWSCredentials credentials = new BasicAWSCredentials(key,secretKey);
-		AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
-				.withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(Regions.AP_SOUTH_1).build();
+		AmazonS3 s3Client = getS3Client();
 		
 		int index = completeName.indexOf('/');
 		String bucketName = completeName.substring(0,index);
@@ -101,12 +95,12 @@ public class AwsS3Repository {
 
 		long beforeCalling = new Date().getTime();
 		
-		File localFile = new File(tempFolder+"/"+TEMP_NAME);
+		File localFile = new File(TEMP_FILE_PATH_NAME);
 		s3Client.getObject(getObjectRequest, localFile);
 
 		long afterAws = new Date().getTime();
 		
-		FileSystemResource fileSystemResource = new FileSystemResource(Paths.get(tempFolder+"/"+TEMP_NAME).toFile());
+		FileSystemResource fileSystemResource = new FileSystemResource(Paths.get(TEMP_FILE_PATH_NAME).toFile());
 		
 		long generateResource = new Date().getTime();
 		
@@ -114,5 +108,11 @@ public class AwsS3Repository {
 		log.info(" the time to get object from aws "+(afterAws-beforeCalling));
 		log.info(" the time for creating resource form file : "+(generateResource-afterAws));
 		return fileSystemResource;
+	}
+	
+	private AmazonS3 getS3Client() {
+		return AmazonS3ClientBuilder.standard()
+				.withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(key, secretKey)))
+				.withRegion(Regions.valueOf(awsRegion)).build();
 	}
 }

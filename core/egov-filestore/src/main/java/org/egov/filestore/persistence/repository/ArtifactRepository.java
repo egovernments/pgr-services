@@ -65,4 +65,8 @@ public class ArtifactRepository {
 
 		return new FileInfo(artifact.getContentType(), fileLocation, artifact.getTenantId());
 	}
+	
+	public List<Artifact> getByTenantIdAndFileStoreIdList(String tenantId, List<String> fileStoreIds){
+		return fileStoreJpaRepository.findByTenantIdAndFileStoreIdList(tenantId, fileStoreIds);
+	}
 }

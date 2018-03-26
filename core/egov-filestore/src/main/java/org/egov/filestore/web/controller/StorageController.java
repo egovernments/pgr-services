@@ -5,6 +5,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.egov.filestore.domain.model.FileInfo;
 import org.egov.filestore.domain.service.StorageService;
@@ -65,7 +66,7 @@ public class StorageController {
 			e.printStackTrace();
 		}
 		resource.setResource(null);
-		return new ResponseEntity<org.egov.filestore.domain.model.Resource>(resource, HttpStatus.OK);
+		return new ResponseEntity<>(resource, HttpStatus.OK);
 	}
 
 	@GetMapping(value = "/tag", produces = APPLICATION_JSON_UTF8_VALUE)
@@ -93,6 +94,13 @@ public class StorageController {
 			files.add(f);
 		}
 		return new StorageResponse(files);
+	}
+	
+	@GetMapping("/url")
+	@ResponseBody
+	public ResponseEntity<Map<String, String>> getUrls(@RequestParam(value = "tenantId") String tenantId,
+			@RequestParam("fileStoreIds") List<String> fileStoreIds) {
+		return new ResponseEntity<>(storageService.getUrls(tenantId, fileStoreIds), HttpStatus.OK);
 	}
 	
 }
