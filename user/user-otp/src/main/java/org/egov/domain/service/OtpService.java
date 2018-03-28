@@ -40,6 +40,10 @@ public class OtpService {
 	}
 
 	private void sendOtpForUserRegistration(OtpRequest otpRequest) {
+		if (null != otpRequest.getTenantId() && otpRequest.getTenantId().contains(".")) {
+			String tenantId = otpRequest.getTenantId().split("\\.")[0];
+			otpRequest.setTenantId(tenantId);
+		}
 		final User matchingUser = userRepository.fetchUser(otpRequest.getMobileNumber(), otpRequest.getTenantId());
 
 		if (otpRequest.isRegistrationRequestType() && null != matchingUser)

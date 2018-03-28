@@ -40,7 +40,6 @@ import org.egov.user.persistence.repository.UserRepository;
 import org.egov.user.web.contract.Otp;
 import org.egov.user.web.contract.OtpValidateRequest;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -166,7 +165,6 @@ public class UserServiceTest {
 	}
 
 	
-	@Ignore
 	@Test
 	public void test_should_create_a_valid_citizen_withotp() throws Exception {
 		org.egov.user.domain.model.User domainUser = mock(User.class);
@@ -309,23 +307,23 @@ public class UserServiceTest {
 		userService.partialUpdate(user);
 	}
 
-	@Ignore
 	@Test
-	public void test_should_nullify_fields_that_are_not_allowed_to_be_updated() {
+	public void test_should_nullify_fields_that_are_not_allowed_to_be_updated() throws Exception {
 		final User user = mock(User.class);
-
+		when(userRepository.update(user)).thenReturn(user);
+        when(fileRepository.getUrlByFileStoreId(any(String.class), any(String.class))).thenReturn("fileStoreUrl");
 		userService.partialUpdate(user);
 
 		verify(user).nullifySensitiveFields();
 	}
 
-	@Ignore
 	@Test
-	public void test_should_partially_update_user() {
+	public void test_should_partially_update_user() throws Exception {
 		final User user = mock(User.class);
 		final long userId = 123L;
 		when(user.getId()).thenReturn(userId);
-
+		when(userRepository.update(user)).thenReturn(user);
+        when(fileRepository.getUrlByFileStoreId(any(String.class), any(String.class))).thenReturn("fileStoreUrl");
 		userService.partialUpdate(user);
 
 		verify(userRepository).update(user);
@@ -492,7 +490,6 @@ public class UserServiceTest {
 		userService.updatePasswordForNonLoggedInUser(request);
 	}
 	
-	@Ignore
 	@Test
 	public void test_should_create_a_valid_citizen_WithOtp() throws Exception {
 		org.egov.user.domain.model.User domainUser = mock(User.class);

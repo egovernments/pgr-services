@@ -69,13 +69,14 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 		}
 
 		if (user.getType().toString().equals("CITIZEN") && user.getTenantId().contains(".")) {
-			String[] tenant = user.getTenantId().split("\\.");
-			String tenantid = tenant[0];
+			String tenantid = user.getTenantId().split("\\.")[0];
+			if (tenantId.contains("."))
+				tenantId = tenantId.split("\\.")[0];
 			if (!tenantid.equals(tenantId))
-				throw new OAuth2Exception("Invalid tenantId");
+				throw new OAuth2Exception("Invalid login credentials");
 
 		} else if (user.getType().toString().equals("EMPLOYEE") && !user.getTenantId().equals(tenantId)) {
-			throw new OAuth2Exception("Invalid tenantId");
+			throw new OAuth2Exception("Invalid login credentials");
 		}
 
 		if (user.getActive() == null || !user.getActive()) {
@@ -117,6 +118,11 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 	private boolean isPasswordMatch(Boolean isOtpBased, String password, User user) {
 		BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
 		if (isOtpBased) {
+			String tenantId = null;
+			if (user.getType().toString().equals("CITIZEN") && user.getTenantId().contains("."))
+				tenantId = user.getTenantId().split("\\.")[0];
+			else
+				tenantId = user.getTenantId();
 			Otp otp = Otp.builder().otp(password).identity(user.getUsername()).tenantId(tenantId).build();
 			try {
 				return userService.validateOtp(otp);

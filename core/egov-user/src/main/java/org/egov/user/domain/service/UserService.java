@@ -122,7 +122,7 @@ public class UserService {
 		validateDuplicateUserName(user);
 		// validateOtp(user.getOtpValidationRequest());
 		String tenantId = null;
-		if (user.getTenantId().contains("."))
+		if (null!=user.getTenantId() && user.getTenantId().contains("."))
 			tenantId = user.getTenantId().split("\\.")[0];
 		else
 			tenantId = user.getTenantId();

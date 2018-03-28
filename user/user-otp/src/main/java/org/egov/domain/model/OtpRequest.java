@@ -17,6 +17,7 @@ import lombok.Setter;
 public class OtpRequest {
 	@Setter
     private String mobileNumber;
+	@Setter
     private String tenantId;
     private OtpRequestType type;
 
