@@ -1,4 +1,4 @@
-package org.egov.pgr.contract;
+package org.egov.pgr.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

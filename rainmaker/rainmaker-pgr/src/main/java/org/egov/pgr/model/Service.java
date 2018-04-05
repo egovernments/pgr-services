@@ -1,4 +1,4 @@
-package org.egov.pgr.contract;
+package org.egov.pgr.model;
 
 import java.util.Objects;
 
@@ -181,6 +181,17 @@ public class Service   {
 
   @JsonProperty("auditDetails")
   private AuditDetails auditDetails = null;
+  
+  @JsonProperty("landmark")
+  private String landmark;
+  
+  public void setLandmark(String landmark) {
+	  this.landmark = landmark;
+  }
+  
+  public String getLandmark() {
+	  return landmark;
+  }
 
   public Service tenantId(String tenantId) {
     this.tenantId = tenantId;

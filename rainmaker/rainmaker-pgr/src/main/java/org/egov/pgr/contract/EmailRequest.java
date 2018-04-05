@@ -1,5 +1,7 @@
 package org.egov.pgr.contract;
 
+import org.egov.pgr.model.Email;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 

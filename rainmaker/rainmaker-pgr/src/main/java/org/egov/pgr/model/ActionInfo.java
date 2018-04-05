@@ -1,4 +1,4 @@
-package org.egov.pgr.contract;
+package org.egov.pgr.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +26,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ActionInfo   {
+	
+  @JsonProperty("uuid")
+  private String uuid;
+  
   @JsonProperty("tenantId")
   private String tenantId = null;
 
@@ -57,6 +61,14 @@ public class ActionInfo   {
   @JsonProperty("comments")
   private String comment = null;
 
+  public String getUuid() {
+	  return uuid;
+  }
+  
+  public void setUuid(String uuid) {
+	  this.uuid = uuid;
+  }
+  
   public ActionInfo tenantId(String tenantId) {
     this.tenantId = tenantId;
     return this;

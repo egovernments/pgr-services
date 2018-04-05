@@ -1,4 +1,4 @@
-package org.egov.pgr.contract;
+package org.egov.pgr.model;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -67,6 +67,52 @@ SearchDefinitions:
     jsonFormat: {"ResponseInfo": {}}
     outJsonPath: $.servicesRequestIds
     responseInfoPath: $.ResponseInfo
+    
+    
+ - name: count
+   query: 
+    baseQuery: select array_to_json(array_agg(row_to_json(services))) from (select (row_to_json(services)) from ( select count(*) from eg_pgr_service $where) as services) services
+    groupBy:    
+    orderBy: 
+   searchParams:
+    condition: AND
+    params:
+    - name: tenantid
+      isMandatory: true
+      jsonPath: $.searchCriteria.tenantId
+      operator: LIKE
+    - name: servicerequestid
+      isMandatory: false
+      jsonPath: $.searchCriteria.serviceRequestId
+    - name: accountid
+      isMandatory: false
+      jsonPath: $.searchCriteria.accountId
+    - name: status
+      isMandatory: false
+      jsonPath: $.searchCriteria.status
+    - name: createdtime
+      isMandatory: false
+      operator: GE
+      jsonPath: $.searchCriteria.startDate
+    - name: createdtime
+      isMandatory: false
+      operator: LE
+      jsonPath: $.searchCriteria.endDate
+    - name: lastmodifiedtime
+      isMandatory: false
+      jsonPath: $.searchCriteria.lastUpdatedSince
+    - name: serviceCode
+      isMandatory: false
+      jsonPath: $.searchCriteria.serviceCodes
+    - name: phone
+      isMandatory: false
+      jsonPath: $.searchCriteria.phone
+      
+   output:
+    jsonFormat: {"ResponseInfo": {}}
+    outJsonPath: $.count
+    responseInfoPath: $.ResponseInfo
+      
 
 
 

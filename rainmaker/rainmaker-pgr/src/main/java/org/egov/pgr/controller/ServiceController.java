@@ -9,7 +9,7 @@ import org.egov.pgr.contract.ServiceReqSearchCriteria;
 import org.egov.pgr.contract.ServiceRequest;
 import org.egov.pgr.contract.ServiceResponse;
 import org.egov.pgr.service.GrievanceService;
-import org.egov.pgr.utils.PGRRequestValidator;
+import org.egov.pgr.validator.PGRRequestValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -84,7 +84,7 @@ public class ServiceController {
 	private ResponseEntity<?> search(@RequestBody @Valid RequestInfoWrapper requestInfoWrapper,
 			@ModelAttribute @Valid ServiceReqSearchCriteria serviceReqSearchCriteria) {
 
-		System.err.println(" service req search : "+serviceReqSearchCriteria);
+		log.debug(" service req search : {}",serviceReqSearchCriteria);
 		pgrRequestValidator.validateSearch(serviceReqSearchCriteria, requestInfoWrapper.getRequestInfo());
 		long startTime = new Date().getTime();
 		Object serviceReqResponse = service.getServiceRequestDetails(requestInfoWrapper.getRequestInfo(),
