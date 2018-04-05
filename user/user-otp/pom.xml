@@ -123,6 +123,7 @@
                                         <exclude>org.egov.persistence.LogAwareRestTemplate</exclude>
                                         <exclude>org.egov.persistence.CacheableSimpleClientHttpResponse</exclude>
                                         <exclude>org.egov.persistence.LogAwareKafkaTemplate</exclude>
+                                        <exclude>org.egov.domain.model.User</exclude>
                                          <exclude>org.egov.persistence.repository.UserRepository</exclude>
                                     </excludes>
                                     <limits>

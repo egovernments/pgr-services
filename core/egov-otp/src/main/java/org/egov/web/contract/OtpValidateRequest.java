@@ -4,11 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.domain.model.ValidateRequest;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class OtpValidateRequest {
 	@JsonProperty("RequestInfo")
     private RequestInfo requestInfo;

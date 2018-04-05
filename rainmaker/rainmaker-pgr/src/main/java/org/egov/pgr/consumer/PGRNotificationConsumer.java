@@ -166,7 +166,6 @@ public class PGRNotificationConsumer {
     
     public String getMessageForSMS(Service serviceReq, RequestInfo requestInfo) {
     	String message = textForNotif;
-    	//MessageConstructor msgConstructor = new MessageConstructor();
     	String serviceType = getServiceType(serviceReq, requestInfo);
 		message = message.replace("<complaint_type>", serviceType)
 				.replace("<id>", serviceReq.getServiceRequestId()).replace("date", new Date(serviceReq.getAuditDetails().getCreatedTime()).toString());

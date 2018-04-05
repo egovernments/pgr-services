@@ -1,0 +1,157 @@
+SearchDefinitions:
+ moduleName: rainmaker-pgr
+ summary: PGR resolver for Rainmaker
+ version: 1.0.0
+ definitions:
+ - name: serviceRequestSearchNew
+   query: 
+    baseQuery: select row_to_json(serviceRequests) from (select *, (select (select array_to_json(array_agg(row_to_json(comments)))from ( select * from eg_pgr_comment where serviceRequestId=eg_pgr_serviceReq.serviceRequestId) comments) as comments),(select (select array_to_json(array_agg(row_to_json(media)))from ( select * from eg_pgr_media where serviceRequestId=eg_pgr_serviceReq.serviceRequestId) media) as media) from eg_pgr_serviceReq  $where limit 200) serviceRequests
+    groupBy:    
+    orderBy: 
+   searchParams:
+    condition: AND
+    params:
+    - name: tenantid
+      isMandatory: true
+      jsonPath: $.searchCriteria.tenantId
+    - name: servicerequestid
+      isMandatory: false
+      jsonPath: $.searchCriteria.serviceRequestId
+    - name: assignedto
+      isMandatory: false
+      jsonPath: $.searchCriteria.assignedTo
+    - name: accountid
+      isMandatory: false
+      jsonPath: $.searchCriteria.accountId
+    - name: status
+      isMandatory: false
+      jsonPath: $.searchCriteria.status
+    - name: createdtime
+      isMandatory: false
+      jsonPath: $.searchCriteria.startDate
+    - name: createdtime
+      isMandatory: false
+      jsonPath: $.searchCriteria.endDate
+    - name: lastmodifiedtime
+      isMandatory: false
+      jsonPath: $.searchCriteria.lastUpdatedSince
+    - name: serviceCode
+      isMandatory: false
+      jsonPath: $.searchCriteria.serviceCodes
+    - name: phone
+      isMandatory: false
+      jsonPath: $.searchCriteria.phone
+
+
+   output:
+    jsonFormat: {"ResponseInfo": {},"serviceReq": []}
+    outJsonPath: $.serviceReq
+    responseInfoPath: $.ResponseInfo
+
+ - name: count
+   query: 
+    baseQuery: (select row_to_json(serviceRequests) from (select count(*) from eg_pgr_serviceReq $where) serviceRequests)
+    groupBy:    
+    orderBy:
+   searchParams:
+    condition: AND
+    params:
+    - name: tenantid
+      isMandatory: true
+      jsonPath: $.searchCriteria.tenantId
+    - name: servicerequestid
+      isMandatory: false
+      jsonPath: $.searchCriteria.serviceRequestId
+    - name: assignedto
+      isMandatory: false
+      jsonPath: $.searchCriteria.assignedTo
+    - name: accountid
+      isMandatory: false
+      jsonPath: $.searchCriteria.accountId
+    - name: status
+      isMandatory: false
+      jsonPath: $.searchCriteria.status
+    - name: createdtime
+      isMandatory: false
+      jsonPath: $.searchCriteria.startDate
+    - name: createdtime
+      isMandatory: false
+      jsonPath: $.searchCriteria.endDate
+    - name: lastmodifiedtime
+      isMandatory: false
+      jsonPath: $.searchCriteria.lastUpdatedSince
+    - name: serviceCodes
+      isMandatory: false
+      jsonPath: $.searchCriteria.serviceCodes
+    - name: phone
+      isMandatory: false
+      jsonPath: $.searchCriteria.phone
+
+   output:
+    jsonFormat: {"ResponseInfo": {},"count": {}}
+    outJsonPath: $.count
+    responseInfoPath: $.ResponseInfo
+
+ - name: serviceRequestSearch
+   query: 
+    baseQuery: (select array_to_json(array_agg(row_to_json(serviceRequests)))from (select * from eg_pgr_serviceReq $where limit 200) serviceRequests)
+    groupBy:    
+    orderBy: 
+   searchParams:
+    condition: AND
+    params:
+    - name: tenantid
+      isMandatory: true
+      jsonPath: $.searchCriteria.tenantId
+    - name: servicerequestid
+      isMandatory: false
+      jsonPath: $.searchCriteria.serviceRequestId
+    - name: assignedto
+      isMandatory: false
+      jsonPath: $.searchCriteria.assignedTo
+    - name: accountid
+      isMandatory: false
+      jsonPath: $.searchCriteria.accountId
+    - name: status
+      isMandatory: false
+      jsonPath: $.searchCriteria.status
+    - name: createdtime
+      isMandatory: false
+      jsonPath: $.searchCriteria.startDate
+    - name: createdtime
+      isMandatory: false
+      jsonPath: $.searchCriteria.endDate
+    - name: lastmodifiedtime
+      isMandatory: false
+      jsonPath: $.searchCriteria.lastUpdatedSince
+    - name: serviceCodes
+      isMandatory: false
+      jsonPath: $.searchCriteria.serviceCodes
+    - name: phone
+      isMandatory: false
+      jsonPath: $.searchCriteria.phone
+
+   output:
+    jsonFormat: {"ResponseInfo": {},"serviceReq": []}
+    outJsonPath: $.serviceReq
+    responseInfoPath: $.ResponseInfo
+    
+ - name: history
+   query: 
+    baseQuery: select row_to_json(serviceRequests) from (select status, assignedto, (select (select row_to_json(auditDetails) from (select createdtime from eg_pgr_serviceReq_audit audit where audit.id=eg_pgr_serviceReq_audit.id) auditDetails) as auditDetails) from eg_pgr_serviceReq_audit $where limit 200) serviceRequests;
+    groupBy:    
+    orderBy: auditcreatedtime, DESC
+   searchParams:
+    condition: AND
+    params:
+    - name: tenantid
+      isMandatory: true
+      jsonPath: $.searchCriteria.tenantId
+    - name: servicerequestid
+      isMandatory: true
+      jsonPath: $.searchCriteria.serviceRequestId
+
+   output:
+    jsonFormat: {"ResponseInfo": {},"serviceReq": []}
+    outJsonPath: $.serviceReq
+    responseInfoPath: $.ResponseInfo

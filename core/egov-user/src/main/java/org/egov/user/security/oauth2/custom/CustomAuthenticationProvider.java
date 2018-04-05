@@ -24,7 +24,10 @@ import org.springframework.stereotype.Component;
 
 import com.jayway.jsonpath.JsonPath;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
 	/**
@@ -86,9 +89,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
 		Boolean isPasswordMatch;
 		if (isCitizen) {
-			isPasswordMatch = isPasswordMatch(citizenLoginPasswordOtpEnabled, password, user);
+			isPasswordMatch = isPasswordMatch(citizenLoginPasswordOtpEnabled, password, user, authentication);
 		} else {
-			isPasswordMatch = isPasswordMatch(employeeLoginPasswordOtpEnabled, password, user);
+			isPasswordMatch = isPasswordMatch(employeeLoginPasswordOtpEnabled, password, user, authentication);
 		}
 
 		if (isPasswordMatch) {
@@ -108,9 +111,15 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 		}
 	}
 
-	private boolean isPasswordMatch(Boolean isOtpBased, String password, User user) {
+	private boolean isPasswordMatch(Boolean isOtpBased, String password, User user, Authentication authentication) {
 		BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
+		final LinkedHashMap<String, String> details = (LinkedHashMap<String, String>) authentication.getDetails();
+		String isCallInternal = details.get("isInternal");
 		if (isOtpBased) {
+			if(null != isCallInternal && isCallInternal.equals("true")) {
+				log.info("Skipping otp validation during login.........");
+				return true;
+			}
 			Otp otp = Otp.builder().otp(password).identity(user.getUsername()).tenantId(tenantId).build();
 			try {
 				return userService.validateOtp(otp);

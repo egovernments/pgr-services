@@ -1,0 +1,96 @@
+SearchDefinitions:
+ moduleName: rainmaker-pgr-V2
+ summary: PGR resolver for Rainmaker
+ version: 1.0.0
+ definitions:
+ - name: serviceSearchWithDetails
+   query: 
+    baseQuery: select array_to_json(array_agg(row_to_json(serviceRequests))) from (select (select (select (row_to_json(services)) from ( select *, (select (select row_to_json(auditDetails) from (select createdtime from eg_pgr_service where svc.serviceRequestId=eg_pgr_service.serviceRequestId) auditDetails) as auditDetails) from eg_pgr_service svc where svc.serviceRequestId=eg_pgr_service.serviceRequestId) services) as services),(select (select array_to_json(array_agg(row_to_json(actionHistory))) from ( select * from eg_pgr_action where businessKey=eg_pgr_service.serviceRequestId order by "when" desc) actionHistory) as actionHistory) from eg_pgr_service $where limit 200) serviceRequests
+    groupBy:    
+    orderBy: 
+   searchParams:
+    condition: AND
+    params:
+    - name: tenantid
+      isMandatory: true
+      jsonPath: $.searchCriteria.tenantId
+      operator: LIKE
+    - name: servicerequestid
+      isMandatory: false
+      jsonPath: $.searchCriteria.serviceRequestId
+    - name: accountid
+      isMandatory: false
+      jsonPath: $.searchCriteria.accountId
+    - name: status
+      isMandatory: false
+      jsonPath: $.searchCriteria.status
+    - name: createdtime
+      isMandatory: false
+      operator: GE
+      jsonPath: $.searchCriteria.startDate
+    - name: createdtime
+      isMandatory: false
+      operator: LE
+      jsonPath: $.searchCriteria.endDate
+    - name: lastmodifiedtime
+      isMandatory: false
+      jsonPath: $.searchCriteria.lastUpdatedSince
+    - name: serviceCode
+      isMandatory: false
+      jsonPath: $.searchCriteria.serviceCodes
+    - name: phone
+      isMandatory: false
+      jsonPath: $.searchCriteria.phone
+
+
+   output:
+    jsonFormat: {"ResponseInfo": {}}
+    outJsonPath: $.services
+    responseInfoPath: $.ResponseInfo
+
+ - name: getServiceRequestsOnAssignedTo
+   query: 
+    baseQuery: select array_to_json(array_agg(row_to_json(servicesRequestIds))) from (select businessKey from eg_pgr_action where eg_pgr_action.when IN (select max("when") from eg_pgr_action $where group by businessKey)) servicesRequestIds
+    groupBy:    
+    orderBy: 
+   searchParams:
+    condition: AND
+    params:
+    - name: tenantid
+      isMandatory: true
+      jsonPath: $.searchCriteria.tenantId
+    - name: assignee
+      isMandatory: true
+      jsonPath: $.searchCriteria.assignedTo
+
+   output:
+    jsonFormat: {"ResponseInfo": {}}
+    outJsonPath: $.servicesRequestIds
+    responseInfoPath: $.ResponseInfo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

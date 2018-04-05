@@ -2,7 +2,6 @@ package org.egov.user.domain.service;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -33,9 +32,13 @@ import org.egov.user.web.contract.Otp;
 import org.egov.user.web.contract.OtpValidateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import com.jayway.jsonpath.JsonPath;
@@ -53,6 +56,9 @@ public class UserService {
 	private boolean isCitizenLoginOtpBased;
 	private boolean isEmployeeLoginOtpBased;
 	private FileStoreRepository fileRepository;
+	
+	@Value("${egov.user.host}")
+	private String userHost;
 
 	@Autowired
 	private RestTemplate restTemplate;
@@ -164,6 +170,15 @@ public class UserService {
 	public Object regosterWithLogin(User user) {
 		log.info("Into register with login method......");
 		user.setUuid(UUID.randomUUID().toString());
+		validateUser(user);
+		Otp otp = validateCredentials(user);
+		user.setDefaultPasswordExpiry(defaultPasswordExpiryInDays);
+		user.setActive(true);
+		return getAccess(user, otp);
+	}
+	
+	public void validateUser(User user) {
+		log.info("Validating User........");
 		if (isCitizenLoginOtpBased && !StringUtils.isNumeric(user.getUsername()))
 			throw new UserNameNotValidException();
 		else if (isCitizenLoginOtpBased)
@@ -172,8 +187,11 @@ public class UserService {
 		user.setRoleToCitizen();
 		validateDuplicateUserName(user);
 		user.validateNewUser();
-		// validateOtp(user.getOtpValidationRequest());
 		log.info("User validated successfully");
+	}
+	
+	public Otp validateCredentials(User user) {
+		log.info("Validating Credentials........");
 		String tenantId = null;
 		if (user.getTenantId().contains("."))
 			tenantId = user.getTenantId().split("\\.")[0];
@@ -181,27 +199,48 @@ public class UserService {
 			tenantId = user.getTenantId();
 
 		Otp otp = Otp.builder().otp(user.getOtpReference()).identity(user.getUsername()).tenantId(tenantId).build();
+		log.info("OTP: "+otp);
 		try {
 			validateOtp(otp);
 		} catch (Exception e) {
 			log.error("Exception while validating otp: " + e);
 			String errorMessage = JsonPath.read(e.getMessage(), "$.error.message");
-			System.out.println("message " + errorMessage);
-			throw new InvalidOtpException(errorMessage);
+			if(null != errorMessage && !errorMessage.isEmpty())
+				throw new InvalidOtpException(errorMessage);
+			throw new InvalidOtpException("Exception while validating OTP");
 		}
-		user.setDefaultPasswordExpiry(defaultPasswordExpiryInDays);
-		user.setActive(true);
+		log.info("Credentials validated successfully");
+
+		return otp;
+		
+	}
+	
+	public Object getAccess(User user, Otp otp) {
+		log.info("fetching access token........");
 		User registrationResult = null;
 		try {
 			registrationResult = persistNewUser(user);
 			StringBuilder uri = new StringBuilder();
-			uri.append("http://egov-micro-dev.egovernments.org").append("/user/oauth/token")
-					.append("?username=" + user.getUsername()).append("&password=" + otp.getOtp())
-					.append("&grant_type=password&scope=read").append("&tenantId=" + user.getTenantId());
+			uri.append(userHost).append("/user/oauth/token");			
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+	        headers.set( "Authorization", "Basic ZWdvdi11c2VyLWNsaWVudDplZ292LXVzZXItc2VjcmV0");
+			MultiValueMap<String, String> map= new LinkedMultiValueMap<String, String>();
+			map.add("username", user.getUsername());
+			map.add("password", otp.getOtp());
+			map.add("grant_type", "password");
+			map.add("scope", "read");
+			map.add("tenantId", user.getTenantId());
+			map.add("isInternal", "true");
 
-			return restTemplate.postForObject(uri.toString(), "", UsernamePasswordAuthenticationToken.class);
+			HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
+			return restTemplate.postForEntity(uri.toString(), request , Map.class ).getBody();
+			
 		} catch (Exception e) {
 			log.info("Exception while fecting authtoken: " + e);
+			if(null == registrationResult) {
+				throw new DuplicateUserNameException(user);
+			}
 			return registrationResult;
 		}
 	}

@@ -1,0 +1,153 @@
+SearchDefinitions:
+ moduleName: rainmaker-pgr-V3
+ summary: PGR resolver for Rainmaker
+ version: 1.0.0
+ definitions:
+ - name: serviceSearch
+   query: 
+    baseQuery: (select array_to_json(array_agg(row_to_json(services)))from (select * from eg_pgr_service $where limit 200) services)
+    groupBy:    
+    orderBy: 
+   searchParams:
+    condition: AND
+    params:
+    - name: tenantid
+      isMandatory: true
+      operator: LIKE
+      jsonPath: $.searchCriteria.tenantId
+    - name: servicerequestid
+      isMandatory: false
+      jsonPath: $.searchCriteria.serviceRequestId
+    - name: accountid
+      isMandatory: false
+      jsonPath: $.searchCriteria.accountId
+    - name: status
+      isMandatory: false
+      jsonPath: $.searchCriteria.status
+    - name: createdtime
+      isMandatory: false
+      operator: GE
+      jsonPath: $.searchCriteria.startDate
+    - name: createdtime
+      isMandatory: false
+      operator: LE
+      jsonPath: $.searchCriteria.endDate
+    - name: lastmodifiedtime
+      isMandatory: false
+      jsonPath: $.searchCriteria.lastUpdatedSince
+    - name: serviceCode
+      isMandatory: false
+      jsonPath: $.searchCriteria.serviceCodes
+    - name: phone
+      isMandatory: false
+      jsonPath: $.searchCriteria.phone
+
+   output:
+    jsonFormat: {"ResponseInfo": {}}
+    outJsonPath: $.services
+    responseInfoPath: $.ResponseInfo
+
+ - name: actionSearch
+   query: 
+    baseQuery: (select array_to_json(array_agg(row_to_json(actionHistory)))from (select * from eg_pgr_action $where limit 200) actionHistory)
+    groupBy:    
+    orderBy: 
+   searchParams:
+    condition: AND
+    params:
+    - name: tenantid
+      isMandatory: true
+      jsonPath: $.searchCriteria.tenantId
+    - name: businessKey
+      isMandatory: true
+      jsonPath: $.searchCriteria.serviceRequestId
+
+   output:
+    jsonFormat: {"ResponseInfo": {}}
+    outJsonPath: $.actionHistory
+    responseInfoPath: $.ResponseInfo
+
+
+ - name: serviceSearchOnAssignedTo
+   query: 
+    baseQuery: select array_to_json(array_agg(row_to_json(services))) from (select * from eg_pgr_service where servicerequestid IN (select businessKey from eg_pgr_action where eg_pgr_action.when IN (select max("when") from eg_pgr_action $where group by businessKey))) services
+    groupBy: 
+    orderBy: 
+   searchParams:
+    condition: AND
+    params:
+    - name: tenantid
+      isMandatory: true
+      jsonPath: $.searchCriteria.tenantId
+    - name: assignee
+      isMandatory: true
+      jsonPath: $.searchCriteria.assignedTo
+
+   output:
+    jsonFormat: {"ResponseInfo": {}}
+    outJsonPath: $.services
+    responseInfoPath: $.ResponseInfo
+
+
+ - name: count
+   query: 
+    baseQuery: (select array_to_json(array_agg(row_to_json(services)))from (select count(*) from eg_pgr_service $where limit 200) services)
+    groupBy:    
+    orderBy: 
+   searchParams:
+    condition: AND
+    params:
+    - name: tenantid
+      isMandatory: true
+      jsonPath: $.searchCriteria.tenantId
+    - name: servicerequestid
+      isMandatory: false
+      jsonPath: $.searchCriteria.serviceRequestId
+    - name: accountid
+      isMandatory: false
+      jsonPath: $.searchCriteria.accountId
+    - name: status
+      isMandatory: false
+      jsonPath: $.searchCriteria.status
+    - name: createdtime
+      isMandatory: false
+      jsonPath: $.searchCriteria.startDate
+    - name: createdtime
+      isMandatory: false
+      jsonPath: $.searchCriteria.endDate
+    - name: lastmodifiedtime
+      isMandatory: false
+      jsonPath: $.searchCriteria.lastUpdatedSince
+    - name: serviceCode
+      isMandatory: false
+      jsonPath: $.searchCriteria.serviceCodes
+    - name: phone
+      isMandatory: false
+      jsonPath: $.searchCriteria.phone
+
+   output:
+    jsonFormat: {"ResponseInfo": {}}
+    outJsonPath: $.count
+    responseInfoPath: $.ResponseInfo
+
+
+ - name: countOnAssignedTo
+   query: 
+    baseQuery: select array_to_json(array_agg(row_to_json(services))) from (select count(*) from eg_pgr_service where servicerequestid IN (select businessKey from eg_pgr_action where eg_pgr_action.when IN (select max("when") from eg_pgr_action $where group by businessKey))) services
+    groupBy:
+    orderBy: 
+   searchParams:
+    condition: AND
+    params:
+    - name: tenantid
+      isMandatory: true
+      jsonPath: $.searchCriteria.tenantId
+    - name: assignee
+      isMandatory: true
+      jsonPath: $.searchCriteria.assignedTo
+
+   output:
+    jsonFormat: {"ResponseInfo": {}}
+    outJsonPath: $.count
+    responseInfoPath: $.ResponseInfo
+

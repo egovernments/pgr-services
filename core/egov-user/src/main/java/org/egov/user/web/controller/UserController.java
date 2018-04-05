@@ -42,6 +42,10 @@ public class UserController {
 	
 	@Value("${otp.validation.register.mandatory}")
 	private boolean IsValidationMandatory;
+	
+	@Value("${citizen.registration.withlogin.enabled}")
+	private boolean isRegWithLoginEnabled;
+
 
 	public UserController(UserService userService, TokenService tokenService) {
 		this.userService = userService;
@@ -60,10 +64,10 @@ public class UserController {
 		log.info("Received Citizen Registration Request  " + createUserRequest);
 		User user = createUserRequest.toDomain(true);
 		user.setOtpValidationMandatory(IsValidationMandatory);
-/*		if(createUserRequest.getUser().getTenantId().contains("pb")) {
+		if(isRegWithLoginEnabled) {
 			Object object = userService.regosterWithLogin(user);
 			return new ResponseEntity<>(object, HttpStatus.OK);
-		}*/
+		}
 		final User newUser = userService.createCitizen(user);
 		return createResponse(newUser);
 	}

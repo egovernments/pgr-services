@@ -3,11 +3,14 @@ package org.egov.web.contract;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import org.egov.domain.model.TokenRequest;
 import org.egov.domain.model.TokenSearchCriteria;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class OtpRequest {
     private Otp otp;
 
