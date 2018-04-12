@@ -2,10 +2,10 @@ package org.egov.filestore.domain.service;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.egov.filestore.domain.exception.EmptyFileUploadRequestException;
@@ -100,12 +100,11 @@ public class StorageService {
 	}
 
 	private Map<String, String> getUrlMap(List<org.egov.filestore.persistence.entity.Artifact> artifactList) {
-		Map<String, String> nameMap = new HashMap<>();
-		artifactList.forEach(a -> {
-			if (null!=a.getFileSource() && a.getFileSource().equals(awsS3Source))
-				nameMap.put(a.getFileStoreId(), a.getFileName());
-		});
-		return awsS3Repository.getUrlMap(nameMap);
+		
+		Map<String, org.egov.filestore.persistence.entity.Artifact> fileMap = artifactList.parallelStream()
+				.filter(a -> (null != a.getFileSource() && a.getFileSource().equals(awsS3Source))).collect(Collectors
+						.toMap(org.egov.filestore.persistence.entity.Artifact::getFileStoreId, Function.identity()));
+		return awsS3Repository.getUrlMap(fileMap);
 	}
 
 	private String getUrlFromName(String completeName) {
