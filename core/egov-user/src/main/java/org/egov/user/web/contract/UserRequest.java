@@ -1,8 +1,10 @@
 package org.egov.user.web.contract;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.egov.user.domain.model.Address;
 import org.egov.user.domain.model.Role;
 import org.egov.user.domain.model.User;
@@ -11,16 +13,22 @@ import org.egov.user.domain.model.enums.BloodGroup;
 import org.egov.user.domain.model.enums.Gender;
 import org.egov.user.domain.model.enums.UserType;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 @Setter
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Slf4j
 public class UserRequest {
 
 	private Long id;
@@ -114,44 +122,34 @@ public class UserRequest {
 	}
 
 	private List<RoleRequest> convertDomainRoleToContract(List<Role> domainRoles) {
-		if (domainRoles == null) return new ArrayList<>();
+		if (domainRoles == null)
+			return new ArrayList<>();
 		return domainRoles.stream().map(RoleRequest::new).collect(Collectors.toList());
 	}
 
 	@JsonIgnore
 	public User toDomain(Long loggedInUserId, boolean isCreate) {
-		return User.builder()
-				.id(this.id)
-				.name(this.name)
-				.username(this.userName)
-				.salutation(this.salutation)
-				.mobileNumber(this.mobileNumber)
-				.emailId(this.emailId)
-				.altContactNumber(this.altContactNumber)
-				.pan(this.pan)
-				.aadhaarNumber(this.aadhaarNumber)
-				.active(isActive(isCreate))
-				.dob(this.dob)
-				.passwordExpiryDate(this.pwdExpiryDate)
-				.locale(this.locale)
-				.type(this.type)
-				.accountLocked(isAccountLocked(isCreate))
-				.signature(this.signature)
-				.photo(this.photo)
+		BloodGroup bloodGroup = null;
+		try {
+			if (this.bloodGroup != null)
+				bloodGroup = BloodGroup.valueOf(this.bloodGroup.toUpperCase());
+		} catch (Exception e) {
+			for (BloodGroup bloodgroup : BloodGroup.values()) {
+				if (bloodgroup.getValue().equals(this.bloodGroup))
+					bloodGroup = bloodgroup;
+			}
+		}
+		return User.builder().id(this.id).name(this.name).username(this.userName).salutation(this.salutation)
+				.mobileNumber(this.mobileNumber).emailId(this.emailId).altContactNumber(this.altContactNumber)
+				.pan(this.pan).aadhaarNumber(this.aadhaarNumber).active(isActive(isCreate)).dob(this.dob)
+				.passwordExpiryDate(this.pwdExpiryDate).locale(this.locale).type(this.type)
+				.accountLocked(isAccountLocked(isCreate)).signature(this.signature).photo(this.photo)
 				.identificationMark(this.identificationMark)
-				.gender(this.gender != null ? Gender.valueOf(this.gender.toUpperCase()) : null)
-				.bloodGroup(this.bloodGroup != null ? BloodGroup.valueOf(this.bloodGroup.toUpperCase()) : null)
-				.lastModifiedDate(new Date())
-				.createdDate(new Date())
-				.otpReference(this.otpReference)
-				.tenantId(this.tenantId)
-				.password(this.password)
-				.roles(toDomainRoles())
-				.loggedInUserId(loggedInUserId)
-				.permanentAddress(toDomainPermanentAddress())
-				.correspondenceAddress(toDomainCorrespondenceAddress())
-				.guardian(fatherOrHusbandName)
-				.build();
+				.gender(this.gender != null ? Gender.valueOf(this.gender.toUpperCase()) : null).bloodGroup(bloodGroup)
+				.lastModifiedDate(new Date()).createdDate(new Date()).otpReference(this.otpReference)
+				.tenantId(this.tenantId).password(this.password).roles(toDomainRoles()).loggedInUserId(loggedInUserId)
+				.permanentAddress(toDomainPermanentAddress()).correspondenceAddress(toDomainCorrespondenceAddress())
+				.guardian(fatherOrHusbandName).build();
 	}
 
 	private Boolean isActive(boolean isCreate) {
@@ -169,29 +167,17 @@ public class UserRequest {
 	}
 
 	private Address toDomainPermanentAddress() {
-		return Address.builder()
-				.type(AddressType.PERMANENT)
-				.city(permanentCity)
-				.pinCode(permanentPinCode)
-				.address(permanentAddress)
-				.build();
+		return Address.builder().type(AddressType.PERMANENT).city(permanentCity).pinCode(permanentPinCode)
+				.address(permanentAddress).build();
 	}
 
 	private Address toDomainCorrespondenceAddress() {
-		return Address.builder()
-				.type(AddressType.CORRESPONDENCE)
-				.city(correspondenceCity)
-				.pinCode(correspondencePinCode)
-				.address(correspondenceAddress)
-				.build();
+		return Address.builder().type(AddressType.CORRESPONDENCE).city(correspondenceCity)
+				.pinCode(correspondencePinCode).address(correspondenceAddress).build();
 	}
 
 	private List<Role> toDomainRoles() {
 		return this.roles != null
-				? this.roles.stream()
-				.map(RoleRequest::toDomain)
-				.distinct()
-				.collect(Collectors.toList())
-				: null;
+				? this.roles.stream().map(RoleRequest::toDomain).distinct().collect(Collectors.toList()) : null;
 	}
 }
