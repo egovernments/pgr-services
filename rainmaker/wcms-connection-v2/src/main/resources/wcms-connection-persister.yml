@@ -1,0 +1,93 @@
+serviceMaps:
+ serviceName: wcms-connection
+ mappings:
+ - version: 1.0
+   name: connection
+   description: Persists connection details in wcms_connection table
+   fromTopic: save-wcms-connection
+   isTransaction: true
+   queryMaps:
+
+    - query: INSERT INTO public.wcms_connection_address_v2(uuid, tenantid, buildingname, roadname, billingaddress, gisnumber, revenueboundary, locationboundary, adminboundary, createdby, lastmodifiedby, createdtime, lastmodifiedtime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+      basePath: connections.*.address
+      jsonMaps:
+
+       - jsonPath: $.connections.*.address.uuid
+
+       - jsonPath: $.connections.*.address.tenantid
+
+       - jsonPath: $.connections.*.address.buildingname
+
+       - jsonPath: $.connections.*.address.roadname
+
+       - jsonPath: $.connections.*.address.billingaddress
+
+       - jsonPath: $.connections.*.address.gisnumber
+
+       - jsonPath: $.connections.*.address.revenueboundary
+
+       - jsonPath: $.connections.*.address.locationboundary
+
+       - jsonPath: $.connections.*.address.adminboundary
+
+       - jsonPath: $.connections.*.auditDetails.createdBy
+
+       - jsonPath: $.connections.*.auditDetails.createdTime
+
+       - jsonPath: $.connections.*.auditDetails.lastModifiedBy
+
+       - jsonPath: $.connections.*.auditDetails.lastModifiedTime
+
+    - query: INSERT INTO public.wcms_connection_v2(uuid, tenantid, type, status, oldconnectionnumber, acknowledgmentnumber, connectionnumber, applicationtype, billingtype, pipesize, sourcetype, numberoftaps, numberofpersons, parentconnection, documents, property, address, meter, owner, additionaldetails, createdby, lastmodifiedby, createdtime, lastmodifiedtime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+      basePath: connections.*
+      jsonMaps:
+
+       - jsonPath: $.connections.*.uuid
+
+       - jsonPath: $.connections.*.tenantid
+
+       - jsonPath: $.connections.*.type
+
+       - jsonPath: $.connections.*.status
+
+       - jsonPath: $.connections.*.oldconnectionnumber
+
+       - jsonPath: $.connections.*.acknowledgmentnumber
+
+       - jsonPath: $.connections.*.connectionnumber
+
+       - jsonPath: $.connections.*.applicationtype
+
+       - jsonPath: $.connections.*.billingtype
+
+       - jsonPath: $.connections.*.pipesize
+
+       - jsonPath: $.connections.*.sourceType
+
+       - jsonPath: $.connections.*.numberOfTaps
+
+       - jsonPath: $.connections.*.numberOfPersons
+
+       - jsonPath: $.connections.*.parentconnection
+
+       - jsonPath: $.connections.*.documents
+
+       - jsonPath: $.connections.*.property
+
+       - jsonPath: $.connections.*.address
+
+       - jsonPath: $.connections.*.meter
+
+       - jsonPath: $.connections.*.owner
+
+       - jsonPath: $.connections.*.additionalDetails
+         type: JSON
+         dbType: JSONB
+
+       - jsonPath: $.connections.*.auditDetails.createdBy
+
+       - jsonPath: $.connections.*.auditDetails.createdTime
+
+       - jsonPath: $.connections.*.auditDetails.lastModifiedBy
+
+       - jsonPath: $.connections.*.auditDetails.lastModifiedTime
