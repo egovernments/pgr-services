@@ -43,10 +43,10 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 	@Value("${employee.login.password.otp.enabled}")
 	private boolean employeeLoginPasswordOtpEnabled;
 
-	@Value("${citizen.login.password.otp.fixed_otp}")
+	@Value("${citizen.login.password.otp.fixed.value}")
 	private String fixedOTPPassword;
 
-	@Value("${citizen.login.password.otp.fixed_otp_enabled}")
+	@Value("${citizen.login.password.otp.fixed.enabled}")
 	private boolean fixedOTPEnabled;
 
 	private static String tenantId;
