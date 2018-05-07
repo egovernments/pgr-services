@@ -95,15 +95,15 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
 		Boolean isPasswordMatched;
 		if (isCitizen) {
-			isPasswordMatched = isPasswordMatch(citizenLoginPasswordOtpEnabled, password, user, authentication);
-		} else {
-			if (fixedOTPEnabled && fixedOTPPassword != "" && fixedOTPPassword == password)
+			if (fixedOTPEnabled && !fixedOTPPassword.equals("") && fixedOTPPassword.equals(password))
 			{
 				//for automation allow fixing otp validation to a fixed otp
 				isPasswordMatched = true;
 			} else {
-				isPasswordMatched = isPasswordMatch(employeeLoginPasswordOtpEnabled, password, user, authentication);
+				isPasswordMatched = isPasswordMatch(citizenLoginPasswordOtpEnabled, password, user, authentication);
 			}
+		} else {
+			isPasswordMatched = isPasswordMatch(employeeLoginPasswordOtpEnabled, password, user, authentication);
 		}
 
 		if (isPasswordMatched) {
