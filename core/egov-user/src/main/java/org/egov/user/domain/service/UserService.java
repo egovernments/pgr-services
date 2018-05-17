@@ -130,9 +130,8 @@ public class UserService {
 		user.setUuid(UUID.randomUUID().toString());
 		if (isCitizenLoginOtpBased && !StringUtils.isNumeric(user.getUsername()))
 			throw new UserNameNotValidException();
-		else if (isCitizenLoginOtpBased)
-			user.setMobileNumber(user.getUsername());
 
+		user.setMobileNumber(user.getUsername());
 		user.setRoleToCitizen();
 		validateDuplicateUserName(user);
 		user.validateNewUser();
@@ -184,9 +183,8 @@ public class UserService {
 		log.info("Validating User........");
 		if (isCitizenLoginOtpBased && !StringUtils.isNumeric(user.getUsername()))
 			throw new UserNameNotValidException();
-		else if (isCitizenLoginOtpBased)
-			user.setMobileNumber(user.getUsername());
 
+		user.setMobileNumber(user.getUsername());
 		user.setRoleToCitizen();
 		validateDuplicateUserName(user);
 		user.validateNewUser();

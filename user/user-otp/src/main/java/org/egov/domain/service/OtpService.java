@@ -47,6 +47,8 @@ public class OtpService {
 		else if (otpRequest.isLoginRequestType() && null == matchingUser)
 			throw new UserNotExistingInSystemException();
 
+		if(matchingUser!=null && matchingUser.getMobileNumber()!=null)
+			otpRequest.setMobileNumber(matchingUser.getMobileNumber());
 		final String otpNumber = otpRepository.fetchOtp(otpRequest);
 		otpSMSSender.send(otpRequest, otpNumber);
 	}

@@ -132,7 +132,12 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 				log.info("Skipping otp validation during login.........");
 				return true;
 			}
-			Otp otp = Otp.builder().otp(password).identity(user.getUsername()).tenantId(tenantId).build();
+			String identity ="";
+			if(user.getType().toString().equals("EMPLOYEE") && null!= user.getMobileNumber())
+				identity = user.getMobileNumber();
+			else if(user.getType().toString().equals("CITIZEN"))
+				identity = user.getUsername();
+			Otp otp = Otp.builder().otp(password).identity(identity).tenantId(tenantId).build();
 			try {
 				return userService.validateOtp(otp);
 			} catch (Exception e) {

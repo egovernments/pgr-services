@@ -25,13 +25,13 @@ public class OtpRequestErrorAdapter implements ErrorAdapter<OtpRequest> {
 	private static final String TYPE_INVALID_MESSAGE = "Request type (register, passwordreset,login) is mandatory";
 	private static final String TYPE_FIELD = "otp.type";
 	
-	private static final String MOBILE_INVALID_CODE = "OTP.MOBILE_NUMBER_INVALID";
+/*	private static final String MOBILE_INVALID_CODE = "OTP.MOBILE_NUMBER_INVALID";
 	private static final String MOBILE_INVALID_MESSAGE = "Mobile number field should be numeric.";
 	private static final String MOBILE_INVALID_FIELD = "otp.mobileNumber";
 
 	private static final String MOBILE_INVALIDLENGTH_CODE = "OTP.MOBILE_NUMBER_INVALIDLENGTH";
 	private static final String MOBILE_INVALIDLENGTH_MESSAGE = "Mobile number length should be min 10 and max 13 digits";
-	private static final String MOBILE_INVALIDLENGTH_FIELD = "otp.mobileNumber";
+	private static final String MOBILE_INVALIDLENGTH_FIELD = "otp.mobileNumber";*/
 
     @Override
     public ErrorResponse adapt(OtpRequest model) {
@@ -53,8 +53,8 @@ public class OtpRequestErrorAdapter implements ErrorAdapter<OtpRequest> {
         addTenantIdValidationErrors(model, errorFields);
         addMobileNumberValidationErrors(model, errorFields);
         addRequestTypeValidationErrors(model, errorFields);
-        addMobileNumberInvalidValidationErrors(model, errorFields);
-		addMobileNumberValidLengthValidationError(model, errorFields);
+       // addMobileNumberInvalidValidationErrors(model, errorFields);
+	//	addMobileNumberValidLengthValidationError(model, errorFields);
         return errorFields;
     }
 
@@ -94,7 +94,7 @@ public class OtpRequestErrorAdapter implements ErrorAdapter<OtpRequest> {
         errorFields.add(longitudeErrorField);
     }
     
-	private void addMobileNumberValidLengthValidationError(OtpRequest model, List<ErrorField> errorFields) {
+/*	private void addMobileNumberValidLengthValidationError(OtpRequest model, List<ErrorField> errorFields) {
 		if (!model.isMobileNumberValidLength()) {
 			return;
 		}
@@ -110,6 +110,6 @@ public class OtpRequestErrorAdapter implements ErrorAdapter<OtpRequest> {
 		final ErrorField latitudeErrorField = ErrorField.builder().code(MOBILE_INVALID_CODE)
 				.message(MOBILE_INVALID_MESSAGE).field(MOBILE_INVALID_FIELD).build();
 		errorFields.add(latitudeErrorField);
-	}
+	}*/
 
 }

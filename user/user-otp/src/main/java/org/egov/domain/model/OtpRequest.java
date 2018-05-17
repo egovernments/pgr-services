@@ -3,7 +3,7 @@ package org.egov.domain.model;
 import static org.springframework.util.StringUtils.isEmpty;
 
 import org.egov.domain.exception.InvalidOtpRequestException;
-import org.apache.commons.lang3.StringUtils;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -25,14 +25,12 @@ public class OtpRequest {
     public void validate() {
         if(isTenantIdAbsent()
 				|| isMobileNumberAbsent()
-				|| isInvalidType()
-				|| isMobileNumberNumeric()
-				|| isMobileNumberValidLength()) {
+				|| isInvalidType()) {
             throw new InvalidOtpRequestException(this);
         }
     }
 
-	public boolean isMobileNumberNumeric() {
+/*	public boolean isMobileNumberNumeric() {
 		// TODO Auto-generated method stub
 		if(!(type!=null && type.toString().equalsIgnoreCase(OtpRequestType.PASSWORD_RESET.toString())))
 		return !StringUtils.isNumeric(mobileNumber);
@@ -44,7 +42,7 @@ public class OtpRequest {
 		if(!(type!=null && type.toString().equalsIgnoreCase(OtpRequestType.PASSWORD_RESET.toString())))
 		return !(mobileNumber != null && mobileNumber.matches("^[0-9]{10,13}$"));
 		return false;
-	}
+	}*/
     
 	public boolean isRegistrationRequestType() {
     	return OtpRequestType.REGISTER.equals(getType());
