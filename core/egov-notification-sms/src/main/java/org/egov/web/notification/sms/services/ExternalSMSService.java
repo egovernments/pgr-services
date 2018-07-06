@@ -40,20 +40,37 @@
 
 package org.egov.web.notification.sms.services;
 
+
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
+
+
 import org.egov.web.notification.sms.config.SmsProperties;
 import org.egov.web.notification.sms.models.Sms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+
+import org.springframework.http.*;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import javax.net.ssl.SSLContext;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+
 
 @Service
 @ConditionalOnProperty(value = "sms.enabled", havingValue = "true")
@@ -65,10 +82,54 @@ public class ExternalSMSService implements SMSService {
     private SmsProperties smsProperties;
     private RestTemplate restTemplate;
 
+    @Value("${sms.sender.requestType:POST}")
+    private String requestType;
+
+    @Value("${sms.verify.response:false}")
+    private boolean verifyResponse;
+
+    @Value("${sms.verify.responseContains:}")
+    private String verifyResponseContains;
+
+    @Value("${sms.verify.ssl:true}")
+    private boolean verifySSL;
+
+    @Value("${sms.url.dont_encode_url:true}")
+    private boolean dontEncodeURL;
+
+
     @Autowired
     public ExternalSMSService(SmsProperties smsProperties, RestTemplate restTemplate) {
+
         this.smsProperties = smsProperties;
         this.restTemplate = restTemplate;
+
+        if (!verifySSL) {
+            TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
+                @Override
+                public boolean isTrusted(java.security.cert.X509Certificate[] x509Certificates, String s) {
+                    return true;
+                }
+
+            };
+
+            SSLContext sslContext = null;
+            try {
+                sslContext = org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy)
+                        .build();
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (KeyManagementException e) {
+                e.printStackTrace();
+            } catch (KeyStoreException e) {
+                e.printStackTrace();
+            }
+            SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext, new NoopHostnameVerifier());
+            CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
+            HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+            requestFactory.setHttpClient(httpClient);
+            restTemplate.setRequestFactory(requestFactory);
+        }
     }
 
     @Override
@@ -82,12 +143,32 @@ public class ExternalSMSService implements SMSService {
 
     private void submitToExternalSmsService(Sms sms) {
         try {
-            HttpEntity<MultiValueMap<String, String>> request = getRequest(sms);
+            
             String url = smsProperties.getSmsProviderURL();
-            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-            if (isResponseCodeInKnownErrorCodeList(response)) {
-                throw new RuntimeException(SMS_RESPONSE_NOT_SUCCESSFUL);
+            ResponseEntity<String> response = new ResponseEntity<String>(HttpStatus.OK);
+            if (requestType.equals("POST"))
+            {
+                HttpEntity<MultiValueMap<String, String>> request = getRequest(sms);
+                response = restTemplate.postForEntity(url, request, String.class);
+                if (isResponseCodeInKnownErrorCodeList(response)) {
+                    throw new RuntimeException(SMS_RESPONSE_NOT_SUCCESSFUL);
+                }
+            } else {
+               final MultiValueMap<String, String> requestBody = smsProperties.getSmsRequestBody(sms);
+
+
+               String final_url = UriComponentsBuilder.fromHttpUrl(url).queryParams(requestBody).toUriString();
+
+               if (dontEncodeURL) {
+                   final_url = final_url.replace("%20", " ").replace("%2B", "+");
+               }
+
+               String responseString = restTemplate.getForObject(final_url, String.class);
+               if (verifyResponse && !responseString.contains(verifyResponseContains)) {
+                   throw new RuntimeException(SMS_RESPONSE_NOT_SUCCESSFUL);
+               }
             }
+
         } catch (RestClientException e) {
             LOGGER.error("Error occurred while sending SMS to " + sms.getMobileNumber(), e);
             throw e;
