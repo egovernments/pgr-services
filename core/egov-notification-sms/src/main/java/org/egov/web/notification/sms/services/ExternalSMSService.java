@@ -165,10 +165,8 @@ public class ExternalSMSService implements SMSService {
 
                String responseString = restTemplate.getForObject(final_url, String.class);
                
-               LOGGER.error("the final url is - " + final_url);
-               LOGGER.error("Response from API - " + responseString);
-               
                if (verifyResponse && !responseString.contains(verifyResponseContains)) {
+                   LOGGER.error("Response from API - " + responseString);
                    throw new RuntimeException(SMS_RESPONSE_NOT_SUCCESSFUL);
                }
             }
