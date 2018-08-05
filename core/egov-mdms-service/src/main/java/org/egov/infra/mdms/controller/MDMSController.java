@@ -2,7 +2,6 @@ package org.egov.infra.mdms.controller;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.validation.Valid;
@@ -16,7 +15,6 @@ import org.egov.mdms.model.MdmsCriteriaReq;
 import org.egov.mdms.model.MdmsResponse;
 import org.egov.mdms.model.ModuleDetail;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +35,12 @@ public class MDMSController {
 	@Autowired
 	private MDMSService mdmsService;
 
+	/***
+	 * search API which takes the criteria input in the body and returns the mdms response 
+	 * 
+	 * @param mdmsCriteriaReq
+	 * @return
+	 */
 	@PostMapping("_search")
 	@ResponseBody
 	private ResponseEntity<?> search(@RequestBody @Valid MdmsCriteriaReq mdmsCriteriaReq) {
@@ -44,10 +48,7 @@ public class MDMSController {
 		long startTime = new Date().getTime();
 		log.info("api startTime:"+startTime);
 		log.info("MDMSController mdmsCriteriaReq:" + mdmsCriteriaReq);
-		/*
-		 * if(bindingResult.hasErrors()) { throw new
-		 * CustomBindingResultExceprion(bindingResult); }
-		 */
+
 		Map<String, Map<String, JSONArray>> response = mdmsService.searchMaster(mdmsCriteriaReq);
 		MdmsResponse mdmsResponse = new MdmsResponse();
 		mdmsResponse.setMdmsRes(response);
@@ -62,7 +63,15 @@ public class MDMSController {
 		
 	}
 	
-
+	/***
+	 * search API which takes the criteria input in the url and returns the mdms response
+	 * @param module
+	 * @param master
+	 * @param filter
+	 * @param tenantId
+	 * @param requestInfo
+	 * @return
+	 */
 	@PostMapping("_get")
 	@ResponseBody
 	private ResponseEntity<?> search(@RequestParam("moduleName") String module,
@@ -72,9 +81,6 @@ public class MDMSController {
 									 @RequestBody RequestInfo requestInfo){
 
     	log.info("MDMSController mdmsCriteriaReq [" + module + ", " + master + ", " + filter + "]");
-    	/*if(bindingResult.hasErrors()) {
-    		throw new CustomBindingResultExceprion(bindingResult);
-    	}*/
 
     	MdmsCriteriaReq mdmsCriteriaReq = new MdmsCriteriaReq();
     	mdmsCriteriaReq.setRequestInfo(requestInfo);
@@ -114,7 +120,7 @@ public class MDMSController {
 									 @RequestBody RequestInfo requestInfo){
 
 		System.out.println(filePath+","+tenantId);
-		mdmsService.updateCache(filePath, tenantId);
+		mdmsService.updateCache(filePath);
 		return new ResponseEntity<>("Success" ,HttpStatus.OK);
 	}
 	

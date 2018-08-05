@@ -1,5 +1,6 @@
 package org.egov.infra.mdms.service;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 
@@ -26,6 +28,9 @@ import net.minidev.json.JSONArray;
 @Service
 @Slf4j
 public class MDMSService {
+	
+	@Autowired 
+	MDMSApplicationRunnerImpl applicationRunnerImpl;
 
 	@Autowired
 	private KafkaTemplate<String, Object> kafkaTemplate;
@@ -33,9 +38,14 @@ public class MDMSService {
 	@Value("${egov.kafka.topics.reload}")
 	private String reloadTopic;
 
+	/***
+	 * returns the Master details in a map of module containing a map of master and list of data.
+	 * @param mdmsCriteriaReq
+	 * @return
+	 */
 	public Map<String, Map<String, JSONArray>> searchMaster(MdmsCriteriaReq mdmsCriteriaReq) {
 		
-		Map<String, Map<String, Map<String, JSONArray>>> tenantIdMap = MDMSApplicationRunnerImpl.getTenantMap();
+		Map<String, Map<String, Map<String, JSONArray>>> tenantIdMap = applicationRunnerImpl.getTenantMap();
 
 		String tenantId = mdmsCriteriaReq.getMdmsCriteria().getTenantId();
 
@@ -43,7 +53,7 @@ public class MDMSService {
 		Map<String, Map<String, JSONArray>> ulbLevel = null;
 
 		if (tenantId.contains(".")) {
-			String array[] = tenantId.split("\\.");
+			String[] array = tenantId.split("\\.");
 			stateLevel = tenantIdMap.get(array[0]);
 			ulbLevel = tenantIdMap.get(tenantId);
 			if (ulbLevel == null)
@@ -77,15 +87,8 @@ public class MDMSService {
 			Map<String, JSONArray> finalMasterMap = new HashMap<>();
 
 			for (MasterDetail masterDetail : masterDetails) {
-				// JSONArray masterData = masters.get(masterDetail.getName());
 				JSONArray masterData = null;
-				try {
-					masterData = getMasterData(stateLevel, ulbLevel, moduleDetail.getModuleName(),
-							masterDetail.getName(),tenantId);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				masterData = getMasterData(stateLevel, ulbLevel, moduleDetail.getModuleName(), masterDetail.getName());
 				if (masterData == null)
 					continue;
 
@@ -99,10 +102,18 @@ public class MDMSService {
 		return responseMap;
 	}
 
+	/***
+	 *  prepares and returns master data from sets state level and ulb level data based on the given parameters.
+	 * @param stateLevel
+	 * @param ulbLevel
+	 * @param moduleName
+	 * @param masterName
+	 * @return 
+	 */
 	private JSONArray getMasterData(Map<String, Map<String, JSONArray>> stateLevel,
-			Map<String, Map<String, JSONArray>> ulbLevel, String moduleName, String masterName,String tenantId) throws Exception {
+			Map<String, Map<String, JSONArray>> ulbLevel, String moduleName, String masterName) {
 		
-		Map<String, Map<String, Object>> masterConfigMap = MDMSApplicationRunnerImpl.getMasterConfigMap();
+		Map<String, Map<String, Object>> masterConfigMap = applicationRunnerImpl.getMasterConfigMap();
 
 		Map<String, Object> moduleData = masterConfigMap.get(moduleName);
 		log.info(" The Module Config map : {}",moduleData);
@@ -113,25 +124,22 @@ public class MDMSService {
 			masterData = moduleData.get(masterName);
 		
 		if (null != masterData) {
-			try {
-			isStateLevel = (Boolean) JsonPath.read(mapper.writeValueAsString(masterData),
-					MDMSConstants.STATE_LEVEL_JSONPATH);
-			}catch(Exception e) {
-				isStateLevel = false;
-			}
+				try {
+					isStateLevel = (Boolean) JsonPath.read(mapper.writeValueAsString(masterData),
+							MDMSConstants.STATE_LEVEL_JSONPATH);
+				} catch (JsonProcessingException e) {
+					log.error(" exception while reading stateLevel field from masterConfig json : {}",e);
+				}
 		}
-		log.info("MasterName... " +  masterName + "isStateLevelConfiguration.."+isStateLevel);
+		log.info("MasterName... " + masterName + "isStateLevelConfiguration.." + isStateLevel);
 
 		if (ulbLevel == null || isStateLevel) {
 			if (stateLevel.get(moduleName) != null) {
 				return stateLevel.get(moduleName).get(masterName);
-			}else {
+			} else {
 				return null;
 			}
-		}
-		/*if (isStateLevel && stateLevel.get(moduleName) != null) {
-				return stateLevel.get(moduleName).get(masterName);
-		}*/ else if (ulbLevel != null && ulbLevel.get(moduleName) != null) {
+		} else if (ulbLevel.get(moduleName) != null) {
 			return ulbLevel.get(moduleName).get(masterName);
 		} else {
 			return null;
@@ -143,7 +151,12 @@ public class MDMSService {
 		return filteredMasters;
 	}
 
-	public void updateCache(String path, String tenantId) {
+	/***
+	 * updates the cache in the service based on the given path
+	 * @param path
+	 */
+	@SuppressWarnings("unchecked")
+	public void updateCache(String path) {
 
 		ObjectMapper jsonReader = new ObjectMapper();
 
@@ -151,8 +164,8 @@ public class MDMSService {
 			URL jsonFileData = new URL(path);
 			Map<String, Object> map = jsonReader.readValue(new InputStreamReader(jsonFileData.openStream()), Map.class);
 			kafkaTemplate.send(reloadTopic, map);
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IOException e) {
+			log.error(" exception in updateCache readValue from JsonFileData : {}",e);
 			throw new CustomException("mdms_invalid_file_path", "invalid file path");
 		}
 
