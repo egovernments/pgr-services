@@ -13,7 +13,6 @@ UploadDefinitions:
    isBulkApi: false
    tenantIdPaths: ["$.Asset.tenantId"]
    uniqueKeysForInnerObject: []
-   uri: /asset-services-maha/assets/_create
    additionalResFields:
    templateFileName: Asset_Movable_Template.xls
 

@@ -24,12 +24,12 @@ public class DataUploadConsumer {
 	private DataUploadService dataUploadService;
 	
 	@KafkaListener(topics = {"${kafka.topics.dataupload}"})
-	
+
 	public void listen(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
 		ObjectMapper mapper = new ObjectMapper();
 		try{
 			logger.info("Consuming record: "+record);
-			dataUploadService.parseExcel(mapper.convertValue(record, UploaderRequest.class));
+			dataUploadService.excelDataUpload(mapper.convertValue(record, UploaderRequest.class));
 		}catch(final Exception e){
 			logger.error("Error while listening to value: "+record+" on topic: "+topic+": ", e.getMessage());
 		}
