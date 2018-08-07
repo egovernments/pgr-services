@@ -24,7 +24,7 @@ public class DataUploadProducer {
 
     public void producer(Object value) {
     	logger.info("Value being pushed to the queue: "+value.toString());
-    		kafkaTemplate.send(topic, key, value);
+    	kafkaTemplate.send(topic, key, value);
     	
     }
 }

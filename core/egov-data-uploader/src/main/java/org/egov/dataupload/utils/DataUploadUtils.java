@@ -1,269 +1,174 @@
 package org.egov.dataupload.utils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import com.jayway.jsonpath.DocumentContext;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.*;
 import org.egov.dataupload.model.Definition;
+import org.egov.dataupload.model.Document;
 import org.egov.dataupload.model.UploadDefinition;
 import org.egov.tracer.model.CustomException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
+import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 
 @Component
 public class DataUploadUtils {
 	
-	public static final Logger logger = LoggerFactory.getLogger(DataUploadUtils.class);
+	private static final Logger logger = LoggerFactory.getLogger(DataUploadUtils.class);
+	private DateFormat format = new SimpleDateFormat("dd/MM/YYYY");
+	private DataFormatter dataFormatter = new DataFormatter();
 	
 	@Value("${internal.file.folder.path}")
 	private String internalFolderPath;
 	
 	@Value("${business.module.host}")
 	private String businessModuleHost;
+
+	@Autowired
+	private ObjectMapper objectMapper;
 		
-	@SuppressWarnings({ "deprecation", "static-access" })
-	public List<List<Object>> readExcelFile(HSSFSheet sheet, List<Object> coloumnHeaders){
-        List<List<Object>> excelData = new ArrayList<>(); 
-        int rowStart = sheet.getFirstRowNum();
-        int rowEnd = sheet.getLastRowNum();
-        int totalRows = 0;
-        logger.info("start row of the sheet: "+rowStart);
-        logger.info("last row of the sheet: "+rowEnd);
-        for (int rowNum = rowStart; rowNum < (rowEnd + 1); rowNum++) {
-            List<Object> dataList = new ArrayList<>();
-           logger.info("Parsing row: "+rowNum);
-           Row row = sheet.getRow(rowNum);
-           if (null == row) {
-        	  logger.info("empty row: row - "+rowNum);
-              continue;
-           }
-           int lastColumn = 0;
-           if(rowNum == 0) {
-        	   totalRows = row.getLastCellNum();
-        	   lastColumn = totalRows;
-           }else {
-        	   lastColumn = Math.max(totalRows, row.getLastCellNum());
-           }
-           logger.info("last column of this row: "+lastColumn);
-           for (int colNum = 0; colNum < lastColumn; colNum++) {
-              Cell cell = row.getCell(colNum, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL );
-              if(null == cell) {
-          		    logger.debug("empty cell");
-	            	dataList.add(null);
-              }else if(0 == cell.getRowIndex()) {
-	            	coloumnHeaders.add(cell.getStringCellValue());
-	          }else {
-		            if(!isCellEmpty(cell)) {
-		            	if(cell.CELL_TYPE_NUMERIC == cell.getCellType()) {
-		            	    if (HSSFDateUtil.isCellDateFormatted(cell)) {
-			            		logger.debug("date: "+cell.getDateCellValue());
-			            		dataList.add(cell.getDateCellValue().getTime());
-		            	    }else {
-		            	    	logger.debug("numeric: "+cell.getNumericCellValue());
-		            	    	dataList.add(cell.getNumericCellValue());
-		            	    }
-		            	}
-		            	else if(cell.CELL_TYPE_STRING == cell.getCellType()) {
-		            		if(cell.getStringCellValue().equals("NA") || 
-		            				cell.getStringCellValue().equals("N/A") || cell.getStringCellValue().equals("na")) {
-			            		dataList.add(null);		            		
-			            	}else if(validateDate(cell.getStringCellValue())){
-			            		logger.debug("date - string: "+cell.getStringCellValue());
-			            		try {
-				            		DateFormat format = new SimpleDateFormat("dd/MM/YYYY");
-				            		Date date = format.parse(cell.getStringCellValue());
-			            			dataList.add(date.getTime());
-			            		}catch(Exception e) {
-			            			logger.info("Couldn't parse date", e);
-			            			dataList.add(cell.getStringCellValue());
-			            		}
-		            		}else if(!cell.getStringCellValue().trim().isEmpty()){
-			            		logger.debug("string: "+cell.getStringCellValue());
-		            			dataList.add(cell.getStringCellValue());
-		            		}else{
-			            		dataList.add(null);
-		            		}
-		            	}
-		            	else if(cell.CELL_TYPE_BOOLEAN == cell.getCellType()) {
-		            		logger.info("boolean: "+cell.getBooleanCellValue());
-		            		dataList.add(cell.getBooleanCellValue());
 
-		            	}
-		            }	
-	          }
-           }
-           logger.info("dataList: "+dataList);
-           logger.info("size: "+dataList.size());
+	public Document readExcelFile(InputStream stream) throws IOException, InvalidFormatException {
+		try(Workbook wb = WorkbookFactory.create(stream)) {
+            Sheet sheet = wb.getSheetAt(0);
 
-           if(!dataList.isEmpty()) {
-              	excelData.add(dataList);
-           }
-           
+            List<List<Object>> excelData = new ArrayList<>();
+            List<String> columnHeaders = new ArrayList<>();
+
+            int rowStart = sheet.getFirstRowNum();
+            int rowEnd = sheet.getLastRowNum();
+            int totalRows = 0;
+
+            logger.info("Total number of rows:  " + sheet.getPhysicalNumberOfRows());
+
+            for (int rowNum = rowStart; rowNum < (rowEnd + 1); rowNum++) {
+                List<Object> dataList = new ArrayList<>();
+                Row row = sheet.getRow(rowNum);
+                if (null == row) {
+                    continue;
+                }
+                int lastColumn = 0;
+                if(rowNum == 0) {
+                    totalRows = row.getLastCellNum();
+                    lastColumn = totalRows;
+                }else {
+                    lastColumn = Math.max(totalRows, row.getLastCellNum());
+                }
+                for (int colNum = 0; colNum < lastColumn; colNum++) {
+                    Cell cell = row.getCell(colNum, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL );
+                    if(null == cell) {
+                        dataList.add(null);
+                    }else if(0 == cell.getRowIndex()) {
+                        columnHeaders.add(cell.getStringCellValue());
+                    }else {
+                            switch (cell.getCellTypeEnum()) {
+                                case NUMERIC:
+                                    if (CellType.NUMERIC == cell.getCellTypeEnum()) {
+                                        if (HSSFDateUtil.isCellDateFormatted(cell)) {
+                                            dataList.add(cell.getDateCellValue().getTime());
+                                        } else {
+                                            dataList.add(dataFormatter.formatCellValue(cell));
+                                        }
+                                    }
+                                    break;
+                                case STRING:
+                                    if (cell.getStringCellValue().equals("NA") ||
+                                            cell.getStringCellValue().equals("N/A") || cell.getStringCellValue().equals("na")) {
+                                        dataList.add(null);
+                                    } else if (validateDate(cell.getStringCellValue())) {
+                                        try {
+                                            Date date = format.parse(cell.getStringCellValue());
+                                            dataList.add(date.getTime());
+                                        } catch (Exception e) {
+                                            logger.info("Couldn't parse date", e);
+                                            dataList.add(cell.getStringCellValue());
+                                        }
+                                    } else if (!cell.getStringCellValue().trim().isEmpty()) {
+                                        logger.trace("string: " + cell.getStringCellValue());
+                                        dataList.add(cell.getStringCellValue());
+                                    } else {
+                                        dataList.add(null);
+                                    }
+                                    break;
+                                case BOOLEAN:
+                                    dataList.add(cell.getBooleanCellValue());
+                                    break;
+                                case BLANK:
+                                    dataList.add(null);
+                                    break;
+
+                            }
+                    }
+                }
+                logger.info("dataList: " + dataList);
+
+                if (!dataList.isEmpty()) {
+                    excelData.add(dataList);
+                }
+
+            }
+
+            return new Document(columnHeaders, excelData);
+
+        } catch(IOException e){
+            logger.error("Unable to open stream.", e);
+            throw e;
+        } catch (InvalidFormatException e) {
+            logger.error("Invalid format found, not an excel file. ", e);
+            throw e;
         }
-	    logger.info("coloumnHeaders: "+coloumnHeaders);
-	    logger.info("excelData: "+excelData);
 
-        
-        return excelData;
-
-		
 	}
-	
-	@SuppressWarnings({ "deprecation", "static-access" })
-	public List<List<Object>> readExcelFile(XSSFSheet sheet, List<Object> coloumnHeaders){
-		logger.info("entering read excel for xlsx...");
-        List<List<Object>> excelData = new ArrayList<>(); 
-        int rowStart = sheet.getFirstRowNum();
-        int rowEnd = sheet.getLastRowNum();
-        int totalRows = 0;
-        logger.info("start row of the sheet: "+rowStart);
-        logger.info("last row of the sheet: "+rowEnd);
-        for (int rowNum = rowStart; rowNum < (rowEnd + 1); rowNum++) {
-            List<Object> dataList = new ArrayList<>();
-           logger.info("Parsing row: "+rowNum);
-           Row row = sheet.getRow(rowNum);
-           if (null == row) {
-        	  logger.info("empty row: row - "+rowNum);
-              continue;
-           }
-           int lastColumn = 0;
-           if(rowNum == 0) {
-        	   totalRows = row.getLastCellNum();
-        	   lastColumn = totalRows;
-           }else {
-        	   lastColumn = Math.max(totalRows, row.getLastCellNum());
-           }
-           logger.info("last column of this row: "+lastColumn);
-           for (int colNum = 0; colNum < lastColumn; colNum++) {
-              Cell cell = row.getCell(colNum, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL );
-              if(null == cell) {
-          		    logger.debug("empty cell");
-	            	dataList.add(null);
-              }else if(0 == cell.getRowIndex()) {
-	            	coloumnHeaders.add(cell.getStringCellValue());
-	          }else {
-		            if(!isCellEmpty(cell)) {
-		            	if(cell.CELL_TYPE_NUMERIC == cell.getCellType()) {
-		            	    if (HSSFDateUtil.isCellDateFormatted(cell)) {
-			            		logger.debug("date: "+cell.getDateCellValue().getTime());
-			            		dataList.add(cell.getDateCellValue().getTime());
-		            	    }else {
-			            		logger.debug("numeric: "+cell.getNumericCellValue());
-		            	    	dataList.add(cell.getNumericCellValue());
-		            	    }
-		            	}
-		            	else if(cell.CELL_TYPE_STRING == cell.getCellType()) {
-		            		if(cell.getStringCellValue().equals("NA") || 
-		            				cell.getStringCellValue().equals("N/A") || cell.getStringCellValue().equals("na")) {
-			            		dataList.add(null);		            		
-			            	}else if(validateDate(cell.getStringCellValue())){
-			            		logger.debug("date - string: "+cell.getStringCellValue());
-			            		try {
-				            		DateFormat format = new SimpleDateFormat("dd/MM/YYYY");
-				            		Date date = format.parse(cell.getStringCellValue());
-			            			dataList.add(date.getTime());
-			            		}catch(Exception e) {
-			            			logger.info("Couldn't parse date", e);
-			            			dataList.add(cell.getStringCellValue());
-			            		}
-		            		}else if(!cell.getStringCellValue().trim().isEmpty()){
-			            		logger.debug("string: "+cell.getStringCellValue());
-		            			dataList.add(cell.getStringCellValue());
-		            		}else{
-			            		dataList.add(null);
-		            		}
-		            	}
-		            	else if(cell.CELL_TYPE_BOOLEAN == cell.getCellType()) {
-		            		logger.debug("boolean: "+cell.getBooleanCellValue());
-		            		dataList.add(cell.getBooleanCellValue());
 
-		            	}
-		            }	
-	          }
-           }
-           logger.info("dataList: "+dataList);
-           if(!dataList.isEmpty()) {
-              	excelData.add(dataList);
-           }
-           
-        }
-	    logger.info("coloumnHeaders: "+coloumnHeaders);
-	    logger.info("excelData: "+excelData);
 
-        
-        return excelData;
-
-		
-	}
-	public boolean validateDate(String date) {
-		boolean isValid = false;
-		String dateRegex = "([0-9]{2})\\\\([0-9]{2})\\\\([0-9]{4})";
+    private boolean validateDate(String date) {
+        boolean isValid = false;
+        String dateRegex = "([0-9]{2})\\\\([0-9]{2})\\\\([0-9]{4})";
         if(date.matches(dateRegex))
-        	isValid = true;
-        
-		return isValid;
-	}
-	
-	public static boolean isCellEmpty(final Cell cell) {
-	    if (cell == null || cell.getCellType() == Cell.CELL_TYPE_BLANK)
-	        return true;
-	    if (cell.getCellType() == Cell.CELL_TYPE_STRING && cell.getStringCellValue().isEmpty())
-	        return true;
-	
-	    return false;
-	}
-	
+            isValid = true;
+
+        return isValid;
+    }
+
+    private static boolean isCellEmpty(final Cell cell) {
+        return cell == null ||
+                cell.getCellTypeEnum() == CellType.BLANK ||
+                cell.getCellTypeEnum() == CellType.STRING && cell.getStringCellValue().isEmpty();
+
+    }
+
 	public Definition getUploadDefinition(Map<String, UploadDefinition> searchDefinitionMap,
 			String moduleName, String defName){
 		logger.info("Fetching Definitions for module: "+moduleName+" and upload feature: "+defName);
-		List<Definition> definitions = null;
-		try{
-			definitions = searchDefinitionMap.get(moduleName).getDefinitions().parallelStream()
-											.filter(def -> (def.getDefName().equals(defName)))
+		List<Definition> definitions = searchDefinitionMap.get(moduleName).getDefinitions().stream()
+											.filter(def -> (def.getName().equals(defName)))
 		                                 .collect(Collectors.toList());
-		}catch(Exception e){
-			logger.error("There's no Upload Definition provided for this upload feature", e);
-			throw new CustomException(HttpStatus.BAD_REQUEST.toString(), 
-					"There's no Upload Definition provided for this upload feature");
-		}
-		if(0 == definitions.size()){
+		if(definitions.isEmpty()){
 			logger.error("There's no Upload Definition provided for this upload feature");
-			throw new CustomException(HttpStatus.BAD_REQUEST.toString(), 
+			throw new CustomException(HttpStatus.BAD_REQUEST.toString(),
 					"There's no Upload Definition provided for this upload feature");
 		}
 		logger.info("Definition to be used: "+definitions.get(0));
 
 		return definitions.get(0);
-		
+
 	}
 	
 	public String getJsonPathKey(String jsonPath, StringBuilder expression){
@@ -276,77 +181,76 @@ public class DataUploadUtils {
     	return expressionArray[expressionArray.length - 1];
 	}
 	
-	public MultipartFile getExcelFile(String path) throws Exception{
-		File file = new File(path);
-	    FileInputStream input = new FileInputStream(file);
-	    MultipartFile multipartFile = new MockMultipartFile("ReadFile",
-	            file.getName(), "text/plain", IOUtils.toByteArray(input));
-	    
-	    return multipartFile;
-	}
+//	private File getExcelFile(String path) throws Exception{
+//		File file = new File(path);
+//	    FileInputStream input = new FileInputStream(file);
+//
+//        return new File("");
+//	}
 	
-	public String createANewFile(String fileName) {
-		String folder = internalFolderPath;
-		logger.info("Creating a new file: "+fileName);
-		logger.info("Into the internal folder: "+folder);
-		try {
-	        HSSFWorkbook workbook = new HSSFWorkbook();
-	        HSSFSheet sheet = workbook.createSheet("Sheet 1"); 
-	        folder = folder + "/"+ fileName;
-	        FileOutputStream fileOut = new FileOutputStream(folder);
+	public String createANewFile(String fileName) throws IOException{
+		String outputFile = internalFolderPath + File.separator + fileName;
+        System.out.println("file create : "+outputFile);
+		logger.info("Attempting to create a new file: "+outputFile);
+		try (FileOutputStream fileOut = new FileOutputStream(outputFile);
+             HSSFWorkbook workbook = new HSSFWorkbook();
+		){
+	        workbook.createSheet("Sheet 1");
 	        workbook.write(fileOut);
-	        fileOut.close();
-	        workbook.close();
-		}catch(Exception e) {
-			logger.error("New file creation for processing failed",e);
+            return outputFile;
 		}
-        
-        return folder;
 		
 	}
 	
 	
-	public void writeToexcelSheet(List<Object> exisitingFields, String fileName) throws Exception{
+	public void writeToexcelSheet(List<Object> rowData, String fileName) throws IOException {
 		logger.info("Writing to file: "+fileName);
-	    MultipartFile file = getExcelFile(fileName);
-		HSSFWorkbook workbook = new HSSFWorkbook(file.getInputStream());
-        HSSFSheet sheet = workbook.getSheetAt(0);
-        int rowCount = sheet.getLastRowNum();
-        Row row = sheet.createRow(++rowCount);
-        for(int i = 0; i < exisitingFields.size(); i++)
-        {
-            Cell cell = row.createCell(i);
-            if(exisitingFields.get(i) instanceof String){
-            	cell.setCellType(CellType.STRING);
-            	cell.setCellValue(exisitingFields.get(i).toString());
-            }else if(exisitingFields.get(i) instanceof Double){
-            	cell.setCellType(CellType.NUMERIC);
-            	cell.setCellValue(Double.parseDouble(exisitingFields.get(i).toString()));
-            }else if(exisitingFields.get(i) instanceof Long){
-            	if(13 == exisitingFields.get(i).toString().length()) {
-            		CellStyle cellStyle = workbook.createCellStyle();
-            		CreationHelper createHelper = workbook.getCreationHelper();
-            		cellStyle.setDataFormat(
-            		    createHelper.createDataFormat().getFormat("dd/mm/yyyy"));
-            		cell.setCellValue(new Date(Long.parseLong(exisitingFields.get(i).toString())));
-            		cell.setCellStyle(cellStyle);
-            	}else {
-	            	cell.setCellType(CellType.NUMERIC);
-	            	cell.setCellValue(Long.parseLong(exisitingFields.get(i).toString()));
-            	}
-            }else if(exisitingFields.get(i) instanceof Boolean) {
-            	cell.setCellType(CellType.BOOLEAN);
-            	cell.setCellValue(Boolean.parseBoolean(exisitingFields.get(i).toString()));
+		try(InputStream stream = new FileInputStream(fileName);
+        HSSFWorkbook workbook = new HSSFWorkbook(stream)) {
+            HSSFSheet sheet = workbook.getSheetAt(0);
+            int rowCount = sheet.getLastRowNum();
+            Row row = sheet.createRow(++rowCount);
+            for (int i = 0; i < rowData.size(); i++) {
+                Cell cell = row.createCell(i);
+
+                if (rowData.get(i) instanceof String) {
+                    cell.setCellType(CellType.STRING);
+                    cell.setCellValue(rowData.get(i).toString());
+                } else if (rowData.get(i) instanceof Double) {
+                    cell.setCellType(CellType.NUMERIC);
+                    cell.setCellValue(Double.parseDouble(rowData.get(i).toString()));
+                } else if (rowData.get(i) instanceof Long) {
+                    if (13 == rowData.get(i).toString().length()) {
+                        CellStyle cellStyle = workbook.createCellStyle();
+                        CreationHelper createHelper = workbook.getCreationHelper();
+                        cellStyle.setDataFormat(
+                                createHelper.createDataFormat().getFormat("dd/mm/yyyy"));
+                        cell.setCellValue(new Date(Long.parseLong(rowData.get(i).toString())));
+                        cell.setCellStyle(cellStyle);
+                    } else {
+                        cell.setCellType(CellType.NUMERIC);
+                        cell.setCellValue(Long.parseLong(rowData.get(i).toString()));
+                    }
+                } else if (rowData.get(i) instanceof Boolean) {
+                    cell.setCellType(CellType.BOOLEAN);
+                    cell.setCellValue(Boolean.parseBoolean(rowData.get(i).toString()));
+                } else if(!Objects.isNull(rowData.get(i))){
+                    cell.setCellType(CellType.STRING);
+                    cell.setCellValue(rowData.get(i).toString());
+                }
+
             }
-            
+            sheet.shiftRows(row.getRowNum(), rowCount, -1);
+            try (FileOutputStream outputStream = new FileOutputStream(fileName)) {
+                workbook.write(outputStream);
+            }
+
+        } catch (IOException e) {
+            logger.error("Unable to write to output excel", e);
+            throw e;
         }
-        sheet.shiftRows(row.getRowNum(), rowCount, -1);
-        try (FileOutputStream outputStream = new FileOutputStream(fileName)) {
-            workbook.write(outputStream);
-        }
-          
-        workbook.close();
-	}
+
+    }
 
 	public void clearInternalDirectory(){
 		logger.info("Clearing the internal folder....: "+internalFolderPath);
@@ -359,10 +263,10 @@ public class DataUploadUtils {
 	}
 	
 	
-	public List<Object> getResJsonPathList(Map<String, String> resFieldsMap, List<Object> coloumnHeaders){
+	public List<Object> getResJsonPathList(Map<String, String> resFieldsMap, List<Object> columnHeaders){
 		List<Object> jsonpathList = new ArrayList<>();
 		for(Entry<String, String> entry: resFieldsMap.entrySet()){
-			coloumnHeaders.add(entry.getValue());
+			columnHeaders.add(entry.getValue());
 			jsonpathList.add(entry.getKey());
 		}
 		
@@ -370,34 +274,47 @@ public class DataUploadUtils {
 		
 	}
 	
-	public void addAdditionalFields(Object response, List<Object> row, List<Object> jsonPathList) throws Exception{
-		ObjectMapper mapper = new ObjectMapper();
-		response = mapper.writeValueAsString(response);
-		for(Object path: jsonPathList){
-			try{
-				Object value = JsonPath.read(response, path.toString());
-				row.add(value);
-			}catch(Exception e){
-				row.add(null);
-				
-				continue;
-			}
-		}
+	public List<Object> fetchValuesFromResponse(Object response, List<Object> jsonPathList) {
+	    List<Object> values = new ArrayList<>();
+
+        if( Objects.isNull(response) || response instanceof String ){
+            for (Object obj : jsonPathList) {
+                values.add(null);
+            }
+        }
+        else {
+            try{
+            String responseString = objectMapper.writeValueAsString(response);
+            for(Object path: jsonPathList){
+                try{
+                    Object value = JsonPath.read(responseString, path.toString());
+                    logger.debug("Response value from JSON Path {} is {}", path.toString(), value);
+                    values.add(value);
+                }catch(Exception e){
+                    values.add(null);
+                }
+            }
+            }catch (JsonProcessingException e){
+                for (Object obj : jsonPathList) {
+                    values.add(null);
+                }
+            }
+        }
+
+		return values;
 	}
 	
 	public String mockIdGen(String module, String defName){
 		StringBuilder id = new StringBuilder();
-		id.append(module+"-").append(defName+"-").append(new Date().getTime());
+		id.append(module).append("-").append(defName).append("-").append(new Date().getTime());
 		logger.info("JOB CODE: "+id.toString());
 		return id.toString();
 	}
 
 	public String getURI(String endPoint){
 		logger.info("endpoint: "+endPoint);
-		StringBuilder uri = new StringBuilder();
-		uri.append(businessModuleHost).append(endPoint);
-		
-		return uri.toString();
+
+        return businessModuleHost + endPoint;
 
 	}
 	
@@ -407,25 +324,46 @@ public class DataUploadUtils {
 		for(Integer index: indexes){
 			logger.info("index: "+index);
 			result = excelData.parallelStream()
-					.filter(obj -> ((obj.get(index)).equals(row.get(index))))
+					.filter(obj -> (obj.get(index)).equals(row.get(index)))
 					.collect(Collectors.toList());
 			
 			excelData = result;
 		}
 		return result;
 	}
+
+	public static Map<String, List<List<Object>>> groupRowsByIndexes(List<List<Object>> excelData, List<Integer>
+            indexes){
+		Map<String, List<List<Object>>> map = new LinkedHashMap<>();
+
+		for(List<Object> data : excelData){
+			StringBuilder key = new StringBuilder();
+			for(Integer index : indexes){
+				key.append(data.get(index));
+			}
+			if(map.containsKey(key.toString())){
+				map.get(key.toString()).add(data);
+			}
+			else {
+				List<List<Object>> list = new ArrayList<>();
+				list.add(data);
+				map.put(key.toString(), list);
+			}
+		}
+
+		return map;
+	}
 	
-	public Map<String, Object> eliminateEmptyList(Map<String, Object> objectMap) throws IllegalAccessException{
+	public Map<String, Object> eliminateEmptyList(Map<String, Object> objectMap) {
 		for(String key: objectMap.keySet()) {
-			if(key.equals("RequestInfo") || key.equals("requestIndo")) {
-				continue;
+			if(key.equals("RequestInfo") || key.equals("requestInfo")) {
 			}else {
 				if(!(objectMap.get(key) instanceof Map)) {
 					continue;
 				}
 				Map<String, Object> moduleObject = (Map<String, Object>) objectMap.get(key);
 				for(String mapKey: moduleObject.keySet()) {
-					if(moduleObject.get(mapKey) instanceof List) {
+					if(moduleObject.get(mapKey) instanceof List && !((List) moduleObject.get(mapKey)).isEmpty()) {
 						logger.info("entering checkNull for: "+mapKey);
 						if(checkNullPropsOfObject(((List)moduleObject.get(mapKey)).get(0))) {
 							logger.info("setting empty list for the key: "+mapKey);
@@ -439,48 +377,51 @@ public class DataUploadUtils {
 		return objectMap;
 	}
 	
-	public boolean checkNullPropsOfObject(Object obj) throws IllegalAccessException {
+	private boolean checkNullPropsOfObject(Object obj) {
 		logger.info("Object: "+obj);
-		Map<String, Object> objectMap = (Map<String, Object>) obj; 
-		for(Entry<String, Object> entry: objectMap.entrySet()) {
-			if(entry.getKey().equals("tenantId"))
-				continue;
-			
-			if(null != entry.getValue() || !entry.getValue().toString().isEmpty())
-				return false;
-		}
-	    return true;            
-	}
+		if(obj instanceof Map) {
+            Map<String, Object> objectMap = (Map<String, Object>) obj;
+            for (Entry<String, Object> entry : objectMap.entrySet()) {
+                if (entry.getKey().equals("tenantId"))
+                    continue;
 
-    public List<Integer> getIndexes(Definition uploadDefinition, List<Object> coloumnHeaders) {
+                if (!Objects.isNull(entry.getValue()) && !entry.getValue().toString().isEmpty())
+                    return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public List<Integer> getIndexes(Definition uploadDefinition, List<String> columnHeaders) {
 		List<Integer> indexes = new ArrayList<>();
 
 		//Getting indexes of parentKeys from header list to filter data based on those keys.
 		for(String key: uploadDefinition.getUniqueParentKeys()){
-			indexes.add(coloumnHeaders.indexOf(key));
+			indexes.add(columnHeaders.indexOf(key));
 		}
 
 		return indexes;
 	}
 
-    public DocumentContext getDocumentContext(Definition uploadDefinition) {
-        if(uploadDefinition.getIsBulkApi()){
-            String value = JsonPath.read(uploadDefinition.getApiRequest(),
-                    uploadDefinition.getArrayPath()).toString();
-            //Module specific content of the request body
-            return  JsonPath.parse(value.substring(1, value.length() - 1));
-            //Actual request with RequestInfo and module specific content
-        }else{
-            //Actual request with RequestInfo and module specific content
-            return JsonPath.parse(uploadDefinition.getApiRequest());
-        }
-    }
-
-    public DocumentContext getBulkApiRequestContext(Definition uploadDefinition) {
-        if(uploadDefinition.getIsBulkApi()) {
-            return JsonPath.parse(uploadDefinition.getApiRequest());
-        }
-        return null;
-    }
+//    public DocumentContext getDocumentContext(Definition uploadDefinition) {
+//        if(uploadDefinition.getIsBulkApi()){
+//            String value = JsonPath.read(uploadDefinition.getApiRequest(),
+//                    uploadDefinition.getArrayPath()).toString();
+//            //Module specific content of the request body
+//            return  JsonPath.parse(value.substring(1, value.length() - 1));
+//            //Actual request with RequestInfo and module specific content
+//        }else{
+//            //Actual request with RequestInfo and module specific content
+//            return JsonPath.parse(uploadDefinition.getApiRequest());
+//        }
+//    }
+//
+//    public DocumentContext getBulkApiRequestContext(Definition uploadDefinition) {
+//        if(uploadDefinition.getIsBulkApi()) {
+//            return JsonPath.parse(uploadDefinition.getApiRequest());
+//        }
+//        return null;
+//    }
 }
 
