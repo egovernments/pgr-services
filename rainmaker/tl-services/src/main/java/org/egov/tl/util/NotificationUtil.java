@@ -3,16 +3,11 @@ package org.egov.tl.util;
 import com.jayway.jsonpath.JsonPath;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.request.RequestInfo;
-import org.egov.mdms.model.MasterDetail;
-import org.egov.mdms.model.MdmsCriteria;
-import org.egov.mdms.model.MdmsCriteriaReq;
-import org.egov.mdms.model.ModuleDetail;
 import org.egov.tl.config.TLConfiguration;
 import org.egov.tl.producer.Producer;
 import org.egov.tl.repository.ServiceRequestRepository;
 import org.egov.tl.web.models.SMSRequest;
 import org.egov.tl.web.models.TradeLicense;
-import org.egov.tl.web.models.TradeLicenseRequest;
 import org.egov.tracer.model.CustomException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +16,8 @@ import org.springframework.util.CollectionUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static org.egov.tl.util.TLConstants.*;
 
 
 @Component
@@ -59,32 +56,32 @@ public class NotificationUtil {
         String message = null,messageTemplate;
         switch (license.getStatus()){
 
-            case INITIATED :
+            case STATUS_INITIATED :
                 messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_INITIATED,localizationMessage);
                 message = getInitiatedMsg(license,messageTemplate);
                 break;
 
-            case APPLIED :
+            case STATUS_APPLIED :
                 messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_APPLIED,localizationMessage);
                 message = getAppliedMsg(license,messageTemplate);
                 break;
 
-            case PAID :
+            case STATUS_PAID :
                 messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_PAID,localizationMessage);
                 message = getApprovalPendingMsg(license,messageTemplate);
                 break;
 
-            case APPROVED :
+            case STATUS_APPROVED :
                 messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_APPROVED,localizationMessage);
                 message = getApprovedMsg(license,messageTemplate);
                 break;
 
-            case REJECTED :
+            case STATUS_REJECTED :
                 messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_REJECTED,localizationMessage);
                 message = getRejectedMsg(license,messageTemplate);
                 break;
 
-            case CANCELLED :
+            case STATUS_CANCELLED :
                 messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_CANCELLED,localizationMessage);
                 message = getCancelledMsg(license,messageTemplate);
                 break;

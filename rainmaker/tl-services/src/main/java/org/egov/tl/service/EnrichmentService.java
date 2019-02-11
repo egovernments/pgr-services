@@ -281,9 +281,9 @@ public class EnrichmentService {
     private void setStatusForCreate(TradeLicenseRequest tradeLicenseRequest){
         tradeLicenseRequest.getLicenses().forEach(license -> {
             if(license.getAction().equalsIgnoreCase(ACTION_INITIATE))
-                license.setStatus(TradeLicense.StatusEnum.INITIATED);
+                license.setStatus(STATUS_INITIATED);
             if(license.getAction().equalsIgnoreCase(ACTION_APPLY))
-                license.setStatus(TradeLicense.StatusEnum.APPLIED);
+                license.setStatus(STATUS_APPLIED);
         });
     }
 

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.egov.tl.web.models.TradeLicense;
-import org.egov.tl.web.models.TradeLicense.StatusEnum;
 import org.egov.tl.web.models.TradeLicenseRequest;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,6 +142,6 @@ public class WorkflowIntegrator {
 
 		// setting the status back to TL object from wf response
 		tradeLicenseRequest.getLicenses()
-				.forEach(tlObj -> tlObj.setStatus(StatusEnum.fromValue(idStatusMap.get(tlObj.getApplicationNumber()))));
+				.forEach(tlObj -> tlObj.setStatus(idStatusMap.get(tlObj.getApplicationNumber())));
 	}
 }

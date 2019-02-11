@@ -144,8 +144,8 @@ public class ActionValidator {
     private void validateIds(TradeLicenseRequest request){
         Map<String,String> errorMap = new HashMap<>();
         request.getLicenses().forEach(license -> {
-            if(!license.getStatus().equals(TradeLicense.StatusEnum.APPLIED)
-                    && !license.getStatus().equals(TradeLicense.StatusEnum.INITIATED)) {
+            if(!license.getStatus().equalsIgnoreCase(STATUS_APPLIED)
+                    && !license.getStatus().equalsIgnoreCase(STATUS_INITIATED)) {
                 if (license.getId() == null)
                     errorMap.put("INVALID UPDATE", "Id of tradeLicense cannot be null");
                 if(license.getTradeLicenseDetail().getId()==null)
