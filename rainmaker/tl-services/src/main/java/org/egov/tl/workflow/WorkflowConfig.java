@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.*;
 
 import static org.egov.tl.util.TLConstants.*;
-import static org.egov.tl.web.models.TradeLicense.StatusEnum.*;
 
 
 @Configuration
@@ -46,11 +45,11 @@ public class WorkflowConfig {
 
         Map<String, String> map = new HashMap<>();
 
-        map.put(ACTION_INITIATE, INITIATED.toString());
-        map.put(ACTION_APPLY, APPLIED.toString());
-        map.put(ACTION_APPROVE, APPROVED.toString());
-        map.put(ACTION_REJECT, REJECTED.toString());
-        map.put(ACTION_CANCEL, CANCELLED.toString());
+        map.put(ACTION_INITIATE, STATUS_INITIATED);
+        map.put(ACTION_APPLY, STATUS_APPLIED);
+        map.put(ACTION_APPROVE, STATUS_APPROVED);
+        map.put(ACTION_REJECT, STATUS_REJECTED);
+        map.put(ACTION_CANCEL, STATUS_CANCELLED);
 
         actionStatusMap = Collections.unmodifiableMap(map);
     }
@@ -86,12 +85,12 @@ public class WorkflowConfig {
         Map<String, List<String>> map = new HashMap<>();
 
         map.put(null, Arrays.asList(ACTION_APPLY,ACTION_INITIATE));
-        map.put(INITIATED.toString(), Arrays.asList(ACTION_APPLY,ACTION_INITIATE));
-        map.put(APPLIED.toString(), Arrays.asList(ACTION_APPLY)); // FIXME PUT THE ACTIONS IN PLACE
-        map.put(PAID.toString(), Arrays.asList(ACTION_APPROVE, ACTION_REJECT));
-        map.put(APPROVED.toString(), Arrays.asList(ACTION_CANCEL));
-        map.put(REJECTED.toString(), Arrays.asList()); // FIXME PUT THE ACTIONS IN PLACE
-        map.put(CANCELLED.toString(), Arrays.asList()); // FIXME PUT THE ACTIONS IN PLACE
+        map.put(STATUS_INITIATED, Arrays.asList(ACTION_APPLY,ACTION_INITIATE));
+        map.put(STATUS_APPLIED, Arrays.asList(ACTION_APPLY)); // FIXME PUT THE ACTIONS IN PLACE
+        map.put(STATUS_PAID, Arrays.asList(ACTION_APPROVE, ACTION_REJECT));
+        map.put(STATUS_APPROVED, Arrays.asList(ACTION_CANCEL));
+        map.put(STATUS_REJECTED, Arrays.asList()); // FIXME PUT THE ACTIONS IN PLACE
+        map.put(STATUS_CANCELLED, Arrays.asList()); // FIXME PUT THE ACTIONS IN PLACE
 
         actionCurrentStatusMap = Collections.unmodifiableMap(map);
     }

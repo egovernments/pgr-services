@@ -69,7 +69,7 @@ public class TLRowMapper  implements ResultSetExtractor<List<TradeLicense>> {
                         .validFrom(validFrom)
                         .validTo(validTo)
                         .action(rs.getString("action"))
-                        .status(TradeLicense.StatusEnum.fromValue(rs.getString("status")))
+                        .status(rs.getString("status"))
                         .tenantId(tenantId)
                         .tradeName(rs.getString("tradeName"))
                         .propertyId(rs.getString("propertyid"))

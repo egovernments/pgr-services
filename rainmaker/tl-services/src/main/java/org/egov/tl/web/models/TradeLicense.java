@@ -139,47 +139,8 @@ public class  TradeLicense   {
         @JsonProperty("wfDocumnets")
         private List<Document> wfDocumnets;
 
-              /**
-   * Unique identifier (code) of the Trade license Status
-   */
-  public enum StatusEnum {
-    INITIATED("INITIATED"),
-    
-    APPLIED("APPLIED"),
-    
-    PAID("PAID"),
-    
-    APPROVED("APPROVED"),
-    
-    REJECTED("REJECTED"),
-
-    CANCELLED("CANCELLED");
-
-    private String value;
-
-    StatusEnum(String value) {
-      this.value = value;
-    }
-
-    @Override
-    @JsonValue
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    @JsonCreator
-    public static StatusEnum fromValue(String text) {
-      for (StatusEnum b : StatusEnum.values()) {
-        if (String.valueOf(b.value).equalsIgnoreCase(text)) {
-          return b;
-        }
-      }
-      return null;
-    }
-  }
-
         @JsonProperty("status")
-        private StatusEnum status = null;
+        private String status = null;
 
         @Valid
         @NotNull
