@@ -46,7 +46,7 @@ public class TLWorkflowService {
     private void changeStatus(TradeLicenseRequest request){
        Map<String,String> actionToStatus =  workflowConfig.getActionStatusMap();
        request.getLicenses().forEach(license -> {
-             license.setStatus(TradeLicense.StatusEnum.valueOf(actionToStatus.get(license.getAction())));
+             license.setStatus(actionToStatus.get(license.getAction()));
              if(license.getAction().equalsIgnoreCase(ACTION_APPROVE)){
                  Long time = System.currentTimeMillis();
                  license.setIssuedDate(time);
