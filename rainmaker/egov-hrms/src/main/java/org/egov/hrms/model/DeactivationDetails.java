@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.validation.constraints.NotNull;
+
 @Validated
 @EqualsAndHashCode(exclude = {"auditDetails"})
 @AllArgsConstructor
@@ -22,12 +24,14 @@ public class DeactivationDetails {
 	
 	private String id;
 
+	@NotNull
 	private String reasonForDeactivation;
 	
 	private String orderNo;
 
 	private String remarks;
 
+	@NotNulls
 	private Long effectiveFrom;
 
 	private String tenantId;
