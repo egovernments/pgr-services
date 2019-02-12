@@ -31,7 +31,7 @@ public class DeactivationDetails {
 
 	private String remarks;
 
-	@NotNulls
+	@NotNull
 	private Long effectiveFrom;
 
 	private String tenantId;
