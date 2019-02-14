@@ -403,7 +403,7 @@ public class EstimationService {
 		}
 		TaxHeadEstimate decimalEstimate = payService.roundOfDecimals(taxAmt.add(penalty), rebate.add(exemption));
         if (null != decimalEstimate) {
-
+			decimalEstimate.setCategory(taxHeadCategoryMap.get(decimalEstimate.getTaxHeadCode()));
             estimates.add(decimalEstimate);
             if (PT_DECIMAL_CEILING_CREDIT.equalsIgnoreCase(decimalEstimate.getTaxHeadCode()))
                 taxAmt = taxAmt.add(decimalEstimate.getEstimateAmount());
