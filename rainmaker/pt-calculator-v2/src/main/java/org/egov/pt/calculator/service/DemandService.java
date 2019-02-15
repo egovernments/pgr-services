@@ -438,31 +438,38 @@ public class DemandService {
 	}
 
 	/**
+	 * 
+	 * Balances the decimal values in the newly updated demand by performing a roundoff
+	 * 
 	 * @param demand
-	 * @param tenantId
-	 * @param demandId
-	 * @param totalTax
-	 * @param totalCollectedAmount
-	 * @param isDecimalMathcing
-	 * @param details
-	 * @param rebate
-	 * @param penalty
-	 * @param interest
+	 * @param requestInfoWrapper
 	 */
 	public void roundOffDecimalForDemand(Demand demand, RequestInfoWrapper requestInfoWrapper) {
 		
 		List<DemandDetail> details = demand.getDemandDetails();
 		String tenantId = demand.getTenantId();
 		String demandId = demand.getId();
+		
+		/*
+		 * isDecimalMatching 
+		 * 
+		 * This boolean variable will be set to true in case of the decimal tax-heads already being present in the demand
+		 * 
+		 * given that only debit or credit can exist at a time with value greater than zero
+		 */
 		boolean isDecimalMathcing = false;
 
 		BigDecimal creditAmt = BigDecimal.ZERO;
 		BigDecimal debitAmt = BigDecimal.ZERO;
 		BigDecimal totalCollectedAmount = BigDecimal.ZERO;
-		
+
+		// Collecting the taxHead master codes with the isDebit field in a Map 
 		Map<String, Boolean> isTaxHeadDebitMap = mstrDataService.getTaxHeadMasterMap(requestInfoWrapper.getRequestInfo(), tenantId).stream()
 				.collect(Collectors.toMap(TaxHeadMaster::getCode, TaxHeadMaster::getIsDebit));
 
+		/*
+		 * Summing the credit amount and Debit amount in to separate variables(based on the taxhead:isdebit map) to send to roundoffDecimal method
+		 */
 		for (DemandDetail detail : demand.getDemandDetails()) {
 
 			totalCollectedAmount = totalCollectedAmount.add(detail.getCollectionAmount());
@@ -475,8 +482,19 @@ public class DemandService {
 				debitAmt = debitAmt.add(detail.getTaxAmount());
 		}
 
+		/*
+		 *  An estimate object will be returned incase if there is a decimal value
+		 *  
+		 *  If no decimal value found null object will be returned 
+		 */
 		TaxHeadEstimate estimate = payService.roundOfDecimals(creditAmt, debitAmt.add(totalCollectedAmount));
 
+		/*
+		 *  setting value to decimalCredit/decimalDebit fields in case estimate is available, in case of null Zero will be set
+		 *  
+		 *  if taxhead code is credit then debit will be zero and vice versa
+		 */
+		
 		BigDecimal decimalCredit = null != estimate
 				&& estimate.getTaxHeadCode().equalsIgnoreCase(CalculatorConstants.PT_DECIMAL_CEILING_CREDIT)
 						? estimate.getEstimateAmount() : BigDecimal.ZERO;
@@ -485,6 +503,13 @@ public class DemandService {
 				&& estimate.getTaxHeadCode().equalsIgnoreCase(CalculatorConstants.PT_DECIMAL_CEILING_DEBIT)
 						? estimate.getEstimateAmount() : BigDecimal.ZERO;
 
+		/*
+		 *  Looping the demandDetails to update the tax Amount for the decimal demandDetails if they present
+		 *  
+		 *  If any decimal Detail found the isDecimalMatching will be set to true  
+		 */
+						
+						
 		for (DemandDetail detail : demand.getDemandDetails()) {
 
 			if (detail.getTaxHeadMasterCode().equalsIgnoreCase(CalculatorConstants.PT_DECIMAL_CEILING_CREDIT)) {
@@ -503,6 +528,11 @@ public class DemandService {
 			}
 		}
 
+		/*
+		 *  If isDecimalMatching set to false (meaning no decimal Detail is found already)
+		 *  
+		 *   then a new demandDetail will be created and added to the Demand. 
+		 */
 		if (!isDecimalMathcing && null != estimate && BigDecimal.ZERO.compareTo(estimate.getEstimateAmount()) <= 0)
 			details.add(DemandDetail.builder().taxAmount(estimate.getEstimateAmount())
 					.taxHeadMasterCode(estimate.getTaxHeadCode()).demandId(demandId).tenantId(tenantId).build());
