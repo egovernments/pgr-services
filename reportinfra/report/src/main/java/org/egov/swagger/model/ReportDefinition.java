@@ -19,6 +19,9 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties 
 @EnableConfigurationProperties(ReportDefinition.class)
 public class ReportDefinition   {
+
+    @JsonProperty("uiConfig")
+    private Object uiConfig = null;
 	
 	@JsonProperty("searchFilter")
 	private boolean searchFilter = false;
@@ -328,5 +331,13 @@ public void setLinkedReport(LinkedReport linkedReport) {
     }
     return o.toString().replace("\n", "\n    ");
   }
+
+    public Object getUiConfig() {
+        return uiConfig;
+    }
+
+    public void setUiConfig(Object uiConfig) {
+        this.uiConfig = uiConfig;
+    }
 }
 

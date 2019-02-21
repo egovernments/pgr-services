@@ -17,6 +17,9 @@ public class ReportMetadata   {
   
   @JsonProperty("serialNo")
   private boolean serialNo = false;
+
+  @JsonProperty("uiConfig")
+  private Object uiConfig = null;
   
   public boolean isSerialNo() {
 	return serialNo;
@@ -150,6 +153,13 @@ public void setSummary(String summary) {
     this.searchParams = searchParams;
   }
 
+  public Object getUiConfig() {
+      return uiConfig;
+  }
+    
+  public void setUiConfig(Object uiConfig) {
+      this.uiConfig = uiConfig;
+  }
 
   @Override
   public boolean equals(java.lang.Object o) {
