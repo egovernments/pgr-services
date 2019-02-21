@@ -328,5 +328,16 @@ public void setLinkedReport(LinkedReport linkedReport) {
     }
     return o.toString().replace("\n", "\n    ");
   }
+
+    @JsonProperty("uiConfig")
+    private Object uiConfig = null;
+
+    public Object getUiConfig() {
+        return uiConfig;
+    }
+
+    public void setUiConfig(Object uiConfig) {
+        this.uiConfig = uiConfig;
+    }
 }
 

@@ -98,6 +98,9 @@ ReportDefinitions:
         source: pt
         isMandatory: false
         searchClause: AND pt_addr.locality IN ($localityArray)
+    uiConfig:
+      pagination: true
+      rowCountPerPage: 20
     query: |
       -- Use CTE to force query plan, compute & use CTE later
       WITH receipt_breakup AS (

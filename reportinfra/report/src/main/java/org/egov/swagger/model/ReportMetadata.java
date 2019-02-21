@@ -151,6 +151,17 @@ public void setSummary(String summary) {
   }
 
 
+  @JsonProperty("uiConfig")
+  private Object uiConfig = null;
+
+    public Object getUiConfig() {
+        return uiConfig;
+    }
+
+    public void setUiConfig(Object uiConfig) {
+        this.uiConfig = uiConfig;
+    }
+
   @Override
   public boolean equals(java.lang.Object o) {
     if (this == o) {

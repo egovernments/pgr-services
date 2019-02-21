@@ -101,6 +101,7 @@ public class ReportService {
 		}
 		rmt.setReportHeader(reportHeaders);
 		rmt.setSearchParams(searchParams);
+		rmt.setUiConfig(reportDefinition.getUiConfig());
 		metadataResponse.setReportDetails(rmt);
 		metadataResponse.setTenantId(metaDataRequest.getTenantId());
 		try {
