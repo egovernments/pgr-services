@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 1.1.0
+  version: 1.0.0
   title: eGov Billing Service APIs
   description: |-
     eGov Billing Service manages head wise demand and Demand Bill information for all the revenue modules from eGov solution. It manages
@@ -11,7 +11,7 @@ info:
     name: eGovernments Foundation
 schemes:
   - https
-basePath: /billingservice/v11
+basePath: /billingservice/v1
 x-common-path: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml'
 paths:
 
@@ -488,6 +488,15 @@ definitions:
       additionalDetails:  
         type: string
         description: field for capturing any additional details.
+      collectionMap:
+        type: object
+        properties:
+          default:
+            type: string
+        required:
+          - default
+        additionalProperties:
+          type: number
       billDetails:
         type: array
         items:
@@ -547,10 +556,18 @@ definitions:
         type: number
         format: double
         description: Total bill amount to be paid.
+      fromPeriod:
+        type: number
+        format: int64
+        description: starting date of the demand period referred by the bill detail.
+      toPeriod:
+        type: number
+        format: int64
+        description: ending date of the demand period referred by the bill detail.
       collectedAmount:
         type: number
         format: double
-        description: collected amount from the payee for the bill detail
+        description: sum of the amount which has been collected for the demand.
       collectionModesNotAllowed:
         type: array
         items:
