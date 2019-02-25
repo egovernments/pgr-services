@@ -11,7 +11,7 @@ info:
     name: eGovernments Foundation
 schemes:
   - https
-basePath: /billingservice/v11
+basePath: /billingservice/v1
 x-common-path: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml'
 paths:
 
@@ -290,7 +290,7 @@ definitions:
       auditDetails:
         $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/AuditDetails'
       additionalDetails:  
-        type: string
+        type: object
         description: field for capturing any additional details.
       minimumAmountPayable:
         type: number
@@ -334,7 +334,7 @@ definitions:
         default: 0
         description: collection against taxAmount.
       additionalDetails:  
-        type: string
+        type: object
         description: field for capturing any additional details.
       auditDetails:
         $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/AuditDetails'
@@ -486,8 +486,17 @@ definitions:
         type: boolean
         description: 'true when cancelled bill is cancelled, false when non-cancelled bill is created.'
       additionalDetails:  
-        type: string
+        type: object
         description: field for capturing any additional details.
+      collectionMap:
+        type: object
+        properties:
+          default:
+            type: string
+        required:
+          - default
+        additionalProperties:
+          type: number
       billDetails:
         type: array
         items:
@@ -547,10 +556,18 @@ definitions:
         type: number
         format: double
         description: Total bill amount to be paid.
+      fromPeriod:
+        type: number
+        format: int64
+        description: starting date of the demand period referred by the bill detail.
+      toPeriod:
+        type: number
+        format: int64
+        description: ending date of the demand period referred by the bill detail.
       collectedAmount:
         type: number
         format: double
-        description: collected amount from the payee for the bill detail
+        description: sum of the amount which has been collected for the demand.
       collectionModesNotAllowed:
         type: array
         items:
@@ -560,7 +577,7 @@ definitions:
         type: boolean
         description: 'true if part payment allowed, false if part payment is not allowed.'
       additionalDetails:  
-        type: string
+        type: object
         description: field for capturing any additional details.
       billAccountDetails:
         type: array
@@ -609,7 +626,7 @@ definitions:
         type: string
         description: field for capturing the glcode value.
       additionalDetails:  
-        type: string
+        type: object
         description: field for capturing any additional details.        
       purpose:
         type: string
