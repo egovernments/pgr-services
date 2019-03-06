@@ -60,6 +60,7 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/businessservices")
+@Deprecated
 public class BusinessServiceDetailController {
 
     private static final Logger logger = LoggerFactory.getLogger(BusinessServiceDetailController.class);

@@ -39,6 +39,7 @@
  */
 package org.egov.demand.web.validator;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,18 +53,18 @@ import org.egov.demand.model.BusinessServiceDetail;
 import org.egov.demand.model.Demand;
 import org.egov.demand.model.DemandCriteria;
 import org.egov.demand.model.DemandDetail;
-import org.egov.demand.model.Owner;
 import org.egov.demand.model.TaxHeadMaster;
 import org.egov.demand.model.TaxHeadMasterCriteria;
 import org.egov.demand.model.TaxPeriod;
 import org.egov.demand.repository.DemandRepository;
-import org.egov.demand.repository.OwnerRepository;
+import org.egov.demand.repository.PayerRepository;
 import org.egov.demand.service.BusinessServDetailService;
 import org.egov.demand.service.TaxHeadMasterService;
 import org.egov.demand.service.TaxPeriodService;
 import org.egov.demand.web.contract.BusinessServiceDetailCriteria;
 import org.egov.demand.web.contract.DemandRequest;
 import org.egov.demand.web.contract.TaxPeriodCriteria;
+import org.egov.demand.web.contract.User;
 import org.egov.demand.web.contract.UserSearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -81,7 +82,7 @@ public class DemandValidator implements Validator {
 	private TaxHeadMasterService taxHeadMasterService;
 
 	@Autowired
-	private OwnerRepository ownerRepository;
+	private PayerRepository ownerRepository;
 
 	@Autowired
 	private BusinessServDetailService businessServDetailService;
@@ -210,7 +211,7 @@ public class DemandValidator implements Validator {
 		List<Demand> dbDemands = demandRepository.getDemandsForConsumerCodes(businessConsumerValidatorMap, tenatId);
 		Map<String, List<Demand>> dbDemandMap = dbDemands.stream()
 				.collect(Collectors.groupingBy(Demand::getConsumerCode, Collectors.toList()));
-		// Valiadting for existing records
+
 		int index = 0;
 		if (!dbDemandMap.isEmpty()) {
 			for (Demand demand : demands) {
@@ -229,15 +230,19 @@ public class DemandValidator implements Validator {
 
 	private void validateDemandDetails(List<DemandDetail> demandDetails, Errors errors) {
 
-		/*
-		 * for (DemandDetail demandDetail : demandDetails) {
-		 * if(!"ADVANCE".equalsIgnoreCase(demandDetail.getTaxHeadMasterCode())){
-		 * BigDecimal tax = demandDetail.getTaxAmount(); BigDecimal collection =
-		 * demandDetail.getCollectionAmount(); int i = tax.compareTo(collection); if (i
-		 * < 0) errors.rejectValue("Demands", "", "DEMAND_DETAIL_COLLECTIONAMOUNT : " +
-		 * collection + " should not be greater than taxAmount : " + tax +
-		 * " for demandDetail"); } }
-		 */
+		
+		for (DemandDetail demandDetail : demandDetails) {
+			
+			if (!"ADVANCE".equalsIgnoreCase(demandDetail.getTaxHeadMasterCode())) {
+				BigDecimal tax = demandDetail.getTaxAmount();
+				BigDecimal collection = demandDetail.getCollectionAmount();
+				int i = tax.compareTo(collection);
+				if (i < 0)
+					errors.rejectValue("Demands", "", "DEMAND_DETAIL_COLLECTIONAMOUNT : " + collection
+							+ " should not be greater than taxAmount : " + tax + " for demandDetail");
+			}
+		}
+		 
 	}
 
 	private void validateTaxPeriod(DemandRequest demandRequest, Errors errors) {
@@ -361,9 +366,9 @@ public class DemandValidator implements Validator {
 	private void validateOwner(DemandRequest demandRequest, Errors errors) {
 
 		List<Demand> demands = demandRequest.getDemands();
-		List<Owner> owners = null;
-		List<Long> ownerIds = new ArrayList<>(demands.stream().filter(demand -> null != demand.getOwner())
-				.map(demand -> demand.getOwner().getId()).collect(Collectors.toSet()));
+		List<User> owners = null;
+		List<Long> ownerIds = new ArrayList<>(demands.stream().filter(demand -> null != demand.getPayer())
+				.map(demand -> demand.getPayer().getId()).collect(Collectors.toSet()));
 
 		if (!CollectionUtils.isEmpty(ownerIds)) {
 
@@ -372,12 +377,12 @@ public class DemandValidator implements Validator {
 					.userType("CITIZEN").pageSize(500).build();
 
 			log.info("The user search req : " + userSearchRequest);
-			owners = ownerRepository.getOwners(userSearchRequest);
+			owners = ownerRepository.getPayers(userSearchRequest);
 		}
 
 		if (!CollectionUtils.isEmpty(owners)) {
 
-			Map<Long, Long> ownerMap = owners.stream().collect(Collectors.toMap(Owner::getId, Owner::getId));
+			Map<Long, Long> ownerMap = owners.stream().collect(Collectors.toMap(User::getId, User::getId));
 			for (Long rsId : ownerIds) {
 				if (null != rsId && ownerMap.get(rsId) == null)
 					errors.rejectValue("demands", "DEMAND_INVALID_OWNER", "the given user id value '" + rsId

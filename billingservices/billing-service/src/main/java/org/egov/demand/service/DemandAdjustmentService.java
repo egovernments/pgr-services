@@ -1,26 +1,8 @@
 package org.egov.demand.service;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.egov.common.contract.request.RequestInfo;
-import org.egov.demand.config.ApplicationProperties;
-import org.egov.demand.model.Bill;
-import org.egov.demand.model.BillAccountDetail;
-import org.egov.demand.model.BillDetail;
-import org.egov.demand.model.Demand;
-import org.egov.demand.model.DemandCriteria;
-import org.egov.demand.model.DemandDetail;
 import org.egov.demand.web.contract.BillRequest;
-import org.egov.demand.web.contract.DemandRequest;
-import org.egov.demand.web.contract.DemandResponse;
 import org.egov.demand.web.contract.Receipt;
 import org.egov.demand.web.contract.ReceiptRequest;
-import org.egov.demand.web.contract.factory.ResponseFactory;
-import org.egov.tracer.kafka.LogAwareKafkaTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +23,8 @@ public class DemandAdjustmentService {
 		for(Receipt receipt: receiptRequest.getReceipt()) {
 			try {
 				BillRequest billRequest = BillRequest.builder().requestInfo(receiptRequest.getRequestInfo()).bills(receipt.getBill()).build();
-				demandService.updateDemandFromBill(billRequest, true);
+				//FIXME TOOD update bill from reciept has been commented out
+				//demandService.updateDemandFromBill(billRequest, true);
 			}catch(Exception e) {
 				log.error("Couldn't adjust the demand! Exception: "+e);
 				continue;

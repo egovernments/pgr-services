@@ -75,9 +75,9 @@ public class BillRepository {
 
 				ps.setString(1, bill.getId());
 				ps.setString(2, bill.getTenantId());
-				ps.setString(3, bill.getPayeeName());
-				ps.setString(4, bill.getPayeeAddress());
-				ps.setString(5, bill.getPayeeEmail());
+				ps.setString(3, bill.getPayerName());
+				ps.setString(4, bill.getPayerAddress());
+				ps.setString(5, bill.getPayerEmail());
 				ps.setBoolean(6, bill.getIsActive());
 				ps.setBoolean(7, bill.getIsCancelled());
 				ps.setString(8, requestInfo.getUserInfo().getId().toString());
@@ -124,11 +124,12 @@ public class BillRepository {
 				ps.setLong(6, billDetail.getBillDate());
 				ps.setString(7, billDetail.getConsumerCode());
 				ps.setString(8, billDetail.getConsumerType());
-				ps.setString(9, billDetail.getBillDescription());
-				ps.setString(10, billDetail.getDisplayMessage());
+				ps.setString(9, null);
+				ps.setString(10, null);
 				ps.setObject(11, billDetail.getMinimumAmount());
 				ps.setObject(12, billDetail.getTotalAmount());
-				ps.setBoolean(13, billDetail.getCallBackForApportioning());
+				// apportioning logic does not reside in billing service anymore 
+				ps.setBoolean(13, false);
 				ps.setBoolean(14, billDetail.getPartPaymentAllowed());
 				List<String> collectionModesNotAllowed = billDetail.getCollectionModesNotAllowed();
 				if (collectionModesNotAllowed.isEmpty())
@@ -167,10 +168,10 @@ public class BillRepository {
 				ps.setString(3, billAccountDetail.getBillDetail());
 				ps.setString(4, billAccountDetail.getGlcode());
 				ps.setObject(5, billAccountDetail.getOrder());
-				ps.setString(6, billAccountDetail.getAccountDescription());
-				ps.setBigDecimal(7,billAccountDetail.getCrAmountToBePaid());
-				ps.setObject(8, billAccountDetail.getCreditAmount());
-				ps.setObject(9, billAccountDetail.getDebitAmount());
+				ps.setString(6, null);
+				ps.setBigDecimal(7,billAccountDetail.getAmount());
+				ps.setObject(8, billAccountDetail.getAdjustedAmount());
+				ps.setObject(9, null);
 				ps.setObject(10, billAccountDetail.getIsActualDemand());
 				ps.setString(11, purpose);
 				ps.setString(12, requestInfo.getUserInfo().getId().toString());
@@ -186,6 +187,7 @@ public class BillRepository {
 		});
 	}
 
+	@Deprecated
 	public List<Bill> apportion(BillRequest billRequest) {
 
 		RequestInfo requestInfo = billRequest.getRequestInfo();
@@ -209,7 +211,7 @@ public class BillRepository {
 			reqBills = new ArrayList<>();
 			for (Bill bill : inputBills) {
 
-				Bill reqBill = new Bill(bill);
+				Bill reqBill = bill;
 				List<BillDetail> reqbillDetails = new ArrayList<>();
 				for (BillDetail billDetail : reqBill.getBillDetails())
 					if (billDetail.getBusinessService().equalsIgnoreCase(businessService))

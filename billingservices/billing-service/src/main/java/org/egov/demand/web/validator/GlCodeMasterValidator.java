@@ -9,10 +9,8 @@ import org.egov.demand.model.GlCodeMasterCriteria;
 import org.egov.demand.model.TaxHeadMasterCriteria;
 import org.egov.demand.service.GlCodeMasterService;
 import org.egov.demand.service.TaxHeadMasterService;
-import org.egov.demand.web.contract.DemandRequest;
 import org.egov.demand.web.contract.GlCodeMasterRequest;
 import org.egov.demand.web.contract.GlCodeMasterResponse;
-import org.egov.demand.web.contract.TaxHeadMasterRequest;
 import org.egov.demand.web.contract.TaxHeadMasterResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
+@Deprecated
 public class GlCodeMasterValidator implements Validator {
 
 	@Autowired

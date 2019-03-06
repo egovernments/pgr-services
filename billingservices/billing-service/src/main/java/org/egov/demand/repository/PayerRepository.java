@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.egov.common.contract.response.ErrorResponse;
 import org.egov.demand.config.ApplicationProperties;
-import org.egov.demand.model.Owner;
 import org.egov.demand.web.contract.User;
 import org.egov.demand.web.contract.UserResponse;
 import org.egov.demand.web.contract.UserSearchRequest;
@@ -25,9 +24,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @Repository
 @Slf4j
-public class OwnerRepository {
+@Deprecated
+public class PayerRepository {
 
-	private static final Logger logger = LoggerFactory.getLogger(OwnerRepository.class);
+	private static final Logger logger = LoggerFactory.getLogger(PayerRepository.class);
 
 	@Autowired
 	private RestTemplate restTemplate;
@@ -38,7 +38,8 @@ public class OwnerRepository {
 	@Autowired
 	private ObjectMapper  objectMapper;
 
-	public List<Owner> getOwners(UserSearchRequest userSearchRequest) {
+	public List<User> getPayers(UserSearchRequest userSearchRequest) {
+		
 
 		String url = applicationProperties.getUserServiceHostName() + applicationProperties.getUserServiceSearchPath();
 		UserResponse userResponse = null;
@@ -69,10 +70,7 @@ public class OwnerRepository {
 			log.error("Following Exception Occurred While Calling User Service : " + e.getMessage());
 			throw new RuntimeException(e);
 		}
-		List<Owner> owners = new ArrayList<>();
-		if (userResponse != null && !userResponse.getUser().isEmpty())
-			for (User userRequest : userResponse.getUser())
-				owners.add(userRequest.toOwner());
-		return owners;
+	
+		return userResponse.getUser();
 	}
 }

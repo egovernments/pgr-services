@@ -46,21 +46,29 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.egov.demand.model.Demand;
-import org.egov.demand.model.Owner;
+import org.egov.demand.web.contract.User;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DemandEnrichmentUtil {
 
-	public List<Demand> enrichOwners(List<Demand> demands, List<Owner> owners) {
+	/**
+	 * Collects the list of payer in to map of UUID and object 
+	 * 
+	 * and enriches demand array based on the map
+	 * @param demands
+	 * @param payers
+	 * @return
+	 */
+	public List<Demand> enrichPayer(List<Demand> demands, List<User> payers) {
 
-		Map<Long, Owner> map = owners.stream().collect(Collectors.toMap(Owner::getId, Function.identity()));
+		Map<String, User> map = payers.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
 		List<Demand> rsDemands = new ArrayList<>();
 
 		for (Demand demand : demands) {
-			Long ownerId = demand.getOwner().getId();
-			if (map.containsKey(ownerId)) {
-				demand.setOwner(map.get(ownerId));
+			String payerUuid = demand.getPayer().getUuid();
+			if (map.containsKey(payerUuid)) {
+				demand.setPayer(map.get(payerUuid));
 			}
 			rsDemands.add(demand);
 		}

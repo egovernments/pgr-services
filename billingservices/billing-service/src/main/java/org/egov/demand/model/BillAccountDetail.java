@@ -2,50 +2,95 @@ package org.egov.demand.model;
 
 import java.math.BigDecimal;
 
-import org.apache.commons.lang3.StringUtils;
-import org.egov.demand.model.enums.Purpose;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Builder.Default;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
-@NoArgsConstructor
+/**
+ * BillAccountDetail
+ */
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class BillAccountDetail {
-
-	private String id;
-
-	private String tenantId;
-
-	private String billDetail;
+public class BillAccountDetail   {
 	
-	private String glcode;
-
-	private Integer order;
-
-	private String accountDescription;
 	
-	@Default
-	private BigDecimal crAmountToBePaid = BigDecimal.ZERO;
+        @JsonProperty("id")
+        private String id;
 
-	@Default
-	private BigDecimal creditAmount = BigDecimal.ZERO;
+        @JsonProperty("tenantId")
+        private String tenantId;
 
-	@Default
-	private BigDecimal debitAmount = BigDecimal.ZERO;
+        @JsonProperty("billDetail")
+        private String billDetail;
 
-	private Boolean isActualDemand;
+        @JsonProperty("demandDetailId")
+        private String demandDetailId;
 
-	private Purpose purpose;
-	
-	public String getTaxHeadCode() {
-		if(!StringUtils.isEmpty(this.accountDescription))
-			return this.accountDescription.split("[-]")[0];
-		else
-			return null;
-	}
+        @JsonProperty("order")
+        private Integer order;
+
+        @JsonProperty("amount")
+        private BigDecimal amount;
+
+        @JsonProperty("adjustedAmount")
+        private BigDecimal adjustedAmount;
+
+        @JsonProperty("isActualDemand")
+        private Boolean isActualDemand;
+
+        @JsonProperty("glcode")
+        private String glcode;
+
+        @JsonProperty("additionalDetails")
+        private Object additionalDetails;
+
+              /**
+   * Purpose of Account head.
+   */
+  public enum PurposeEnum {
+    ARREAR("ARREAR"),
+    
+    CURRENT("CURRENT"),
+    
+    ADVANCE("ADVANCE"),
+    
+    OTHERS("OTHERS");
+
+    private String value;
+
+    PurposeEnum(String value) {
+      this.value = value;
+    }
+
+    @Override
+    @JsonValue
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    @JsonCreator
+    public static PurposeEnum fromValue(String text) {
+      for (PurposeEnum b : PurposeEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+  }
+
+        @JsonProperty("purpose")
+        private PurposeEnum purpose;
+
+
 }
+

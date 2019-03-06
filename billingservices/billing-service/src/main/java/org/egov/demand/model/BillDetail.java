@@ -4,56 +4,136 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.egov.demand.model.enums.Status;
+import javax.validation.Valid;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
-@NoArgsConstructor
+/**
+ * BillDetail
+ */
+
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class BillDetail {
+public class BillDetail   {
+        @JsonProperty("id")
+        private String id;
 
-	private String id;
-	//TODO do we need to tenantId in child when parent is having?
-	private String tenantId;
-	
-	private String bill;
+        @JsonProperty("tenantId")
+        private String tenantId;
 
-	private String businessService;
+        @JsonProperty("demandId")
+        private String demandId;
 
-	private String billNumber;
+        @JsonProperty("bill")
+        private String bill;
 
-	private Long billDate;
+        @JsonProperty("businessService")
+        private String businessService;
 
-	private String consumerCode;
+        @JsonProperty("billNumber")
+        private String billNumber;
 
-	private String consumerType;
+        @JsonProperty("billDate")
+        private Long billDate;
 
-	private String billDescription;
+        @JsonProperty("consumerCode")
+        private String consumerCode;
 
-	private String displayMessage;
-	
-	private Long receiptDate;
-	
-	private String receiptNumber;
+        @JsonProperty("consumerType")
+        private String consumerType;
 
-	private BigDecimal minimumAmount;
+        @JsonProperty("minimumAmount")
+        private BigDecimal minimumAmount;
 
-	private BigDecimal totalAmount;
-	
-	private BigDecimal collectedAmount;
+        @JsonProperty("totalAmount")
+        private BigDecimal totalAmount;
 
-	private List<String> collectionModesNotAllowed = new ArrayList<>();
+        @JsonProperty("fromPeriod")
+        private Long fromPeriod;
 
-	private Boolean callBackForApportioning;
+        @JsonProperty("toPeriod")
+        private Long toPeriod;
 
-	private Boolean partPaymentAllowed;
-	
-	private Status status;
+        @JsonProperty("collectedAmount")
+        private BigDecimal collectedAmount;
 
-	private List<BillAccountDetail> billAccountDetails = new ArrayList<>();
+        @JsonProperty("collectionModesNotAllowed")
+        @Valid
+        private List<String> collectionModesNotAllowed;
+
+        @JsonProperty("partPaymentAllowed")
+        private Boolean partPaymentAllowed;
+
+        @JsonProperty("additionalDetails")
+        private Object additionalDetails;
+
+        @JsonProperty("billAccountDetails")
+        @Valid
+        private List<BillAccountDetail> billAccountDetails;
+
+              /**
+   * status if the bill detail
+   */
+  public enum StatusEnum {
+    CREATED("CREATED"),
+    
+    CANCELLED("CANCELLED"),
+    
+    INSTRUMENT_BOUNCED("INSTRUMENT_BOUNCED");
+
+    private String value;
+
+    StatusEnum(String value) {
+      this.value = value;
+    }
+
+    @Override
+    @JsonValue
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    @JsonCreator
+    public static StatusEnum fromValue(String text) {
+      for (StatusEnum b : StatusEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+  }
+
+        @JsonProperty("status")
+        private StatusEnum status;
+
+
+        public BillDetail addCollectionModesNotAllowedItem(String collectionModesNotAllowedItem) {
+            if (this.collectionModesNotAllowed == null) {
+            this.collectionModesNotAllowed = new ArrayList<>();
+            }
+        this.collectionModesNotAllowed.add(collectionModesNotAllowedItem);
+        return this;
+        }
+
+        public BillDetail addBillAccountDetailsItem(BillAccountDetail billAccountDetailsItem) {
+            if (this.billAccountDetails == null) {
+            this.billAccountDetails = new ArrayList<>();
+            }
+        this.billAccountDetails.add(billAccountDetailsItem);
+        return this;
+        }
+
 }
+

@@ -64,12 +64,6 @@ public class ApplicationProperties {
 	@Value("${kafka.topics.updateMIS.demand}")
 	private String updateMISTopicName;
 	
-	@Value("${egov.services.user_service.hostname}")
-	private String userServiceHostName;
-
-	@Value("${egov.services.user_service.searchpath}")
-	private String userServiceSearchPath;
-
 	private static final String SEARCH_PAGESIZE_DEFAULT = "search.pagesize.default";
 
 	@Autowired
@@ -192,4 +186,23 @@ public class ApplicationProperties {
 	public String commonsSearchPageSizeDefault() {
 		return environment.getProperty(SEARCH_PAGESIZE_DEFAULT);
 	}
+	
+	
+	
+	/*
+	 * billing service v1.1
+	 */
+	
+    @Value("${egov.mdms.host}")
+    private String mdmsHost;
+
+    @Value("${egov.mdms.search.endpoint}")
+    private String mdmsEndpoint;
+    
+	@Value("${user.service.hostname}")
+	private String userServiceHostName;
+
+	@Value("${user.service.searchpath}")
+	private String userServiceSearchPath;
+
 }

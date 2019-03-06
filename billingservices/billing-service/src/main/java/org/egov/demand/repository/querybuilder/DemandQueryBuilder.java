@@ -57,20 +57,19 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class DemandQueryBuilder {
 
-	public static final String BASE_DEMAND_QUERY = "SELECT demand.id AS did,demand.consumercode AS dconsumercode,"
-			+ "demand.consumertype AS dconsumertype,demand.businessservice AS dbusinessservice,demand.owner AS downer,"
-			+ "demand.taxperiodfrom AS dtaxperiodfrom,demand.taxperiodto AS dtaxperiodto,"
-			+ "demand.minimumamountpayable AS dminimumamountpayable,demand.createdby AS dcreatedby,"
-			+ "demand.lastmodifiedby AS dlastmodifiedby,demand.createdtime AS dcreatedtime,"
-			+ "demand.lastmodifiedtime AS dlastmodifiedtime,demand.tenantid AS dtenantid,demand.status,"
+	public static final String BASE_DEMAND_QUERY = "SELECT dmd.id AS did,dmd.consumercode AS dconsumercode,"
+			+ "dmd.consumertype AS dconsumertype,dmd.businessservice AS dbusinessservice,dmd.payer,"
+			+ "dmd.taxperiodfrom AS dtaxperiodfrom,dmd.taxperiodto AS dtaxperiodto,"
+			+ "dmd.minimumamountpayable AS dminimumamountpayable,dmd.createdby AS dcreatedby,"
+			+ "dmd.lastmodifiedby AS dlastmodifiedby,dmd.createdtime AS dcreatedtime,"
+			+ "dmd.lastmodifiedtime AS dlastmodifiedtime,dmd.tenantid AS dtenantid,dmd.status,dmd.additionaldetails as demandadditionaldetails,"
 
-			+ "demanddetail.id AS dlid,demanddetail.demandid AS dldemandid,demanddetail.taxheadcode AS dltaxheadcode,"
-			+ "demanddetail.taxamount AS dltaxamount,demanddetail.collectionamount AS dlcollectionamount,"
-			+ "demanddetail.createdby AS dlcreatedby,demanddetail.lastModifiedby AS dllastModifiedby,"
-			+ "demanddetail.createdtime AS dlcreatedtime,demanddetail.lastModifiedtime AS dllastModifiedtime,"
-			+ "demanddetail.tenantid AS dltenantid " + "FROM egbs_demand demand "
-			+ "INNER JOIN egbs_demanddetail demanddetail ON demand.id=demanddetail.demandid "
-			+ "AND demand.tenantid=demanddetail.tenantid WHERE ";
+			+ "dmdl.id AS dlid,dmdl.demandid AS dldemandid,dmdl.taxheadcode AS dltaxheadcode,"
+			+ "dmdl.taxamount AS dltaxamount,dmdl.collectionamount AS dlcollectionamount,"
+			+ "dmdl.createdby AS dlcreatedby,dmdl.lastModifiedby AS dllastModifiedby,"
+			+ "dmdl.createdtime AS dlcreatedtime,dmdl.lastModifiedtime AS dllastModifiedtime,"
+			+ "dmdl.tenantid AS dltenantid,dmdl.additionaldetails as detailadditionaldetails " + "FROM egbs_demand dmd "
+			+ "INNER JOIN egbs_demanddetail dmdl ON dmd.id=dmdl.demandid " + "AND dmd.tenantid=dmdl.tenantid WHERE ";
 
 	public static final String BASE_DEMAND_DETAIL_QUERY = "SELECT "
 			+ "demanddetail.id AS dlid,demanddetail.demandid AS dldemandid,demanddetail.taxheadcode AS dltaxheadcode,"
@@ -87,23 +86,23 @@ public class DemandQueryBuilder {
 
 	public static final String DEMAND_INSERT_QUERY = "INSERT INTO egbs_demand "
 			+ "(id,consumerCode,consumerType,businessService,owner,taxPeriodFrom,taxPeriodTo,"
-			+ "minimumAmountPayable,createdby,lastModifiedby,createdtime,lastModifiedtime,tenantid, status) "
-			+ "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+			+ "minimumAmountPayable,createdby,lastModifiedby,createdtime,lastModifiedtime,tenantid, status, additionaldetails) "
+			+ "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
 	public static final String DEMAND_DETAIL_INSERT_QUERY = "INSERT INTO egbs_demanddetail "
 			+ "(id,demandid,taxHeadCode,taxamount,collectionamount,"
-			+ "createdby,lastModifiedby,createdtime,lastModifiedtime,tenantid)" 
-			+ " VALUES (?,?,?,?,?,?,?,?,?,?);";
+			+ "createdby,lastModifiedby,createdtime,lastModifiedtime,tenantid,additionaldetails)" 
+			+ " VALUES (?,?,?,?,?,?,?,?,?,?,?);";
 
 	// FIX ME REMOVE CREATED BY FROM UPDATE
 	public static final String DEMAND_UPDATE_QUERY = "UPDATE egbs_demand SET "
 			+ "id=?,consumerCode=?,consumerType=?,businessService=?,owner=?,taxPeriodFrom=?,"
 			+ "taxPeriodTo=?,minimumAmountPayable=?,lastModifiedby=?," + "lastModifiedtime=?,tenantid=?, status=?"
-			+ " WHERE id=? AND tenantid=?;";
+			+ ", additionaldetails=? WHERE id=? AND tenantid=?;";
 
 	public static final String DEMAND_DETAIL_UPDATE_QUERY = "UPDATE egbs_demanddetail SET "
 			+ "id=?,demandid=?,taxHeadCode=?,taxamount=?,collectionamount=?,"
-			+ "lastModifiedby=?,lastModifiedtime=?,tenantid=? WHERE id=? AND tenantid=?;";
+			+ "lastModifiedby=?,lastModifiedtime=?, additionaldetails=? WHERE id=? AND tenantid=?;";
 	
 	public final String DEMAND_UPDATE_CONSUMERCODE_QUERY="UPDATE egbs_demand SET consumercode=?, lastmodifiedby=?, lastmodifiedtime=? "
 			+ " WHERE tenantid=? AND id IN (";
@@ -122,11 +121,12 @@ public class DemandQueryBuilder {
 		log.info("query::"+query);
 		return query.toString();
 	}
-	public String getDemandQueryForConsumerCodes(Map<String,Set<String>> businessConsumercodeMap,String tenantId){
+	public String getDemandQueryForConsumerCodes(Map<String,Set<String>> businessConsumercodeMap,List<Object> preparedStmtList, String tenantId){
 		
 		StringBuilder query = new StringBuilder(BASE_DEMAND_QUERY);
 		
-		query.append("demand.tenantid='"+tenantId+"' ");
+		query.append("demand.tenantid=? ");
+		preparedStmtList.add(tenantId);
 		boolean orFlag = false;
 		for (Entry<String, Set<String>> consumerCode : businessConsumercodeMap.entrySet()) {
 			

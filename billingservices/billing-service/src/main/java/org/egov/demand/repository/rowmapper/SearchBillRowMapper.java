@@ -10,8 +10,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.egov.demand.model.AuditDetail;
+import org.egov.demand.model.AuditDetails;
 import org.egov.demand.model.Bill;
 import org.egov.demand.model.BillAccountDetail;
+import org.egov.demand.model.BillAccountDetail.PurposeEnum;
 import org.egov.demand.model.BillDetail;
 import org.egov.demand.model.GlCodeMaster;
 import org.egov.demand.model.TaxHeadMaster;
@@ -41,19 +43,19 @@ public class SearchBillRowMapper implements ResultSetExtractor<List<Bill>>{
 					bill = new Bill();
 					bill.setId(billId);
 					bill.setTenantId(rs.getString("b_tenantid"));
-					bill.setPayeeName(rs.getString("b_payeename"));
-					bill.setPayeeAddress(rs.getString("b_payeeaddress"));
-					bill.setPayeeEmail(rs.getString("b_payeeemail"));
+					bill.setPayerName(rs.getString("b_payeename"));
+					bill.setPayerAddress(rs.getString("b_payeeaddress"));
+					bill.setPayerEmail(rs.getString("b_payeeemail"));
 					bill.setIsActive(rs.getBoolean("b_isactive"));
 					bill.setIsCancelled(rs.getBoolean("b_iscancelled"));
 	
-					AuditDetail auditDetails = new AuditDetail();
+					AuditDetails auditDetails = new AuditDetails();
 					auditDetails.setCreatedBy(rs.getString("b_createdby"));
 					auditDetails.setCreatedTime((Long)rs.getObject("b_createddate"));
 					auditDetails.setLastModifiedBy(rs.getString("b_lastmodifiedby"));
 					auditDetails.setLastModifiedTime((Long)rs.getObject("b_lastmodifieddate"));
 					
-					bill.setAuditDetail(auditDetails);
+					bill.setAuditDetails(auditDetails);
 					
 					billMap.put(bill.getId(), bill);
 				}
@@ -71,11 +73,11 @@ public class SearchBillRowMapper implements ResultSetExtractor<List<Bill>>{
 					billDetail.setBillDate(rs.getLong("bd_billdate"));
 					billDetail.setConsumerCode(rs.getString("bd_consumercode"));
 					billDetail.setConsumerType(rs.getString("bd_consumertype"));
-					billDetail.setBillDescription(rs.getString("bd_billdescription"));
-					billDetail.setDisplayMessage(rs.getString("bd_displaymessage"));
+					//billDetail.setBillDescription(rs.getString("bd_billdescription"));
+					//billDetail.setDisplayMessage(rs.getString("bd_displaymessage"));
 					billDetail.setMinimumAmount(rs.getBigDecimal("bd_minimumamount"));
 					billDetail.setTotalAmount(rs.getBigDecimal("bd_totalamount"));
-					billDetail.setCallBackForApportioning(rs.getBoolean("bd_callbackforapportioning"));
+					//billDetail.setCallBackForApportioning(rs.getBoolean("bd_callbackforapportioning"));
 					billDetail.setPartPaymentAllowed(rs.getBoolean("bd_partpaymentallowed"));
 					billDetail.setCollectionModesNotAllowed(Arrays.asList(rs.getString("bd_collectionmodesnotallowed").split(",")));
 
@@ -91,12 +93,12 @@ public class SearchBillRowMapper implements ResultSetExtractor<List<Bill>>{
 				billAccDetail.setBillDetail(rs.getString("ad_billdetail"));
 				billAccDetail.setGlcode(rs.getString("ad_glcode"));
 				billAccDetail.setOrder(rs.getInt("ad_orderno"));
-				billAccDetail.setAccountDescription(rs.getString("ad_accountdescription"));
-				billAccDetail.setCreditAmount(rs.getBigDecimal("ad_creditamount"));
-				billAccDetail.setDebitAmount(rs.getBigDecimal("ad_debitamount"));
+				//billAccDetail.setAccountDescription(rs.getString("ad_accountdescription"));
+				billAccDetail.setAdjustedAmount(rs.getBigDecimal("ad_creditamount"));
+				//billAccDetail.setDebitAmount(rs.getBigDecimal("ad_debitamount"));
 				billAccDetail.setIsActualDemand(rs.getBoolean("ad_isactualdemand"));
-				billAccDetail.setPurpose(Purpose.fromValue(rs.getString("ad_purpose")));
-				billAccDetail.setCrAmountToBePaid(rs.getBigDecimal("ad_cramounttobepaid"));
+				billAccDetail.setPurpose(PurposeEnum.fromValue(rs.getString("ad_purpose")));
+				billAccDetail.setAmount(rs.getBigDecimal("ad_cramounttobepaid"));
 				
 				if(billDetail.getId().equals(billAccDetail.getBillDetail()))
 					billDetail.getBillAccountDetails().add(billAccDetail);

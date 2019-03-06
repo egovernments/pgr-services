@@ -1,6 +1,7 @@
 package org.egov.demand.web.contract;
 
 import java.util.List;
+import java.util.Set;
 
 import org.egov.common.contract.request.RequestInfo;
 
@@ -22,6 +23,8 @@ public class UserSearchRequest {
 
 	@JsonProperty("id")
 	private List<Long> id;
+	
+	private Set<String> uuid;
 
 	@JsonProperty("userName")
 	private String userName;

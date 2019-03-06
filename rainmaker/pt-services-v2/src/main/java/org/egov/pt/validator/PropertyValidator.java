@@ -1,7 +1,14 @@
 package org.egov.pt.validator;
 
-import com.jayway.jsonpath.JsonPath;
-import lombok.extern.slf4j.Slf4j;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.mdms.model.MdmsCriteriaReq;
 import org.egov.pt.config.PropertyConfiguration;
@@ -10,16 +17,22 @@ import org.egov.pt.repository.ServiceRequestRepository;
 import org.egov.pt.util.ErrorConstants;
 import  org.egov.pt.util.PTConstants;
 import org.egov.pt.util.PropertyUtil;
-import org.egov.pt.web.models.*;
+import org.egov.pt.web.models.Document;
+import org.egov.pt.web.models.OwnerInfo;
+import org.egov.pt.web.models.Property;
+import org.egov.pt.web.models.PropertyCriteria;
+import org.egov.pt.web.models.PropertyDetail;
+import org.egov.pt.web.models.PropertyRequest;
+import org.egov.pt.web.models.Unit;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-
-import java.math.BigDecimal;
-import java.util.*;
-
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import com.jayway.jsonpath.JsonPath;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component

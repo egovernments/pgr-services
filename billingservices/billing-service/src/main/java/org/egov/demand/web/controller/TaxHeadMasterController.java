@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/taxheads")
+@Deprecated
 public class TaxHeadMasterController {
 
 	private static final Logger logger = LoggerFactory.getLogger(TaxHeadMasterController.class);

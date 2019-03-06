@@ -40,6 +40,8 @@
 
 package org.egov.demand.service;
 
+import static org.springframework.util.ObjectUtils.isEmpty;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,6 +58,7 @@ import org.egov.demand.config.ApplicationProperties;
 import org.egov.demand.helper.BillHelper;
 import org.egov.demand.model.Bill;
 import org.egov.demand.model.BillAccountDetail;
+import org.egov.demand.model.BillAccountDetail.PurposeEnum;
 import org.egov.demand.model.BillDetail;
 import org.egov.demand.model.BillSearchCriteria;
 import org.egov.demand.model.BusinessServiceDetail;
@@ -65,22 +68,20 @@ import org.egov.demand.model.DemandDetail;
 import org.egov.demand.model.GenerateBillCriteria;
 import org.egov.demand.model.GlCodeMaster;
 import org.egov.demand.model.GlCodeMasterCriteria;
-import org.egov.demand.model.Owner;
 import org.egov.demand.model.TaxHeadMaster;
 import org.egov.demand.model.TaxHeadMasterCriteria;
 import org.egov.demand.model.enums.Category;
-import org.egov.demand.model.enums.Purpose;
 import org.egov.demand.repository.BillRepository;
 import org.egov.demand.web.contract.BillRequest;
 import org.egov.demand.web.contract.BillResponse;
 import org.egov.demand.web.contract.BusinessServiceDetailCriteria;
 import org.egov.demand.web.contract.DemandResponse;
+import org.egov.demand.web.contract.User;
 import org.egov.demand.web.contract.factory.ResponseFactory;
 import org.egov.tracer.kafka.LogAwareKafkaTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import static org.springframework.util.ObjectUtils.isEmpty;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -186,9 +187,10 @@ public class BillService {
 		Map<String,BusinessServiceDetail> businessServiceMap = getBusinessService(businessServices,tenantId,requestInfo);
 		log.info("prepareBill map:" +map);
 		Demand demand = demands.get(0);
-		Owner owner = demand.getOwner();
-		Bill bill = Bill.builder().isActive(true).isCancelled(false).payeeAddress(owner.getPermanentAddress()).
-				payeeEmail(owner.getEmailId()).payeeName(owner.getName()).mobileNumber(owner.getMobileNumber())
+		User owner = demand.getPayer();
+		// please add address to user object TODO FIXME
+		Bill bill = Bill.builder().isActive(true).isCancelled(false).payerAddress(null).
+				payerEmail(owner.getEmailId()).payerName(owner.getName()).mobileNumber(owner.getMobileNumber())
 				.tenantId(tenantId).build();
 
 		List<BillDetail> billDetails = new ArrayList<>();
@@ -248,12 +250,13 @@ public class BillService {
 
 					log.info("prepareBill taxHeadMaster:" + taxHeadMaster);
 					
-					Purpose purpose = getPurpose(
+					PurposeEnum purpose = getPurpose(
 							taxHeadMaster.getCategory(),taxHeadCode,demand2.getTaxPeriodFrom(),demand2.getTaxPeriodTo());
 					
 					String accountDespcription = taxHeadCode+"-"+demand2.getTaxPeriodFrom()+"-"+demand2.getTaxPeriodTo();
 					
-					BillAccountDetail billAccountDetail = BillAccountDetail.builder().accountDescription(accountDespcription)
+					// add tax head code FIXME TODO account description removed
+					BillAccountDetail billAccountDetail = BillAccountDetail.builder()
 							.glcode(glCodeMaster.getGlCode()).isActualDemand(taxHeadMaster.getIsActualDemand())
 							.order(taxHeadMaster.getOrder()).purpose(purpose)
 							.build();
@@ -261,13 +264,14 @@ public class BillService {
 					/*
 					 * collecting values of total tax amount , collection amount and debit amount
 					 */
+					// Review the bill gen logic FIXME TODO
 					totalCollectedAmount = totalCollectedAmount.add(demandDetail.getCollectionAmount());
 					if (taxHeadMaster.getIsDebit()) {
-						billAccountDetail.setDebitAmount(demandDetail.getTaxAmount());
+						billAccountDetail.setAmount(demandDetail.getTaxAmount());
 						totalDebitAmount = totalDebitAmount.add(demandDetail.getTaxAmount());
 					}
 					else {
-						billAccountDetail.setCrAmountToBePaid(demandDetail.getTaxAmount().subtract(
+						billAccountDetail.setAmount(demandDetail.getTaxAmount().subtract(
 								demandDetail.getCollectionAmount() != null ? demandDetail.getCollectionAmount()
 										: BigDecimal.ZERO));
 						totalTaxAmount = totalTaxAmount.add(demandDetail.getTaxAmount());
@@ -281,9 +285,10 @@ public class BillService {
 			String description = demand3.getBusinessService() + " Consumer Code: " + demand3.getConsumerCode();
 
 			BillDetail billDetail = BillDetail.builder().businessService(demand3.getBusinessService())
-					.billDescription(description).displayMessage(description).billAccountDetails(billAccountDetails)
+					// description removed please add tax head code to the billAccountDetail
+					/*.billDescription(description)*/.billAccountDetails(billAccountDetails)
 					.billDate(new Date().getTime())
-					.callBackForApportioning(businessServiceDetail.getCallBackForApportioning())
+					
 					.collectionModesNotAllowed(businessServiceDetail.getCollectionModesNotAllowed())
 					.consumerType(demand3.getConsumerType()).consumerCode(demand3.getConsumerCode())
 					.minimumAmount(totalMinAmount).partPaymentAllowed(businessServiceDetail.getPartPaymentAllowed())
@@ -313,26 +318,22 @@ public class BillService {
 	 * @param taxPeriodTo
 	 * @return
 	 */
-	private Purpose getPurpose(Category category, String taxHeadCode, Long taxPeriodFrom, Long taxPeriodTo) {
+	private PurposeEnum getPurpose(Category category, String taxHeadCode, Long taxPeriodFrom, Long taxPeriodTo) {
 
 		Long currDate = System.currentTimeMillis();
 
 		if (category.equals(Category.TAX) || category.equals(Category.FEE) || category.equals(Category.CHARGES)) {
 
 			if (taxPeriodFrom <= currDate && taxPeriodTo >= currDate)
-				return Purpose.CURRENT_AMOUNT;
+				return PurposeEnum.CURRENT;
 			else if (currDate > taxPeriodTo)
-				return Purpose.ARREAR_AMOUNT;
+				return PurposeEnum.ARREAR;
 			else
-				return Purpose.ADVANCE_AMOUNT;
-		} else if (category.equals(Category.REBATE)) {
-			return Purpose.REBATE;
-		} else if (category.equals(Category.EXEMPTION)) {
-			return Purpose.EXEMPTION;
-		} else if (category.equals(Category.ADVANCE_COLLECTION)) {
-			return Purpose.ADVANCE_AMOUNT;
+				return PurposeEnum.ADVANCE;
+		}else if (category.equals(Category.ADVANCE_COLLECTION)) {
+			return PurposeEnum.ADVANCE;
 		} else {
-			return Purpose.OTHERS;
+			return PurposeEnum.OTHERS;
 		}
 	}
 

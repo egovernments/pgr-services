@@ -9,7 +9,6 @@ import org.egov.demand.service.GlCodeMasterService;
 import org.egov.demand.web.contract.GlCodeMasterRequest;
 import org.egov.demand.web.contract.GlCodeMasterResponse;
 import org.egov.demand.web.contract.RequestInfoWrapper;
-import org.egov.demand.web.contract.TaxHeadMasterResponse;
 import org.egov.demand.web.contract.factory.ResponseFactory;
 import org.egov.demand.web.validator.GlCodeMasterValidator;
 import org.slf4j.Logger;
@@ -27,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/glcodemasters")
+@Deprecated
 public class GlCodeMasterController {
 
 	@Autowired

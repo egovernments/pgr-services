@@ -106,7 +106,8 @@ public class BillingServiceConsumer {
 						.receipt(receipts).requestInfo(requestInfo)
 						.tenantId(collectionReceiptRequest.getTenantId()).build();
 				log.debug("the receipt request is -------------------"+receiptRequest);
-				demandService.updateDemandFromReceipt(receiptRequest,Status.CREATED);
+				//FIXME TODO bill update commented out 
+				//demandService.updateDemandFromReceipt(receiptRequest,Status.CREATED);
 			}
 			else if(applicationProperties.getSaveCollectedReceipts().equals(topic))
 				demandService.saveCollectedReceipts(objectMapper.convertValue(consumerRecord, BillRequest.class));

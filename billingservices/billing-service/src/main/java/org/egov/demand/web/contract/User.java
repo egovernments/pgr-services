@@ -1,5 +1,7 @@
 package org.egov.demand.web.contract;
 
+import javax.validation.constraints.NotNull;
+
 import org.egov.demand.model.Owner;
 
 import lombok.AllArgsConstructor;
@@ -13,6 +15,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class User {
 
+	@NotNull
+	private String uuid;
 	private Long id;
 	private String userName;
 	private String salutation;

@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
+@Deprecated
 public class TaxHeadMasterValidator implements Validator {
 
 	@Autowired

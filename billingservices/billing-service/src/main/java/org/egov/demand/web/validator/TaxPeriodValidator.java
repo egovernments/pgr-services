@@ -51,6 +51,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
+@Deprecated
 public class TaxPeriodValidator {
 
     private static final Logger logger = LoggerFactory.getLogger(TaxPeriodValidator.class);
