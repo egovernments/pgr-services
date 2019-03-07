@@ -86,12 +86,7 @@ public class TaxHeadMasterQueryBuilder {
 			preparedStatementValues.add( searchTaxHead.getIsDebit());
 		}
 		
-		if (searchTaxHead.getValidFrom() != null && searchTaxHead.getValidTill() != null) {
-			selectQuery.append(" AND taxhead.validfrom <= ?");
-			preparedStatementValues.add(searchTaxHead.getValidFrom());
-			selectQuery.append(" AND taxhead.validtill >= ?");
-			preparedStatementValues.add(searchTaxHead.getValidTill());
-		}
+
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -101,7 +96,7 @@ public class TaxHeadMasterQueryBuilder {
 		selectQuery.append(" ORDER BY taxhead.validfrom,taxhead.code");
 
 		selectQuery.append(" LIMIT ?");
-		long pageSize = Integer.parseInt(applicationProperties.commonsSearchPageSizeDefault());
+	/*	long pageSize = Integer.parseInt(applicationProperties.commonsSearchPageSizeDefault());
 		if (searchTaxHeads.getSize() != null)
 			pageSize = searchTaxHeads.getSize();
 		preparedStatementValues.add(pageSize); // Set limit to pageSize
@@ -111,7 +106,7 @@ public class TaxHeadMasterQueryBuilder {
 		long pageNumber = 0; // Default pageNo is zero meaning first page
 		if (searchTaxHeads.getOffset() != null)
 			pageNumber = searchTaxHeads.getOffset() - 1;
-		preparedStatementValues.add(pageNumber * pageSize); // Set offset to
+		preparedStatementValues.add(pageNumber * pageSize); // Set offset to*/
 															// pageNo * pageSize
 	}
 	

@@ -47,7 +47,9 @@ import org.egov.demand.model.AuditDetails;
 import org.egov.demand.model.DemandDetail;
 import org.egov.demand.model.TaxHeadMaster;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class DemandDetailRowMapper implements RowMapper<DemandDetail>{
 
 	@Override

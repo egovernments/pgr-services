@@ -55,8 +55,10 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
 
 @Slf4j
+@Repository
 public class DemandRowMapper implements ResultSetExtractor<List<Demand>> {
 
 	@Override

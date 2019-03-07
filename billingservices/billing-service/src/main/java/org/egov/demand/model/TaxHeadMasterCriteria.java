@@ -29,10 +29,6 @@ public class TaxHeadMasterCriteria {
 	private Set<String> code=new HashSet<>();
 	private Boolean isDebit;
 	private Boolean isActualDemand;
-	
 	private Set<String> id=new HashSet<>();
-	private Long validFrom;
-	private Long validTill;
-	private Long size;
-	private Long offset;
+
 }
