@@ -45,7 +45,7 @@ public class TaxHeadMasterService {
 
 	public TaxHeadMasterResponse getTaxHeads(TaxHeadMasterCriteria searchTaxHead, RequestInfo requestInfo) {
 		log.info("TaxHeadMasterService getTaxHeads");
-		List<TaxHeadMaster> taxHeadMaster = taxHeadMasterRepository.findForCriteria(searchTaxHead);
+		List<TaxHeadMaster> taxHeadMaster = taxHeadMasterRepository.getTaxHeadMaster(requestInfo,searchTaxHead);
 		return getTaxHeadMasterResponse(taxHeadMaster, requestInfo);
 	}
 

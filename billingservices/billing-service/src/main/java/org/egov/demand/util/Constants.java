@@ -73,4 +73,17 @@ public class Constants {
 	public static final String CONSUMER_CODE_DUPLICATE_KEY = "EG_BS_DUPLICATE_CONSUMERCODE";
 	public static final String CONSUMER_CODE_DUPLICATE_MSG = "Demand already exists in the same period with the same businessService for the given consumercodes : {consumercodes}";
 	public static final String CONSUMER_CODE_DUPLICATE_CONSUMERCODE_TEXT = "{consumercodes}";
+
+
+	public static final String TAXHEADMASTER_SERVICE_FILTER = "$.[?(@.service== \"{}\")]";
+	public static final String TAXHEADMASTER_EXPRESSION = "$.MdmsRes.BillingService.TaxHeadMaster[?(EXPRESSION)]";
+	public static final String TAXHEADMASTER_CATEGORY_FILTER = "@.category == \"VAL\"";
+	public static final String TAXHEADMASTER_NAME_FILTER = "@.name== \"VAL\"";
+	public static final String TAXHEADMASTER_ISDEBIT_FILTER = "@.isDebit== \"VAL\"";
+	public static final String TAXHEADMASTER_ISACTUALAMOUNT_FILTER = "@.isActualDemand== \"VAL\"";
+	public static final String TAXHEADMASTER_IDS_FILTER = "@.id in [VAL]";
+	public static final String TAXHEADMASTER_CODES_FILTER = "@.code in [VAL]";
+	public static final String TAXHEADMASTER_NO_FILTER = "$.MdmsRes.BillingService.*";
+
+
 }
