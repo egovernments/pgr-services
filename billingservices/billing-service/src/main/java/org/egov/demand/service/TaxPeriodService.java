@@ -82,7 +82,7 @@ public class TaxPeriodService {
 
     public TaxPeriodResponse searchTaxPeriods(final TaxPeriodCriteria taxPeriodCriteria, final RequestInfo requestInfo) {
         LOGGER.info("-- TaxPeriodService searchTaxPeriods -- ");
-        final List<TaxPeriod> taxPeriods = taxPeriodRepository.searchTaxPeriods(taxPeriodCriteria);
+        final List<TaxPeriod> taxPeriods = taxPeriodRepository.getTaxPeriod(requestInfo,taxPeriodCriteria);
         return getTaxPeriodResponse(taxPeriods, requestInfo);
     }
 

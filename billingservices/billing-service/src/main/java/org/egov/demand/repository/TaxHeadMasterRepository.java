@@ -113,14 +113,14 @@ public class TaxHeadMasterRepository {
 		String jsonPath;
 		if(filterExpression.length()!=0)
 			jsonPath = TAXHEADMASTER_EXPRESSION.replace("EXPRESSION",filterExpression.toString());
-		else jsonPath = TAXHEADMASTER_NO_FILTER;
+		else jsonPath = MDMS_NO_FILTER;
 
 		result = documentContext.read(jsonPath);
 
 		return result;
 
 	}
-	
+
 
 	
 	@Transactional

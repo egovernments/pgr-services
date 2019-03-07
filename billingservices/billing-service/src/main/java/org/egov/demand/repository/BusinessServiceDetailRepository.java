@@ -39,29 +39,41 @@
  */
 package org.egov.demand.repository;
 
+import com.jayway.jsonpath.DocumentContext;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.demand.model.BusinessServiceDetail;
+import org.egov.demand.model.TaxPeriod;
 import org.egov.demand.repository.querybuilder.BusinessServDetailQueryBuilder;
 import org.egov.demand.repository.rowmapper.BusinessServDetailRowMapper;
+import org.egov.demand.util.Util;
 import org.egov.demand.web.contract.BusinessServiceDetailCriteria;
 import org.egov.demand.web.contract.BusinessServiceDetailRequest;
+import org.egov.demand.web.contract.TaxPeriodCriteria;
+import org.egov.mdms.model.MdmsCriteriaReq;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
+import static org.egov.demand.util.Constants.*;
 
 @Repository
 public class BusinessServiceDetailRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(BusinessServiceDetailRepository.class);
 
+    @Autowired
+    private Util util;
+    
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -85,6 +97,55 @@ public class BusinessServiceDetailRepository {
         }
         return businessServiceDetailList;
     }
+
+
+
+    /**
+     * Fetches the BussinessServiceDetail based on search criteria
+     * @param requestInfo The requestInfo of the search request
+     * @param BusinessServiceDetailsCriteria The search criteria for BussinessServiceDetailBussinessServiceDetail
+     * @return List of BussinessServiceDetail
+     */
+    public List<BusinessServiceDetail> getBussinessServiceDetail(RequestInfo requestInfo,BusinessServiceDetailCriteria BusinessServiceDetailsCriteria){
+
+        MdmsCriteriaReq mdmsCriteriaReq = util.prepareMdMsRequest(BusinessServiceDetailsCriteria.getTenantId(),
+                MODULE_NAME, Collections.singletonList(TAXPERIOD_MASTERNAME), null,
+                requestInfo);
+
+        List<BusinessServiceDetail> result = new ArrayList<>();
+
+        DocumentContext documentContext = util.getAttributeValues(mdmsCriteriaReq);
+
+        StringBuilder filterExpression = new StringBuilder();
+
+
+        if (BusinessServiceDetailsCriteria.getId() != null && !BusinessServiceDetailsCriteria.getId().isEmpty()) {
+            if(filterExpression.length()!=0)
+                filterExpression.append(" && ");
+            filterExpression.append(TAXPERIOD_IDS_FILTER.replace("VAL",util.getStringVal(BusinessServiceDetailsCriteria.getId())));
+        }
+        if(!CollectionUtils.isEmpty(BusinessServiceDetailsCriteria.getBusinessService())) {
+            if(filterExpression.length()!=0)
+                filterExpression.append(" && ");
+            filterExpression.append(TAXPERIOD_SERVICES_FILTER.replace("VAL",util.getStringVal(BusinessServiceDetailsCriteria.getBusinessService())));
+        }
+
+
+        String jsonPath;
+        if(filterExpression.length()!=0)
+            jsonPath = TAXPERIOD_EXPRESSION.replace("EXPRESSION",filterExpression.toString());
+        else jsonPath = MDMS_NO_FILTER;
+
+        result = documentContext.read(jsonPath);
+
+        return result;
+
+    }
+
+
+
+
+
 
     public List<BusinessServiceDetail> create(BusinessServiceDetailRequest businessServiceDetailRequest) {
         List<BusinessServiceDetail> businessServiceDetails = businessServiceDetailRequest.getBusinessServiceDetails();
