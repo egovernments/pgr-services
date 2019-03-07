@@ -84,7 +84,7 @@ public class BusinessServDetailService {
 		
 		LOGGER.info("-- BusinessServDetailsService searchBusinessServiceDetails -- ");
 		final List<BusinessServiceDetail> businessServiceDetails = businessServiceDetailRepository
-				.searchBusinessServiceDetails(businessServiceDetailCriteria);
+				.getBussinessServiceDetail(requestInfo,businessServiceDetailCriteria);
 		return getBusinessServiceDetailResponse(businessServiceDetails, requestInfo);
 	}
 

@@ -83,7 +83,20 @@ public class Constants {
 	public static final String TAXHEADMASTER_ISACTUALAMOUNT_FILTER = "@.isActualDemand== \"VAL\"";
 	public static final String TAXHEADMASTER_IDS_FILTER = "@.id in [VAL]";
 	public static final String TAXHEADMASTER_CODES_FILTER = "@.code in [VAL]";
-	public static final String TAXHEADMASTER_NO_FILTER = "$.MdmsRes.BillingService.*";
+	public static final String MDMS_NO_FILTER = "$.MdmsRes.BillingService.*";
 
+
+	public static final String TAXPERIOD_EXPRESSION = "$.MdmsRes.BillingService.TaxPeriod[?(EXPRESSION)]";
+	public static final String TAXPERIOD_PERIODCYCLE_FILTER = "@.periodCycle == \"VAL\"";
+	public static final String TAXPERIOD_CODE_SEARCH_FILTER = "@.code== \"VAL\"";
+	public static final String TAXPERIOD_FROMDATE_FILTER = "@.fromDate >= \"VAL\"";
+	public static final String TAXPERIOD_TODATE_FILTER = "@.toDate <= \"VAL\"";
+	public static final String TAXPERIOD_DATE_FILTER = "@.date == \"VAL\"";
+	public static final String TAXPERIOD_IDS_FILTER = "@.id in [VAL]";
+	public static final String TAXPERIOD_SERVICES_FILTER = "@.service in [VAL]";
+
+	public static final String BUSINESSSERVICE_EXPRESSION = "$.MdmsRes.BillingService.TaxPeriod[?(EXPRESSION)]";
+	public static final String BUSINESSSERVICE_IDS_FILTER = "@.id in [VAL]";
+	public static final String BUSINESSSERVICE_SERVICES_FILTER = "@.businessService in [VAL]";
 
 }

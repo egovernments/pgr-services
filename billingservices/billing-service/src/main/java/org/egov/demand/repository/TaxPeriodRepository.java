@@ -42,16 +42,22 @@ package org.egov.demand.repository;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import com.jayway.jsonpath.DocumentContext;
+import org.apache.commons.lang.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.demand.model.TaxHeadMaster;
+import org.egov.demand.model.TaxHeadMasterCriteria;
 import org.egov.demand.model.TaxPeriod;
 import org.egov.demand.repository.querybuilder.TaxPeriodQueryBuilder;
 import org.egov.demand.repository.rowmapper.TaxPeriodRowMapper;
+import org.egov.demand.util.Util;
 import org.egov.demand.web.contract.TaxPeriodCriteria;
 import org.egov.demand.web.contract.TaxPeriodRequest;
+import org.egov.mdms.model.MdmsCriteriaReq;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,11 +65,17 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
+
+import static org.egov.demand.util.Constants.*;
 
 @Repository
 public class TaxPeriodRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(TaxPeriodRepository.class);
+
+    @Autowired
+	private Util util;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -88,8 +100,81 @@ public class TaxPeriodRepository {
         }
         return taxPeriods;
     }
-    
-    public List<TaxPeriod> create(TaxPeriodRequest taxPeriodRequest){
+
+
+	/**
+	 * Fetches the TaxPeriod based on search criteria
+	 * @param requestInfo The requestInfo of the search request
+	 * @param taxPeriodCriteria The search criteria for TaxPeriod
+	 * @return List of TaxPeriod
+	 */
+	public List<TaxPeriod> getTaxPeriod(RequestInfo requestInfo,TaxPeriodCriteria taxPeriodCriteria){
+
+		MdmsCriteriaReq mdmsCriteriaReq = util.prepareMdMsRequest(taxPeriodCriteria.getTenantId(),
+				MODULE_NAME, Collections.singletonList(TAXPERIOD_MASTERNAME), null,
+				requestInfo);
+
+		List<TaxPeriod> result = new ArrayList<>();
+
+		DocumentContext documentContext = util.getAttributeValues(mdmsCriteriaReq);
+
+		StringBuilder filterExpression = new StringBuilder();
+
+
+		if (taxPeriodCriteria.getCode() != null) {
+			filterExpression.append(TAXPERIOD_CODE_SEARCH_FILTER.replace("VAL",taxPeriodCriteria.getCode()));
+		}
+
+		if (taxPeriodCriteria.getId() != null && !taxPeriodCriteria.getId().isEmpty()) {
+			if(filterExpression.length()!=0)
+				filterExpression.append(" && ");
+			filterExpression.append(TAXPERIOD_IDS_FILTER.replace("VAL",util.getStringVal(taxPeriodCriteria.getId())));
+		}
+		if(!CollectionUtils.isEmpty(taxPeriodCriteria.getService())) {
+			if(filterExpression.length()!=0)
+				filterExpression.append(" && ");
+			filterExpression.append(TAXPERIOD_SERVICES_FILTER.replace("VAL",util.getStringVal(taxPeriodCriteria.getService())));
+		}
+
+		if (taxPeriodCriteria.getFromDate()!=null) {
+			if(filterExpression.length()!=0)
+				filterExpression.append(" && ");
+			filterExpression.append(TAXPERIOD_FROMDATE_FILTER.replace("VAL",taxPeriodCriteria.getFromDate().toString()));
+		}
+
+		if (taxPeriodCriteria.getToDate() != null) {
+			if(filterExpression.length()!=0)
+				filterExpression.append(" && ");
+			filterExpression.append(TAXPERIOD_TODATE_FILTER.replace("VAL",taxPeriodCriteria.getToDate().toString()));
+		}
+
+		if (taxPeriodCriteria.getDate() != null) {
+			if(filterExpression.length()!=0)
+				filterExpression.append(" && ");
+			filterExpression.append(TAXPERIOD_DATE_FILTER.replace("VAL",taxPeriodCriteria.getDate().toString()));
+		}
+
+		if (taxPeriodCriteria.getPeriodCycle() != null) {
+			if(filterExpression.length()!=0)
+				filterExpression.append(" && ");
+			filterExpression.append(TAXPERIOD_PERIODCYCLE_FILTER.replace("VAL",taxPeriodCriteria.getPeriodCycle().toString()));
+		}
+
+		String jsonPath;
+		if(filterExpression.length()!=0)
+			jsonPath = TAXPERIOD_EXPRESSION.replace("EXPRESSION",filterExpression.toString());
+		else jsonPath = MDMS_NO_FILTER;
+
+		result = documentContext.read(jsonPath);
+
+		return result;
+
+	}
+
+
+
+
+	public List<TaxPeriod> create(TaxPeriodRequest taxPeriodRequest){
     	List<TaxPeriod> taxPeriods = taxPeriodRequest.getTaxPeriods();
     	RequestInfo requestInfo = taxPeriodRequest.getRequestInfo();
     	
