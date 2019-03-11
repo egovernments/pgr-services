@@ -41,6 +41,7 @@ package org.egov.collection.model;
 
 import lombok.*;
 import org.egov.collection.model.enums.CollectionType;
+import org.egov.collection.model.enums.Purpose;
 import org.egov.collection.web.contract.*;
 
 import java.math.BigDecimal;
@@ -69,15 +70,12 @@ public class ReceiptCommonModel {
 				billAccountDetails.add(BillAccountDetail.builder().isActualDemand(rctDetail.getIsActualDemand())
 						.id(rctDetail.getId().toString()).tenantId(rctDetail.getTenantId())
 						.billDetail(rctDetail.getReceiptHeader().getId().toString())
-						.creditAmount(BigDecimal.valueOf(rctDetail.getCramount()))
-						.debitAmount(BigDecimal.valueOf(rctDetail.getDramount())).glcode(rctDetail.getChartOfAccount())
 						.purpose(Purpose.valueOf(rctDetail.getPurpose())).build());
 			
 				}else{
 					billAccountDetails.add(BillAccountDetail.builder().isActualDemand(rctDetail.getIsActualDemand())
 							.id(rctDetail.getId().toString()).tenantId(rctDetail.getTenantId())
 							.billDetail(rctDetail.getReceiptHeader().getId().toString())
-							.creditAmount(rctDetail.getCramount() != null ? BigDecimal.valueOf(rctDetail.getCramount()) : BigDecimal.ZERO)
 							.glcode(rctDetail.getChartOfAccount())
 							.purpose(Purpose.valueOf(rctDetail.getPurpose())).build());
 				}
@@ -92,15 +90,13 @@ public class ReceiptCommonModel {
 			BillDetail billDetail = BillDetail.builder().id(receiptHeader.getId().toString()).billNumber(receiptHeader.getReferenceNumber())
 					.consumerCode(receiptHeader.getConsumerCode()).consumerType(receiptHeader.getConsumerType())
 					.collectionModesNotAllowed(Collections.singletonList(receiptHeader.getCollModesNotAllwd()))
-					.tenantId(receiptHeader.getTenantId()).displayMessage(receiptHeader.getDisplayMsg())
+					.tenantId(receiptHeader.getTenantId())
 					.billAccountDetails(billAccountDetails).businessService(receiptHeader.getBusinessDetails())
 					.receiptNumber(receiptHeader.getReceiptNumber()).receiptType(receiptHeader.getReceiptType())
 					.channel(receiptHeader.getChannel()).voucherHeader(receiptHeader.getVoucherheader())
 					.collectionType(collectnType).boundary(receiptHeader.getBoundary())
 					.reasonForCancellation(receiptHeader.getReasonForCancellation())
-					.cancellationRemarks(receiptHeader.getCancellationRemarks()).status(receiptHeader.getStatus())
 					.billAccountDetails(billAccountDetails).receiptDate(receiptHeader.getReceiptDateWithTimeStamp()) //read comment on receiptDateWithTimeStamp variable
-				    .billDescription(receiptHeader.getReferenceDesc()).manualReceiptNumber(receiptHeader.getManualReceiptNumber())
                     .amountPaid(receiptHeader.getTotalAmount() != null ? BigDecimal.valueOf(receiptHeader.getTotalAmount()) : BigDecimal.ZERO).build();
 			if(null != receiptHeader.getMinimumAmount()){
 				billDetail.setMinimumAmount(BigDecimal.valueOf(receiptHeader.getMinimumAmount()));
@@ -109,8 +105,8 @@ public class ReceiptCommonModel {
 				billDetail.setTotalAmount(BigDecimal.valueOf(receiptHeader.getTotalAmount()));
 			}
 			
-			Bill billInfo = Bill.builder().payeeName(receiptHeader.getPayeename())
-					.payeeAddress(receiptHeader.getPayeeAddress()).payeeEmail(receiptHeader.getPayeeEmail())
+			Bill billInfo = Bill.builder().payerName(receiptHeader.getPayeename())
+					.payerAddress(receiptHeader.getPayeeAddress()).payerEmail(receiptHeader.getPayeeEmail())
 					.paidBy(receiptHeader.getPaidBy()).tenantId(receiptHeader.getTenantId())
 					.billDetails(Collections.singletonList(billDetail)).build();
 			Receipt receipt = Receipt.builder().tenantId(receiptHeader.getTenantId()).bill(Collections.singletonList(billInfo)).

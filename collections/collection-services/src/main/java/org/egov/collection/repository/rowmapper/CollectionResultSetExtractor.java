@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.egov.collection.model.*;
 import org.egov.collection.model.enums.CollectionType;
 import org.egov.collection.model.enums.InstrumentStatusEnum;
+import org.egov.collection.model.enums.Purpose;
 import org.egov.collection.web.contract.*;
 import org.egov.tracer.model.CustomException;
 import org.postgresql.util.PGobject;
@@ -48,7 +49,6 @@ public class CollectionResultSetExtractor implements ResultSetExtractor<List<Rec
                                 ? Arrays.asList(resultSet.getString("rh_collModesNotAllwd").split("\\s*,\\s*"))
                                 : Collections.emptyList())
                         .tenantId(resultSet.getString("rh_tenantId"))
-                        .displayMessage(resultSet.getString("rh_displayMsg"))
                         .businessService(resultSet.getString("rh_businessDetails"))
                         .receiptNumber(resultSet.getString("rh_receiptNumber"))
                         .receiptType(resultSet.getString("rh_receiptType"))
@@ -57,10 +57,8 @@ public class CollectionResultSetExtractor implements ResultSetExtractor<List<Rec
                         .collectionType(CollectionType.valueOf(resultSet.getString("rh_collectionType")))
                         .boundary(resultSet.getString("rh_boundary"))
                         .reasonForCancellation(resultSet.getString("rh_reasonForCancellation"))
-                        .cancellationRemarks(resultSet.getString("rh_cancellationRemarks"))
                         .status(resultSet.getString("rh_status"))
                         .receiptDate(resultSet.getLong("rh_receiptDate"))
-                        .billDescription(resultSet.getString("rh_referenceDesc"))
                         .manualReceiptNumber(resultSet.getString("rh_manualReceiptNumber"))
                         .manualReceiptDate(resultSet.getLong("rh_manualreceiptdate"))
                         .fund(resultSet.getString("rh_fund"))
@@ -75,9 +73,9 @@ public class CollectionResultSetExtractor implements ResultSetExtractor<List<Rec
                         .build();
 
                 Bill billInfo = Bill.builder()
-                        .payeeName(resultSet.getString("rh_payeename"))
-                        .payeeAddress(resultSet.getString("rh_payeeAddress"))
-                        .payeeEmail(resultSet.getString("rh_payeeEmail"))
+                        .payerName(resultSet.getString("rh_payeename"))
+                        .payerAddress(resultSet.getString("rh_payeeAddress"))
+                        .payerEmail(resultSet.getString("rh_payeeEmail"))
                         .mobileNumber(resultSet.getString("rh_payeemobile"))
                         .paidBy(resultSet.getString("rh_paidBy"))
                         .tenantId(resultSet.getString("rh_tenantId"))
@@ -158,14 +156,12 @@ public class CollectionResultSetExtractor implements ResultSetExtractor<List<Rec
                     .isActualDemand((Boolean) resultSet.getObject("rd_isActualDemand"))
                     .tenantId(resultSet.getString("rd_tenantId"))
                     .billDetail(resultSet.getString("rh_id"))
-                    .creditAmount(crAmount)
-                    .crAmountToBePaid(getBigDecimalValue(resultSet.getBigDecimal("rd_actualcramountToBePaid")))
-                    .accountDescription(resultSet.getString("rd_description"))
                     .order(resultSet.getInt("rd_ordernumber"))
-                    .debitAmount(getBigDecimalValue(resultSet.getBigDecimal("rd_dramount")))
                     .glcode(resultSet.getString("rd_chartOfAccount"))
                     .purpose(Purpose.valueOf(resultSet.getString("rd_purpose")))
                     .additionalDetails(getJsonValue((PGobject) resultSet.getObject("rd_additionalDetails")))
+                    .amount(resultSet.getBigDecimal("rd_amount"))
+                    .adjustedAmount(resultSet.getBigDecimal("rd_adjustedamount"))
                     .build();
     }
 

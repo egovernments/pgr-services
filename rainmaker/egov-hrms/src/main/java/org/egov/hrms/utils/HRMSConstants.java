@@ -27,7 +27,9 @@ public class HRMSConstants {
 	public static final String HRMS_LOCALIZATION_MSGS_JSONPATH = "$.messages.*.message";
 	
 	
-	public static final String HRMS_EMP_CREATE_LOCLZN_CODE = "hrms.employee.create.notification";
+	public static final String HRMS_EMP_CREATE_LOCLZN_SMS_CODE = "hrms.employee.create.notification";
+	public static final String HRMS_EMP_CREATE_LOCLZN_EMAIL_CODE = "hrms.employee.create.notification.email";
+	public static final String HRMS_EMP_CREATE_LOCLZN_EMAIL_SUB_CODE = "hrms.employee.create.notification.email.subject";
 	public static final String HRMS_LOCALIZATION_MODULE_CODE = "egov-hrms";
 	public static final String HRMS_LOCALIZATION_ENG_LOCALE_CODE = "en_IN";
 	public static final String HRMS_TENANTBOUNDARY_HIERARCHY_JSONPATH = "$.TenantBoundary[*].hierarchyType.code";

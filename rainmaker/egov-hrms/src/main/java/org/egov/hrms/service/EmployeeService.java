@@ -46,8 +46,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.hrms.config.PropertiesManager;
+import org.egov.hrms.consumer.NotificationConsumer;
 import org.egov.hrms.model.AuditDetails;
 import org.egov.hrms.model.Employee;
+import org.egov.hrms.model.Notification;
 import org.egov.hrms.model.enums.UserType;
 import org.egov.hrms.producer.HRMSProducer;
 import org.egov.hrms.repository.EmployeeRepository;
@@ -95,10 +97,7 @@ public class EmployeeService {
 	
 	@Autowired
 	private HRMSUtils hrmsUtils;
-	
-	@Autowired
-	private NotificationService notificationService;
-	
+	 
 	@Autowired
 	private ObjectMapper objectMapper;
 
@@ -123,7 +122,8 @@ public class EmployeeService {
 			employee.getUser().setPassword(null);
 		});
 		hrmsProducer.push(propertiesManager.getSaveEmployeeTopic(), employeeRequest);
-		notificationService.sendNotification(employeeRequest, pwdMap);
+		hrmsProducer.push(propertiesManager.getNotificationTopic(), 
+				Notification.builder().request(employeeRequest).pwdMap(pwdMap).build());
 		return generateResponse(employeeRequest);
 	}
 	

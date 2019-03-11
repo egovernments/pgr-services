@@ -97,16 +97,15 @@ public class ReceiptEnricher {
 
         Bill validatedBill = validatedBills.get(0);
         validatedBill.setPaidBy(billFromRequest.getPaidBy());
-        validatedBill.setPayeeName(billFromRequest.getPayeeName());
+        validatedBill.setPayerName(billFromRequest.getPayerName());
         validatedBill.setMobileNumber(billFromRequest.getMobileNumber());
-        validatedBill.setPayeeAddress(billFromRequest.getPayeeAddress());
+        validatedBill.setPayerAddress(billFromRequest.getPayerAddress());
 
         validatedBill.getBillDetails().sort(Comparator.comparing(BillDetail::getId));
         billFromRequest.getBillDetails().sort(Comparator.comparing(BillDetail::getId));
 
         for(int i = 0; i < validatedBill.getBillDetails().size(); i++){
-            validatedBill.getBillDetails().get(i).setAmountPaid(billFromRequest.getBillDetails().get(i).getAmountPaid
-                    ());
+            validatedBill.getBillDetails().get(i).setAmountPaid(billFromRequest.getBillDetails().get(i).getAmountPaid());
 
             validatedBill.getBillDetails().get(i).setManualReceiptNumber(billFromRequest.getBillDetails().get(i)
                     .getManualReceiptNumber());
@@ -215,7 +214,7 @@ public class ReceiptEnricher {
         instrument.setId(UUID.randomUUID().toString());
         instrument.setTransactionType(TransactionType.Debit);
         instrument.setTenantId(receipt.getTenantId());
-        instrument.setPayee(receipt.getBill().get(0).getPayeeName());
+        instrument.setPayee(receipt.getBill().get(0).getPayerName());
 
         instrument.setInstrumentDate(instrument.getTransactionDateInput());
 

@@ -89,10 +89,16 @@ public class PropertiesManager {
 	public String saveEmployeeTopic;
 	
 	@Value("${kafka.topics.update.service}")
-	public String UpdateEmployeeTopic;
+	public String updateEmployeeTopic;
+	
+	@Value("${kafka.topics.notification.hrms}")
+	public String notificationTopic;
 	
 	@Value("${kafka.topics.notification.sms}")
-	public String coreNotificationTopic;
+	public String coreSMSNotificationTopic;
+	
+	@Value("${kafka.topics.notification.mail}")
+	public String coreEMAILNotificationTopic;
 	
 	
 	//Variables
@@ -102,6 +108,16 @@ public class PropertiesManager {
 	@Value("${egov.idgen.ack.format}")
 	public String hrmsIdGenFormat;
 	
+	@Value("${egov.hrms.default.email.subject}")
+	public String defaultSubject;
+	
 	@Value("${open.search.enabled.roles}")
 	public String openSearchEnabledRoles;
+	
+	@Value("${egov.hrms.sms.notification.enabled}")
+	public Boolean isSMSNotificationEnabled;
+	
+	@Value("${egov.hrms.email.notification.enabled}")
+	public Boolean isEmailNotificationEnabled;
+	
 }

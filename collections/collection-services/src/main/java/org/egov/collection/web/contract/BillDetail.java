@@ -40,11 +40,8 @@
 package org.egov.collection.web.contract;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import org.egov.collection.model.enums.CollectionType;
@@ -69,78 +66,109 @@ import lombok.ToString;
 @EqualsAndHashCode
 public class BillDetail {
 
-    private String id;
+	  @JsonProperty("id")
+	  private String id = null;
 
-    private String bill;
+	  @JsonProperty("tenantId")
+	  private String tenantId = null;
 
-    private Long billDate;
+	  @JsonProperty("demandId")
+	  private String demandId = null;
 
-    private String billDescription;
+	  @JsonProperty("bill")
+	  private String bill = null;
 
-    private String billNumber; // refNo
+	  @JsonProperty("businessService")
+	  private String businessService = null;
 
-    private String consumerCode;
+	  @JsonProperty("billNumber")
+	  private String billNumber = null;
 
-    private String consumerType;
+	  @JsonProperty("billDate")
+	  private Long billDate = null;
 
-    private BigDecimal minimumAmount;
+	  @JsonProperty("consumerCode")
+	  private String consumerCode = null;
 
-    private BigDecimal totalAmount;
+	  @JsonProperty("consumerType")
+	  private String consumerType = null;
 
-    private BigDecimal collectedAmount;
+	  @JsonProperty("minimumAmount")
+	  private BigDecimal minimumAmount = null;
 
-    private List<String> collectionModesNotAllowed = new ArrayList<>();
+	  @JsonProperty("totalAmount")
+	  @NotNull
+	  private BigDecimal totalAmount = null;
+	  
+	  @JsonProperty("amountPaid")
+	  @NotNull
+	  private BigDecimal amountPaid = null;
 
-    private String tenantId;
+	  @JsonProperty("fromPeriod")
+	  private BigDecimal fromPeriod = null;
 
-    private String businessService; // buisnessDetailsCode
+	  @JsonProperty("toPeriod")
+	  private BigDecimal toPeriod = null;
 
-    private String displayMessage;
+	  @JsonProperty("collectedAmount")
+	  private BigDecimal collectedAmount = null;
 
-    private Boolean callBackForApportioning;
+	  @JsonProperty("collectionModesNotAllowed")
+	  private List<String> collectionModesNotAllowed = null;
 
-    private String receiptNumber;
+	  @JsonProperty("partPaymentAllowed")
+	  private Boolean partPaymentAllowed = null;
 
-    private Long receiptDate;
+	  @JsonProperty("additionalDetails")
+	  private JsonNode additionalDetails = null;
+	  
+	  @JsonProperty("receiptNumber")
+	  private String receiptNumber = null;
+	  
+	  @JsonProperty("receiptDate")
+	  private Long receiptDate = null;
+	  
+	  @JsonProperty("receiptType")
+	  private String receiptType = null;
+	  
+	  @JsonProperty("channel")
+	  private String channel = null;
+	  
+	  @JsonProperty("voucherHeader")
+	  private String voucherHeader = null;
+	  
+	  @JsonProperty("boundary")
+	  private String boundary = null;
+	  
+	  @JsonProperty("reasonForCancellation")
+	  private String reasonForCancellation = null;
+	  
+	  @JsonProperty("manualReceiptNumber")
+	  private String manualReceiptNumber = null;
+	  
+	  @JsonProperty("manualReceiptDate")
+	  private Long manualReceiptDate = null;
+	  
+	  @JsonProperty("stateId")
+	  private String stateId = null;
+	  
+	  @JsonProperty("fund")
+	  private String fund = null;
+	  
+	  @JsonProperty("function")
+	  private String function = null;
+	  
+	  @JsonProperty("department")
+	  private String department = null;
+	  
+	  @JsonProperty("billAccountDetails")
+	  private List<BillAccountDetail> billAccountDetails = null;
 
-    private String receiptType;
+	  @JsonProperty("status")
+	  private String status = null;
+	  
+	  @JsonProperty("collectionType")
+	  private CollectionType collectionType = null;
 
-    private String channel;
-
-    private String fund;
-
-    private String department;
-
-    private String function;
-
-    private String voucherHeader;
-
-    private CollectionType collectionType;
-
-    private String boundary;
-
-    private String reasonForCancellation;
-
-    @NotNull
-    @Min(value = 0)
-    @Max(value = 999999999)
-    private BigDecimal amountPaid;
-
-    private String cancellationRemarks;
-
-    private String status;
-
-    @JsonProperty("billAccountDetails")
-    private List<BillAccountDetail> billAccountDetails = new ArrayList<>();
-
-    private String manualReceiptNumber;
-
-    private Long manualReceiptDate;
-
-    private Long stateId;
-
-    private Boolean partPaymentAllowed;
-
-    private JsonNode additionalDetails;
 
 }

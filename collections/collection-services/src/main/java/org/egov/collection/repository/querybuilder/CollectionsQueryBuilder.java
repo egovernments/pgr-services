@@ -86,8 +86,8 @@ public class CollectionsQueryBuilder {
             "rh_voucherheader, rh.cancellationRemarks as rh_cancellationRemarks, rh.additionalDetails as " +
             "rh_additionalDetails, rh.createdBy as  rh_createdBy, rh.createdDate as rh_createdDate,rh.lastModifiedBy " +
             "as rh_lastModifiedBy, rh.lastModifiedDate as " +
-            "rh_lastModifiedDate, rh.transactionid as rh_transactionid, rd.id as rd_id,  rd.dramount as rd_dramount, " +
-            "rd.cramount as rd_cramount,rd.actualcramountToBePaid as  rd_actualcramountToBePaid,rd.ordernumber as " +
+            "rh_lastModifiedDate, rh.transactionid as rh_transactionid, rd.id as rd_id,  rd.amount as rd_amount, " +
+            "rd.adjustedamount as rd_adjustedamount, rd.ordernumber as " +
             "rd_ordernumber,  rd.description as rd_description,rd.chartOfAccount as rd_chartOfAccount,rd" +
             ".isActualDemand  as rd_isActualDemand,  rd.financialYear as rd_financialYear,rd.purpose as rd_purpose, " +
             "rd.additionalDetails as rd_additionalDetails, rd.tenantId as rd_tenantId,   ins.id as ins_instrumentheader, " +
@@ -130,9 +130,9 @@ public class CollectionsQueryBuilder {
         String collectionModesNotAllowed = String.join(",", billDetail.getCollectionModesNotAllowed());
 
         sqlParameterSource.addValue("id", billDetail.getId());
-        sqlParameterSource.addValue("payeename", bill.getPayeeName());
-        sqlParameterSource.addValue("payeeaddress", bill.getPayeeAddress());
-        sqlParameterSource.addValue("payeeemail", bill.getPayeeEmail());
+        sqlParameterSource.addValue("payeename", bill.getPayerName());
+        sqlParameterSource.addValue("payeeaddress", bill.getPayerAddress());
+        sqlParameterSource.addValue("payeeemail", bill.getPayerEmail());
         sqlParameterSource.addValue("payeemobile", bill.getMobileNumber());
         sqlParameterSource.addValue("paidby", bill.getPaidBy());
         sqlParameterSource.addValue("referencenumber", billDetail.getBillNumber());
@@ -157,7 +157,6 @@ public class CollectionsQueryBuilder {
         sqlParameterSource.addValue("lastmodifieddate", auditDetails.getLastModifiedDate());
         sqlParameterSource.addValue("tenantid", billDetail.getTenantId());
         sqlParameterSource.addValue("referencedate", billDetail.getBillDate());
-        sqlParameterSource.addValue("referencedesc", billDetail.getBillDescription());
         sqlParameterSource.addValue("manualreceiptnumber", billDetail.getManualReceiptNumber());
         sqlParameterSource.addValue("manualreceiptdate", billDetail.getManualReceiptDate());
         sqlParameterSource.addValue("reference_ch_id", null);
@@ -181,9 +180,9 @@ public class CollectionsQueryBuilder {
 
         sqlParameterSource.addValue("id", billDetail.getId());
         sqlParameterSource.addValue("paidby", bill.getPaidBy());
-        sqlParameterSource.addValue("payeeaddress", bill.getPayeeAddress());
-        sqlParameterSource.addValue("payeeemail", bill.getPayeeEmail());
-        sqlParameterSource.addValue("payeename", bill.getPayeeName());
+        sqlParameterSource.addValue("payeeaddress", bill.getPayerAddress());
+        sqlParameterSource.addValue("payeeemail", bill.getPayerEmail());
+        sqlParameterSource.addValue("payeename", bill.getPayerName());
         sqlParameterSource.addValue("manualreceiptnumber", billDetail.getManualReceiptNumber());
         sqlParameterSource.addValue("manualreceiptdate", billDetail.getManualReceiptDate());
         sqlParameterSource.addValue("additionalDetails", getJsonb(billDetail.getAdditionalDetails()));
@@ -219,16 +218,14 @@ public class CollectionsQueryBuilder {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
         sqlParameterSource.addValue("id", billAccountDetails.getId());
         sqlParameterSource.addValue("chartofaccount", billAccountDetails.getGlcode());
-        sqlParameterSource.addValue("dramount", billAccountDetails.getDebitAmount());
-        sqlParameterSource.addValue("cramount", billAccountDetails.getCreditAmount());
         sqlParameterSource.addValue("ordernumber", billAccountDetails.getOrder());
-        sqlParameterSource.addValue("actualcramounttobepaid", billAccountDetails.getCrAmountToBePaid());
-        sqlParameterSource.addValue("description", billAccountDetails.getAccountDescription());
         sqlParameterSource.addValue("financialyear", null);
         sqlParameterSource.addValue("isactualdemand", billAccountDetails.getIsActualDemand());
         sqlParameterSource.addValue("purpose", billAccountDetails.getPurpose().toString());
         sqlParameterSource.addValue("tenantid", billAccountDetails.getTenantId());
         sqlParameterSource.addValue("receiptheader", receiptHeaderId);
+        sqlParameterSource.addValue("amount", billAccountDetails.getAmount());
+        sqlParameterSource.addValue("adjustedAmount", billAccountDetails.getAdjustedAmount());
         sqlParameterSource.addValue("additionalDetails", getJsonb(billAccountDetails.getAdditionalDetails()));
 
         return sqlParameterSource;
