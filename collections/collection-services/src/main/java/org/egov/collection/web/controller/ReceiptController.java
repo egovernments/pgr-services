@@ -42,6 +42,7 @@ package org.egov.collection.web.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.egov.collection.model.ReceiptSearchCriteria;
+import org.egov.collection.model.enums.ReceiptStatus;
 import org.egov.collection.service.CollectionService;
 import org.egov.collection.service.WorkflowService;
 import org.egov.collection.web.contract.Receipt;
@@ -53,13 +54,13 @@ import org.egov.collection.web.contract.factory.ResponseInfoFactory;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/receipts")
@@ -72,13 +73,37 @@ public class ReceiptController {
     @Autowired
     private WorkflowService workflowService;
 
+    @Value("#{'${search.ignore.status}'.split(',')}")
+    private List<String> searchIgnoreStatus;
+
     @RequestMapping(value = "/_search", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<ReceiptRes> search(@ModelAttribute ReceiptSearchCriteria receiptSearchCriteria,
             @RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
 
         final RequestInfo requestInfo = requestInfoWrapper.getRequestInfo();
+
+        // Only do this if there is no receipt number search
+        // Only do this when search ignore status has been defined in application.properties
+        // Only do this when status has not been already provided for the search
+        if ((receiptSearchCriteria.getReceiptNumbers() == null
+              || receiptSearchCriteria.getReceiptNumbers().isEmpty()) &&
+                !searchIgnoreStatus.isEmpty() &&
+                (receiptSearchCriteria.getStatus() == null ||
+                        receiptSearchCriteria.getStatus().isEmpty()) ) {
+            // Do not return ignored status for receipts by default
+            Set<String> defaultStatus = new HashSet<>();
+            for (ReceiptStatus receiptStatus : ReceiptStatus.values()) {
+                if (!searchIgnoreStatus.contains(receiptStatus.toString())) {
+                    defaultStatus.add(receiptStatus.toString());
+                }
+            }
+
+            receiptSearchCriteria.setStatus(defaultStatus);
+        }
+
         List<Receipt> receipts = collectionService.getReceipts(requestInfo, receiptSearchCriteria);
+
         return getSuccessResponse(receipts, requestInfo);
     }
 
