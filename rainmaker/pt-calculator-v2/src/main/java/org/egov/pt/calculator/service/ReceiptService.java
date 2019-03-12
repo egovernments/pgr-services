@@ -1,7 +1,5 @@
 package org.egov.pt.calculator.service;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.egov.pt.calculator.repository.Repository;
@@ -58,7 +56,7 @@ public class ReceiptService {
 		for (Receipt receipt : receipts) {
 			
 			BillDetail detail = receipt.getBill().get(0).getBillDetails().get(0);
-			if (detail.getStatus().equalsIgnoreCase(CalculatorConstants.RECEIPT_STATUS_APPROVED)
+			if (detail.getStatus().equals(CalculatorConstants.RECEIPT_STATUS_APPROVED)
 					&& detail.getReceiptDate().compareTo(latestCollectedDate) > 0)
 				latestCollectedDate = detail.getReceiptDate();
 		}

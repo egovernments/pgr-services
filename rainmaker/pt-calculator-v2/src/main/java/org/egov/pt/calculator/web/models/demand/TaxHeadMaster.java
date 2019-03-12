@@ -1,22 +1,17 @@
 package org.egov.pt.calculator.web.models.demand;
 
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.egov.pt.calculator.web.models.property.AuditDetails;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-
-import org.egov.pt.calculator.web.models.property.AuditDetails;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Builder.Default;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class TaxHeadMaster {
 
 	private String id;
@@ -35,7 +30,6 @@ public class TaxHeadMaster {
 	
 	private List<GlCodeMaster> glCodes;
 
-	@Default
 	private Boolean isDebit = false;
 
 	private Boolean isActualDemand;

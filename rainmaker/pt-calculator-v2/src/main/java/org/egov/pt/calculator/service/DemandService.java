@@ -20,14 +20,7 @@ import org.egov.pt.calculator.web.models.CalculationCriteria;
 import org.egov.pt.calculator.web.models.CalculationReq;
 import org.egov.pt.calculator.web.models.GetBillCriteria;
 import org.egov.pt.calculator.web.models.TaxHeadEstimate;
-import org.egov.pt.calculator.web.models.demand.BillResponse;
-import org.egov.pt.calculator.web.models.demand.Demand;
-import org.egov.pt.calculator.web.models.demand.DemandDetail;
-import org.egov.pt.calculator.web.models.demand.DemandRequest;
-import org.egov.pt.calculator.web.models.demand.DemandResponse;
-import org.egov.pt.calculator.web.models.demand.DemandStatus;
-import org.egov.pt.calculator.web.models.demand.TaxHeadMaster;
-import org.egov.pt.calculator.web.models.demand.TaxPeriod;
+import org.egov.pt.calculator.web.models.demand.*;
 import org.egov.pt.calculator.web.models.property.OwnerInfo;
 import org.egov.pt.calculator.web.models.property.Property;
 import org.egov.pt.calculator.web.models.property.PropertyDetail;
@@ -275,7 +268,6 @@ public class DemandService {
 	/**
 	 * @param requestInfo
 	 * @param property
-	 * @param carryForward
 	 * @return
 	 */
 	public Demand getLatestDemandForCurrentFinancialYear(RequestInfo requestInfo, Property property) {

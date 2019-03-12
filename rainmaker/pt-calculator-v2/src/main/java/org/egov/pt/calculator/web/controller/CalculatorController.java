@@ -51,9 +51,5 @@ public class CalculatorController {
 			@ModelAttribute @Valid GetBillCriteria getBillCriteria) {
 		return new ResponseEntity<>(demandService.getBill(getBillCriteria, requestInfoWrapper), HttpStatus.OK);
 	}
-	
-	@PostMapping("/bill/_apportion")
-	public ResponseEntity<BillResponse> getBill(@RequestBody @Valid BillRequest billRequest) {
-		return new ResponseEntity<>(payService.apportionBills(billRequest), HttpStatus.OK);
-	}	
+
 }

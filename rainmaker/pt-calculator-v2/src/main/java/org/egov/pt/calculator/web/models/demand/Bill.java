@@ -1,50 +1,64 @@
 package org.egov.pt.calculator.web.models.demand;
 
-import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
+import lombok.Builder.Default;
 import org.egov.pt.calculator.web.models.property.AuditDetails;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
-@Data
-@NoArgsConstructor
+/**
+ * Bill
+ */
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class Bill {
-	
-	public Bill(Bill bill) {
+	// TODO some of the fields are mandatory in yml, lets discuss billdetail and billaccountdetail also for more clarity
 
-		this.id = bill.id;
-		this.isActive = bill.isActive;
-		this.tenantId = bill.tenantId;
-		this.payeeName = bill.payeeName;
-		this.payeeEmail = bill.payeeEmail;
-		this.isCancelled = bill.isCancelled;
-		this.auditDetails = bill.auditDetails;
-		this.billDetails = bill.billDetails;
-		this.payeeAddress = bill.payeeAddress;
-	}
-	//TODO some of the fields are mandatory in yml, lets discuss billdetail and billaccountdetail also for more clarity
-	private String id;
+	@JsonProperty("id")
+	private String id = null;
 
-	private String payeeName;
+	@JsonProperty("mobileNumber")
+	private String mobileNumber = null;
 
-	private String payeeAddress;
-	
-	private String mobileNumber;
+	@JsonProperty("paidBy")
+	private String paidBy = null;
 
-	private String payeeEmail;
+	@JsonProperty("payerName")
+	private String payerName = null;
 
-	private Boolean isActive;
+	@JsonProperty("payerAddress")
+	private String payerAddress = null;
 
-	private Boolean isCancelled;
+	@JsonProperty("payerEmail")
+	private String payerEmail = null;
 
-	private List<BillDetail> billDetails;
+	@JsonProperty("isActive")
+	private Boolean isActive = null;
 
-	private String tenantId;
-	
-	private AuditDetails auditDetails;
+	@JsonProperty("isCancelled")
+	private Boolean isCancelled = null;
+
+	@JsonProperty("additionalDetails")
+	private Object additionalDetails = null;
+
+	@JsonProperty("taxAndPayments")
+	@Valid
+	private List<TaxAndPayment> taxAndPayments = null;
+
+	@JsonProperty("billDetails")
+	@Valid
+	private List<BillDetail> billDetails = null;
+
+	@JsonProperty("tenantId")
+	private String tenantId = null;
+
+	@JsonProperty("auditDetails")
+	private AuditDetails auditDetails = null;
+
 }
