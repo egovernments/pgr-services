@@ -18,7 +18,7 @@ public class PropertyCalculatorApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(PropertyCalculatorApplication.class, args);
 	}
-	
+
 	@Bean
 	@Primary
 	public ObjectMapper getObjectMapper(){
@@ -26,7 +26,7 @@ public class PropertyCalculatorApplication {
 		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		return objectMapper;
 	}
-	
+
 	@Bean(name = "secondaryMapper")
 	public ObjectMapper objectMapperForRepository(){
 		ObjectMapper mapper = new ObjectMapper();

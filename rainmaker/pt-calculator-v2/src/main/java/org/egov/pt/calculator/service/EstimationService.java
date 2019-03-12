@@ -294,7 +294,7 @@ public class EstimationService {
 		BigDecimal userExemption = getExemption(detail.getOwners(), payableTax, assessmentYear, propertyBasedExemptionMasterMap);
 		estimates.add(TaxHeadEstimate.builder().taxHeadCode(PT_OWNER_EXEMPTION).estimateAmount(
 		        userExemption.setScale(2, 2)).build());
-		payableTax = payableTax.subtract(userExemption);
+		payableTax = payableTax.add(userExemption);
 
 		// Fire cess
 		List<Object> fireCessMasterList = timeBasedExemeptionMasterMap.get(CalculatorConstants.FIRE_CESS_MASTER);
@@ -583,7 +583,7 @@ public class EstimationService {
 			if (null != applicableOwnerType) {
 
 				BigDecimal currentExemption = mDataService.calculateApplicables(share,
-						applicableOwnerType.get(EXEMPTION_FIELD_NAME));
+						applicableOwnerType.get(EXEMPTION_FIELD_NAME)).negate();
 
 				userExemption = userExemption.add(currentExemption);
 			}

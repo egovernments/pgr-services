@@ -160,7 +160,7 @@ public class PayService {
 	public BillResponse apportionBills(BillRequest billRequest) {
 
 		billRequest.getBills().forEach(bill -> bill.getBillDetails().forEach(detail -> {
-			BigDecimal amtPaid = detail.getAmountPaid();
+			BigDecimal amtPaid = detail.getCollectedAmount();
 			apportionBillAccountDetails(detail.getBillAccountDetails(), amtPaid);
 		}));
 		return BillResponse.builder().bill(billRequest.getBills()).build();
@@ -183,8 +183,8 @@ public class PayService {
 
 			@Override
 			public int compare(BillAccountDetail arg0, BillAccountDetail arg1) {
-				String taxHead0 = arg0.getAccountDescription().split(CalculatorConstants.PT_CONSUMER_CODE_SEPARATOR)[0];
-				String taxHead1 = arg1.getAccountDescription().split(CalculatorConstants.PT_CONSUMER_CODE_SEPARATOR)[0];
+				String taxHead0 = arg0.getTaxHeadCode();
+				String taxHead1 = arg1.getTaxHeadCode();
 
 				Integer value0 = taxHeadpriorityMap.get(CalculatorConstants.MAX_PRIORITY_VALUE);
 				Integer value1 = taxHeadpriorityMap.get(CalculatorConstants.MAX_PRIORITY_VALUE);
@@ -213,12 +213,12 @@ public class PayService {
 		BigDecimal amtRemaining = amtPaid;
 		for (BillAccountDetail billAccountDetail : billAccountDetails) {
 			if (BigDecimal.ZERO.compareTo(amtRemaining) < 0) {
-				BigDecimal amtToBePaid = billAccountDetail.getCrAmountToBePaid();
+				BigDecimal amtToBePaid = billAccountDetail.getAmount();
 				if (amtToBePaid.compareTo(amtRemaining) >= 0) {
-					billAccountDetail.setCreditAmount(amtRemaining);
+					billAccountDetail.setAdjustedAmount(amtRemaining);
 					amtRemaining = BigDecimal.ZERO;
 				} else if (amtToBePaid.compareTo(amtRemaining) < 0) {
-					billAccountDetail.setCreditAmount(amtToBePaid);
+					billAccountDetail.setAdjustedAmount(amtToBePaid);
 					amtRemaining = amtRemaining.subtract(amtToBePaid);
 				}
 			} else break;
@@ -273,7 +273,7 @@ public class PayService {
 		BigDecimal roundOffPos = BigDecimal.ZERO;
 		BigDecimal roundOffNeg = BigDecimal.ZERO;
 
-		BigDecimal result = creditAmount.subtract(debitAmount);
+		BigDecimal result = creditAmount.add(debitAmount);
 		BigDecimal roundOffAmount = result.setScale(2, 2);
 		BigDecimal reminder = roundOffAmount.remainder(BigDecimal.ONE);
 
