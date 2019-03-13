@@ -2,6 +2,7 @@
 ReportDefinitions:
 - reportName: TradeLicenseRegistryReport
   summary: TL Basic Report
+  decrPathId: TradeLicenseRegistryReport
   version: 1.0.0
   moduleName: rainmaker-tl
   sourceColumns:
