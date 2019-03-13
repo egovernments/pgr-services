@@ -2,6 +2,7 @@ package org.egov.tlcalculator.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.contract.request.User;
 import org.egov.tlcalculator.config.TLCalculatorConfigs;
 import org.egov.tlcalculator.repository.CalculationRepository;
 import org.egov.tlcalculator.repository.DemandRepository;
@@ -10,7 +11,6 @@ import org.egov.tlcalculator.repository.builder.CalculationQueryBuilder;
 import org.egov.tlcalculator.utils.CalculationUtils;
 import org.egov.tlcalculator.utils.TLCalculatorConstants;
 import org.egov.tlcalculator.web.models.*;
-import org.egov.tlcalculator.web.models.tradelicense.OwnerInfo;
 import org.egov.tlcalculator.web.models.tradelicense.TradeLicense;
 import org.egov.tlcalculator.web.models.demand.*;
 import org.egov.tracer.model.CustomException;
@@ -21,12 +21,14 @@ import org.springframework.util.CollectionUtils;
 import java.math.BigDecimal;
 import java.util.*;
 
+import static org.egov.tlcalculator.utils.TLCalculatorConstants.MDMS_ROUNDOFF_TAXHEAD;
+
 
 @Service
 public class DemandService {
 
-   @Autowired
-   private CalculationService calculationService;
+    @Autowired
+    private CalculationService calculationService;
 
     @Autowired
     private CalculationUtils utils;
@@ -68,8 +70,7 @@ public class DemandService {
 
         if(!CollectionUtils.isEmpty(calculations)){
             for(Calculation calculation : calculations)
-            {
-                                                                                                                                                                                                            if(CollectionUtils.isEmpty(searchDemand(calculation.getTenantId(),
+            {      if(CollectionUtils.isEmpty(searchDemand(calculation.getTenantId(),
                             calculation.getTradeLicense().getApplicationNumber(),requestInfo)))
                         createCalculations.add(calculation);
                     else
@@ -143,7 +144,7 @@ public class DemandService {
             String tenantId = calculation.getTenantId();
             String consumerCode = calculation.getTradeLicense().getApplicationNumber();
 
-            OwnerInfo owner = license.getTradeLicenseDetail().getOwners().get(0);
+            User owner = license.getTradeLicenseDetail().getOwners().get(0).toCommonUser();
 
             List<DemandDetail> demandDetails = new LinkedList<>();
 
@@ -157,10 +158,12 @@ public class DemandService {
 
              Map<String,Long> taxPeriods = mdmsService.getTaxPeriods(requestInfo,license,mdmsData);
 
-            demands.add(Demand.builder()
+             addRoundOffTaxHead(calculation.getTenantId(),demandDetails);
+
+             demands.add(Demand.builder()
                     .consumerCode(consumerCode)
                     .demandDetails(demandDetails)
-                    .owner(owner)
+                    .payer(owner)
                     .minimumAmountPayable(config.getMinimumPayableAmount())
                     .tenantId(tenantId)
                     .taxPeriodFrom(taxPeriods.get(TLCalculatorConstants.MDMS_STARTDATE))
@@ -189,27 +192,8 @@ public class DemandService {
 
             Demand demand = searchResult.get(0);
             List<DemandDetail> demandDetails = demand.getDemandDetails();
-
-            Map<String, DemandDetail> taxHeadToDemandDetail = new HashMap<>();
-
-            demandDetails.forEach(demandDetail -> {
-                taxHeadToDemandDetail.put(demandDetail.getTaxHeadMasterCode(), demandDetail);
-            });
-
-            calculation.getTaxHeadEstimates().forEach(taxHeadEstimate -> {
-                if (taxHeadToDemandDetail.containsKey(taxHeadEstimate.getTaxHeadCode()))
-                    taxHeadToDemandDetail.get(taxHeadEstimate.getTaxHeadCode()).setTaxAmount(taxHeadEstimate.getEstimateAmount());
-                else
-                    taxHeadToDemandDetail.put(taxHeadEstimate.getTaxHeadCode(),
-                            DemandDetail.builder()
-                                    .taxAmount(taxHeadEstimate.getEstimateAmount())
-                                    .taxHeadMasterCode(taxHeadEstimate.getTaxHeadCode())
-                                    .tenantId(calculation.getTenantId())
-                                    .collectionAmount(BigDecimal.ZERO)
-                                    .build());
-            });
-            demand.setDemandDetails(new LinkedList<>(taxHeadToDemandDetail.values()));
-
+            List<DemandDetail> updatedDemandDetails = getUpdatedDemandDetails(calculation,demandDetails);
+            demand.setDemandDetails(updatedDemandDetails);
             demands.add(demand);
         }
          return demandRepository.updateDemand(requestInfo,demands);
@@ -280,6 +264,120 @@ public class DemandService {
          }
          return response;
     }
+
+
+    /**
+     * Returns the list of new DemandDetail to be added for updating the demand
+     * @param calculation The calculation object for the update tequest
+     * @param demandDetails The list of demandDetails from the existing demand
+     * @return The list of new DemandDetails
+     */
+    private List<DemandDetail> getUpdatedDemandDetails(Calculation calculation, List<DemandDetail> demandDetails){
+
+        List<DemandDetail> newDemandDetails = new ArrayList<>();
+        Map<String, DemandDetail> taxHeadToDemandDetail = new HashMap<>();
+
+        demandDetails.forEach(demandDetail -> {
+            taxHeadToDemandDetail.put(demandDetail.getTaxHeadMasterCode(), demandDetail);
+        });
+
+        BigDecimal diffInTaxAmount;
+        DemandDetail demandDetail;
+
+        for(TaxHeadEstimate taxHeadEstimate : calculation.getTaxHeadEstimates()){
+            if(!taxHeadToDemandDetail.containsKey(taxHeadEstimate.getTaxHeadCode()))
+                newDemandDetails.add(
+                        DemandDetail.builder()
+                                .taxAmount(taxHeadEstimate.getEstimateAmount())
+                                .taxHeadMasterCode(taxHeadEstimate.getTaxHeadCode())
+                                .tenantId(calculation.getTenantId())
+                                .collectionAmount(BigDecimal.ZERO)
+                                .build());
+            else {
+                 demandDetail = taxHeadToDemandDetail.get(taxHeadEstimate.getTaxHeadCode());
+                 diffInTaxAmount = taxHeadEstimate.getEstimateAmount().subtract(demandDetail.getTaxAmount());
+                 if(diffInTaxAmount.compareTo(BigDecimal.ZERO)!=0) {
+                     newDemandDetails.add(
+                             DemandDetail.builder()
+                                     .taxAmount(diffInTaxAmount)
+                                     .taxHeadMasterCode(taxHeadEstimate.getTaxHeadCode())
+                                     .tenantId(calculation.getTenantId())
+                                     .collectionAmount(BigDecimal.ZERO)
+                                     .build());
+                 }
+            }
+        }
+        List<DemandDetail> combinedBillDetials = new LinkedList<>(demandDetails);
+        combinedBillDetials.addAll(newDemandDetails);
+        addRoundOffTaxHead(calculation.getTenantId(),combinedBillDetials);
+        return combinedBillDetials;
+    }
+
+
+
+    /**
+     * Adds roundOff taxHead if decimal values exists
+     * @param tenantId The tenantId of the demand
+     * @param demandDetails The list of demandDetail
+     */
+    private void addRoundOffTaxHead(String tenantId,List<DemandDetail> demandDetails){
+        BigDecimal totalTax = BigDecimal.ZERO;
+
+        DemandDetail prevRoundOffDemandDetail = null;
+
+        /*
+        * Sum all taxHeads except RoundOff as new roundOff will be calculated
+        * */
+        for (DemandDetail demandDetail : demandDetails){
+            if(demandDetail.getTaxHeadMasterCode()!=MDMS_ROUNDOFF_TAXHEAD)
+                totalTax = totalTax.add(demandDetail.getTaxAmount());
+            else prevRoundOffDemandDetail = demandDetail;
+        }
+
+        BigDecimal decimalValue = totalTax.remainder(BigDecimal.ONE);
+        BigDecimal midVal = new BigDecimal(0.5);
+        BigDecimal roundOff = BigDecimal.ZERO;
+
+        /*
+        * If the decimal amount is greater than 0.5 we subtract it from 1 and put it as roundOff taxHead
+        * so as to nullify the decimal eg: If the tax is 12.64 we will add extra tax roundOff taxHead
+        * of 0.36 so that the total becomes 13
+        * */
+        if(decimalValue.compareTo(midVal) > 0)
+            roundOff = BigDecimal.ONE.subtract(decimalValue);
+
+
+        /*
+         * If the decimal amount is less than 0.5 we put negative of it as roundOff taxHead
+         * so as to nullify the decimal eg: If the tax is 12.36 we will add extra tax roundOff taxHead
+         * of -0.36 so that the total becomes 12
+         * */
+        if(decimalValue.compareTo(midVal) < 0)
+            roundOff = decimalValue.negate();
+
+        /*
+        * If roundOff already exists in previous demand create a new roundOff taxHead with roundOff amount
+        * equal to difference between them so that it will be balanced when bill is generated. eg: If the
+        * previous roundOff amount was of -0.36 and the new roundOff excluding the previous roundOff is
+        * 0.2 then the new roundOff will be created with 0.2 so that the net roundOff will be 0.2 - (0.36)
+        * */
+        if(prevRoundOffDemandDetail!=null){
+            roundOff = roundOff.subtract(prevRoundOffDemandDetail.getTaxAmount());
+        }
+
+        if(roundOff.compareTo(BigDecimal.ZERO)!=0){
+                 DemandDetail roundOffDemandDetail = DemandDetail.builder()
+                    .taxAmount(roundOff)
+                    .taxHeadMasterCode(MDMS_ROUNDOFF_TAXHEAD)
+                    .tenantId(tenantId)
+                    .collectionAmount(BigDecimal.ZERO)
+                    .build();
+
+            demandDetails.add(roundOffDemandDetail);
+        }
+    }
+
+
 
 
 

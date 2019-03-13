@@ -1,50 +1,70 @@
 package org.egov.tlcalculator.web.models.demand;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
+import lombok.Builder.Default;
 import org.egov.tlcalculator.web.models.AuditDetails;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
-@NoArgsConstructor
+/**
+ * Bill
+ */
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class Bill {
 	
-	public Bill(Bill bill) {
-
-		this.id = bill.id;
-		this.isActive = bill.isActive;
-		this.tenantId = bill.tenantId;
-		this.payeeName = bill.payeeName;
-		this.payeeEmail = bill.payeeEmail;
-		this.isCancelled = bill.isCancelled;
-		this.auditDetail = bill.auditDetail;
-		this.billDetails = bill.billDetails;
-		this.payeeAddress = bill.payeeAddress;
-	}
-	//TODO some of the fields are mandatory in yml, lets discuss billdetail and billaccountdetail also for more clarity
+	@JsonProperty("id")
 	private String id;
 
-	private String payeeName;
-
-	private String payeeAddress;
-	
+	@JsonProperty("mobileNumber")
 	private String mobileNumber;
 
-	private String payeeEmail;
+	@JsonProperty("payerName")
+	private String payerName;
 
+	@JsonProperty("payerAddress")
+	private String payerAddress;
+
+	@JsonProperty("payerEmail")
+	private String payerEmail;
+
+	@JsonProperty("isActive")
 	private Boolean isActive;
 
+	@JsonProperty("isCancelled")
 	private Boolean isCancelled;
 
+	@JsonProperty("additionalDetails")
+	private Object additionalDetails;
+
+	@JsonProperty("taxAndPayments")
+	@Valid
+	private List<TaxAndPayment> taxAndPayments;
+
+	@JsonProperty("billDetails")
+	@Valid
+	@Default
 	private List<BillDetail> billDetails = new ArrayList<>();
 
+	@JsonProperty("tenantId")
 	private String tenantId;
+
+	@JsonProperty("auditDetails")
+	private AuditDetails auditDetails;
+
 	
-	private AuditDetails auditDetail;
+	public Bill addBillDetailsItem(BillDetail billDetailsItem) {
+		if (this.billDetails == null) {
+			this.billDetails = new ArrayList<>();
+		}
+		this.billDetails.add(billDetailsItem);
+		return this;
+	}
+
 }

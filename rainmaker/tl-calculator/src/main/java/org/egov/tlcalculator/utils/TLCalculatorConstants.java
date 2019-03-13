@@ -29,6 +29,7 @@ public class TLCalculatorConstants {
 
     public static final String MDMS_CALCULATIONTYPE_FINANCIALYEAR_PATH = "$.MdmsRes.TradeLicense.CalculationType[?(@.financialYear=='{}')]";
 
+    public static final String MDMS_ROUNDOFF_TAXHEAD= "TL_ROUNDOFF";
 
 
 

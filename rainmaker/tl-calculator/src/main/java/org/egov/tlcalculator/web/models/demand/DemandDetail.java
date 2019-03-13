@@ -1,35 +1,50 @@
 package org.egov.tlcalculator.web.models.demand;
 
-import java.math.BigDecimal;
-
-import javax.validation.constraints.NotNull;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.egov.tlcalculator.web.models.AuditDetails;
 
+import java.math.BigDecimal;
+
+/**
+ * A object holds a demand and collection values for a tax head and period.
+ */
+
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class DemandDetail {
+public class DemandDetail   {
+	
+        @JsonProperty("id")
+        private String id;
+        
+        @JsonProperty("demandId")
+        private String demandId;
 
-    private String id;
+        @JsonProperty("taxHeadMasterCode")
+        private String taxHeadMasterCode;
 
-    private String demandId;
+        @JsonProperty("taxAmount")
+        private BigDecimal taxAmount;
 
-    @NotNull
-    private String taxHeadMasterCode;
+        @Default
+        @JsonProperty("collectionAmount")
+        private BigDecimal collectionAmount = BigDecimal.ZERO;
 
-    @NotNull
-    private BigDecimal taxAmount;
+        @JsonProperty("additionalDetails")
+        private Object additionalDetails;
 
-    @NotNull
-    private BigDecimal collectionAmount = BigDecimal.valueOf(0d);
+        @JsonProperty("auditDetails")
+        private AuditDetails auditDetails;
 
-    private AuditDetails auditDetail;
+        @JsonProperty("tenantId")
+        private String tenantId;
 
-    private String tenantId;
+
 }
+

@@ -153,7 +153,8 @@ public class MDMSService {
 
     public Object mDMSCall(RequestInfo requestInfo,String tenantId){
         MdmsCriteriaReq mdmsCriteriaReq = getMDMSRequest(requestInfo,tenantId);
-        Object result = serviceRequestRepository.fetchResult(getMdmsSearchUrl(), mdmsCriteriaReq);
+        StringBuilder url = getMdmsSearchUrl();
+        Object result = serviceRequestRepository.fetchResult(url , mdmsCriteriaReq);
         return result;
     }
 
