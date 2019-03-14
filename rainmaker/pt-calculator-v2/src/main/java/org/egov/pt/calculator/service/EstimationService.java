@@ -320,7 +320,7 @@ public class EstimationService {
 			estimates.add(TaxHeadEstimate.builder().taxHeadCode(PT_TIME_REBATE).estimateAmount(rebate).build());
 			estimates.add(TaxHeadEstimate.builder().taxHeadCode(PT_TIME_PENALTY).estimateAmount(penalty).build());
 			estimates.add(TaxHeadEstimate.builder().taxHeadCode(PT_TIME_INTEREST).estimateAmount(interest).build());
-			payableTax = payableTax.subtract(rebate).add(penalty).add(interest);
+			payableTax = payableTax.add(rebate).add(penalty).add(interest);
 		}
 
 		// AdHoc Values (additional rebate or penalty manually entered by the employee)
@@ -330,7 +330,7 @@ public class EstimationService {
 
 		if (null != detail.getAdhocExemption() && detail.getAdhocExemption().compareTo(payableTax.add(fireCess)) <= 0) {
 			estimates.add(TaxHeadEstimate.builder().taxHeadCode(PT_ADHOC_REBATE)
-					.estimateAmount(detail.getAdhocExemption()).build());
+					.estimateAmount(detail.getAdhocExemption().negate()).build());
 		}
 		else if (null != detail.getAdhocExemption()) {
 			throw new CustomException(PT_ADHOC_REBATE_INVALID_AMOUNT, PT_ADHOC_REBATE_INVALID_AMOUNT_MSG + taxAmt);
