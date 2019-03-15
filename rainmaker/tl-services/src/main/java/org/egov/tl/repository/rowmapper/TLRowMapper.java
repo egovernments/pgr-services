@@ -213,6 +213,7 @@ public class TLRowMapper  implements ResultSetExtractor<List<TradeLicense>> {
                     .isPrimaryOwner(isPrimaryOwner)
                     .ownerType(rs.getString("ownerType"))
                     .ownerShipPercentage(ownerShipPercentage)
+                    .relationship(OwnerInfo.RelationshipEnum.fromValue(rs.getString("relationship")))
                     .userActive(rs.getBoolean("useractive"))
                     .institutionId(rs.getString("institutionid"))
                     .build();
