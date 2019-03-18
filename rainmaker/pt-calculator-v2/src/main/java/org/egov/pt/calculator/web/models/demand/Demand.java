@@ -40,12 +40,17 @@
 package org.egov.pt.calculator.web.models.demand;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
+import org.egov.common.contract.request.User;
 import org.egov.pt.calculator.web.models.property.AuditDetails;
 import org.egov.pt.calculator.web.models.property.OwnerInfo;
 
@@ -58,40 +63,89 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Demand {
+public class Demand   {
 
+	@JsonProperty("id")
 	private String id;
 
-	@NotNull
+	@JsonProperty("tenantId")
 	private String tenantId;
 
-	@NotNull
+	@JsonProperty("consumerCode")
 	private String consumerCode;
 
-	@NotNull
+	@JsonProperty("consumerType")
 	private String consumerType;
 
-	@NotNull
+	@JsonProperty("businessService")
 	private String businessService;
 
-	@NotNull
-	private OwnerInfo owner;
+	@Valid
+	@JsonProperty("payer")
+	private User payer;
 
-	@NotNull
+	@JsonProperty("taxPeriodFrom")
 	private Long taxPeriodFrom;
 
-	@NotNull
+	@JsonProperty("taxPeriodTo")
 	private Long taxPeriodTo;
-	
-	@Valid
-	@NotNull
-	private List<DemandDetail> demandDetails;
 
-	@NotNull
-	@Min(1)
+	@Builder.Default
+	@JsonProperty("demandDetails")
+	@Valid
+	private List<DemandDetail> demandDetails = new ArrayList<>();
+
+	@JsonProperty("auditDetails")
+	private AuditDetails auditDetails;
+
+	@JsonProperty("additionalDetails")
+	private Object additionalDetails;
+
+	@Builder.Default
+	@JsonProperty("minimumAmountPayable")
 	private BigDecimal minimumAmountPayable = BigDecimal.ZERO;
 
-	private AuditDetails auditDetail;
-	
-	private DemandStatus status;
+	/**
+	 * Gets or Sets status
+	 */
+	public enum StatusEnum {
+
+		ACTIVE("ACTIVE"),
+
+		CANCELLED("CANCELLED"),
+
+		ADJUSTED("ADJUSTED");
+
+		private String value;
+
+		StatusEnum(String value) {
+			this.value = value;
+		}
+
+		@Override
+		@JsonValue
+		public String toString() {
+			return String.valueOf(value);
+		}
+
+		@JsonCreator
+		public static StatusEnum fromValue(String text) {
+			for (StatusEnum b : StatusEnum.values()) {
+				if (String.valueOf(b.value).equalsIgnoreCase(text)) {
+					return b;
+				}
+			}
+			return null;
+		}
+	}
+
+	@JsonProperty("status")
+	private StatusEnum status;
+
+
+	public Demand addDemandDetailsItem(DemandDetail demandDetailsItem) {
+		this.demandDetails.add(demandDetailsItem);
+		return this;
+	}
+
 }
