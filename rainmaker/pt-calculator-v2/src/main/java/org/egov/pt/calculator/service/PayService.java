@@ -286,7 +286,7 @@ public class PayService {
 			return TaxHeadEstimate.builder().estimateAmount(roundOffPos)
 					.taxHeadCode(CalculatorConstants.PT_DECIMAL_CEILING_CREDIT).build();
 		else if (roundOffNeg.doubleValue() > 0)
-			return TaxHeadEstimate.builder().estimateAmount(roundOffNeg)
+			return TaxHeadEstimate.builder().estimateAmount(roundOffNeg.negate())
 					.taxHeadCode(CalculatorConstants.PT_DECIMAL_CEILING_DEBIT).build();
 		else
 			return null;
