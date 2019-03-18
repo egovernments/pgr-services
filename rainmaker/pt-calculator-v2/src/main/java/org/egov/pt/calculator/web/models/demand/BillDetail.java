@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.type.CollectionType;
 import lombok.*;
 import lombok.Builder.Default;
 
