@@ -344,7 +344,6 @@ public class DemandService {
 	 * If applied already then the demand details will be updated
 	 * 
 	 * @param demand
-	 * @param assessmentYear
 	 * @return
 	 */
 	private boolean applytimeBasedApplicables(Demand demand,RequestInfoWrapper requestInfoWrapper,
@@ -465,15 +464,18 @@ public class DemandService {
 		 */
 		for (DemandDetail detail : demand.getDemandDetails()) {
 
-			totalCollectedAmount = totalCollectedAmount.add(detail.getCollectionAmount());
-
 			if (!isTaxHeadDebitMap.get(detail.getTaxHeadMasterCode())
-					&& !detail.getTaxHeadMasterCode().equalsIgnoreCase(CalculatorConstants.PT_DECIMAL_CEILING_CREDIT))
+					&& !detail.getTaxHeadMasterCode().equalsIgnoreCase(CalculatorConstants.PT_DECIMAL_CEILING_CREDIT)){
+				totalCollectedAmount = totalCollectedAmount.add(detail.getCollectionAmount());
 				creditAmt = creditAmt.add(detail.getTaxAmount());
+			}
 			else if (isTaxHeadDebitMap.get(detail.getTaxHeadMasterCode())
 					&& !detail.getTaxHeadMasterCode().equalsIgnoreCase(CalculatorConstants.PT_DECIMAL_CEILING_DEBIT))
 				debitAmt = debitAmt.add(detail.getTaxAmount());
 		}
+
+		// Collected amount is debit amount therefore sign changed to negative
+		   totalCollectedAmount = totalCollectedAmount.negate();
 
 		/*
 		 *  An estimate object will be returned incase if there is a decimal value
@@ -526,7 +528,7 @@ public class DemandService {
 		 *  
 		 *   then a new demandDetail will be created and added to the Demand. 
 		 */
-		if (!isDecimalMathcing && null != estimate && BigDecimal.ZERO.compareTo(estimate.getEstimateAmount()) <= 0)
+		if (!isDecimalMathcing && null != estimate)
 			details.add(DemandDetail.builder().taxAmount(estimate.getEstimateAmount())
 					.taxHeadMasterCode(estimate.getTaxHeadCode()).demandId(demandId).tenantId(tenantId).build());
 	}
