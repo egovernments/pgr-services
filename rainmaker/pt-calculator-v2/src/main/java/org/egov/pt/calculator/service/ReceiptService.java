@@ -56,7 +56,7 @@ public class ReceiptService {
 		for (Receipt receipt : receipts) {
 			
 			BillDetail detail = receipt.getBill().get(0).getBillDetails().get(0);
-			if (detail.getStatus().equals(CalculatorConstants.RECEIPT_STATUS_APPROVED)
+			if (detail.getStatus().equalsIgnoreCase(CalculatorConstants.RECEIPT_STATUS_APPROVED)
 					&& detail.getReceiptDate().compareTo(latestCollectedDate) > 0)
 				latestCollectedDate = detail.getReceiptDate();
 		}
@@ -74,7 +74,7 @@ public class ReceiptService {
 	 * @param demand
 	 * @param requestInfoWrapper
 	 */
-	private List<Receipt> getReceipts(String tenantId,List<String> consumerCodes, RequestInfoWrapper requestInfoWrapper) {
+	private List<Receipt> 	getReceipts(String tenantId,List<String> consumerCodes, RequestInfoWrapper requestInfoWrapper) {
 
 		StringBuilder url = utils.getReceiptSearchUrl(tenantId, consumerCodes);
 		return mapper.convertValue(repository.fetchResult(url, requestInfoWrapper), ReceiptRes.class).getReceipts();
