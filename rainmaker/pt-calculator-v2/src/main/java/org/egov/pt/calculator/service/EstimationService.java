@@ -287,13 +287,13 @@ public class EstimationService {
 
 		// usage exemption
 		estimates.add(TaxHeadEstimate.builder().taxHeadCode(PT_UNIT_USAGE_EXEMPTION).estimateAmount(
-		        usageExemption.setScale(2, 2)).build());
+		        usageExemption.setScale(2, 2).negate()).build());
 		payableTax = payableTax.subtract(usageExemption);
 
 		// owner exemption
 		BigDecimal userExemption = getExemption(detail.getOwners(), payableTax, assessmentYear, propertyBasedExemptionMasterMap);
 		estimates.add(TaxHeadEstimate.builder().taxHeadCode(PT_OWNER_EXEMPTION).estimateAmount(
-		        userExemption.setScale(2, 2)).build());
+		        userExemption.setScale(2, 2).negate()).build());
 		payableTax = payableTax.add(userExemption);
 
 		// Fire cess
@@ -411,7 +411,7 @@ public class EstimationService {
                 rebate = rebate.add(decimalEstimate.getEstimateAmount());
         }
 
-		BigDecimal totalAmount = taxAmt.add(penalty).subtract(rebate).subtract(exemption);
+		BigDecimal totalAmount = taxAmt.add(penalty).add(rebate).add(exemption);
 		// false in the argument represents that the demand shouldn't be updated from this call
 		BigDecimal collectedAmtForOldDemand = demandService.getCarryForwardAndCancelOldDemand(ptTax, criteria, requestInfo, false);
 
