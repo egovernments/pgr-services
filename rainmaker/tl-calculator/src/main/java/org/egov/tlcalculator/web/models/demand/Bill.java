@@ -18,53 +18,47 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class Bill {
-	
+	// TODO some of the fields are mandatory in yml, lets discuss billdetail and billaccountdetail also for more clarity
+
 	@JsonProperty("id")
-	private String id;
+	private String id = null;
 
 	@JsonProperty("mobileNumber")
-	private String mobileNumber;
+	private String mobileNumber = null;
+
+	@JsonProperty("paidBy")
+	private String paidBy = null;
 
 	@JsonProperty("payerName")
-	private String payerName;
+	private String payerName = null;
 
 	@JsonProperty("payerAddress")
-	private String payerAddress;
+	private String payerAddress = null;
 
 	@JsonProperty("payerEmail")
-	private String payerEmail;
+	private String payerEmail = null;
 
 	@JsonProperty("isActive")
-	private Boolean isActive;
+	private Boolean isActive = null;
 
 	@JsonProperty("isCancelled")
-	private Boolean isCancelled;
+	private Boolean isCancelled = null;
 
 	@JsonProperty("additionalDetails")
-	private Object additionalDetails;
+	private Object additionalDetails = null;
 
 	@JsonProperty("taxAndPayments")
 	@Valid
-	private List<TaxAndPayment> taxAndPayments;
+	private List<TaxAndPayment> taxAndPayments = null;
 
 	@JsonProperty("billDetails")
 	@Valid
-	@Default
-	private List<BillDetail> billDetails = new ArrayList<>();
+	private List<BillDetail> billDetails = null;
 
 	@JsonProperty("tenantId")
-	private String tenantId;
+	private String tenantId = null;
 
 	@JsonProperty("auditDetails")
-	private AuditDetails auditDetails;
-
-	
-	public Bill addBillDetailsItem(BillDetail billDetailsItem) {
-		if (this.billDetails == null) {
-			this.billDetails = new ArrayList<>();
-		}
-		this.billDetails.add(billDetailsItem);
-		return this;
-	}
+	private AuditDetails auditDetails = null;
 
 }

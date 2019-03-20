@@ -21,93 +21,92 @@ import java.util.List;
  */
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class Demand   {
-	
-        @JsonProperty("id")
-        private String id;
 
-        @JsonProperty("tenantId")
-        private String tenantId;
+    @JsonProperty("id")
+    private String id;
 
-        @JsonProperty("consumerCode")
-        private String consumerCode;
+    @JsonProperty("tenantId")
+    private String tenantId;
 
-        @JsonProperty("consumerType")
-        private String consumerType;
+    @JsonProperty("consumerCode")
+    private String consumerCode;
 
-        @JsonProperty("businessService")
-        private String businessService;
+    @JsonProperty("consumerType")
+    private String consumerType;
 
-        @Valid
-        @JsonProperty("payer")
-        private User payer;
+    @JsonProperty("businessService")
+    private String businessService;
 
-        @JsonProperty("taxPeriodFrom")
-        private Long taxPeriodFrom;
+    @Valid
+    @JsonProperty("payer")
+    private User payer;
 
-        @JsonProperty("taxPeriodTo")
-        private Long taxPeriodTo;
+    @JsonProperty("taxPeriodFrom")
+    private Long taxPeriodFrom;
 
-        @Default
-        @JsonProperty("demandDetails")
-        @Valid
-        private List<DemandDetail> demandDetails = new ArrayList<>();
+    @JsonProperty("taxPeriodTo")
+    private Long taxPeriodTo;
 
-        @JsonProperty("auditDetails")
-        private AuditDetails auditDetails;
+    @Builder.Default
+    @JsonProperty("demandDetails")
+    @Valid
+    private List<DemandDetail> demandDetails = new ArrayList<>();
 
-        @JsonProperty("additionalDetails")
-        private Object additionalDetails;
+    @JsonProperty("auditDetails")
+    private AuditDetails auditDetails;
 
-        @Default
-        @JsonProperty("minimumAmountPayable")
-        private BigDecimal minimumAmountPayable = BigDecimal.ZERO;
+    @JsonProperty("additionalDetails")
+    private Object additionalDetails;
 
-              /**
-   * Gets or Sets status
-   */
-  public enum StatusEnum {
-	  
-    ACTIVE("ACTIVE"),
-    
-    CANCELLED("CANCELLED"),
-    
-    ADJUSTED("ADJUSTED");
+    @Builder.Default
+    @JsonProperty("minimumAmountPayable")
+    private BigDecimal minimumAmountPayable = BigDecimal.ZERO;
 
-    private String value;
+    /**
+     * Gets or Sets status
+     */
+    public enum StatusEnum {
 
-    StatusEnum(String value) {
-      this.value = value;
-    }
+        ACTIVE("ACTIVE"),
 
-    @Override
-    @JsonValue
-    public String toString() {
-      return String.valueOf(value);
-    }
+        CANCELLED("CANCELLED"),
 
-    @JsonCreator
-    public static StatusEnum fromValue(String text) {
-      for (StatusEnum b : StatusEnum.values()) {
-        if (String.valueOf(b.value).equalsIgnoreCase(text)) {
-          return b;
+        ADJUSTED("ADJUSTED");
+
+        private String value;
+
+        StatusEnum(String value) {
+            this.value = value;
         }
-      }
-      return null;
+
+        @Override
+        @JsonValue
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static StatusEnum fromValue(String text) {
+            for (StatusEnum b : StatusEnum.values()) {
+                if (String.valueOf(b.value).equalsIgnoreCase(text)) {
+                    return b;
+                }
+            }
+            return null;
+        }
     }
-  }
 
-        @JsonProperty("status")
-        private StatusEnum status;
+    @JsonProperty("status")
+    private StatusEnum status;
 
 
-        public Demand addDemandDetailsItem(DemandDetail demandDetailsItem) {
+    public Demand addDemandDetailsItem(DemandDetail demandDetailsItem) {
         this.demandDetails.add(demandDetailsItem);
         return this;
-        }
+    }
 
 }
-

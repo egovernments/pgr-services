@@ -3,10 +3,12 @@ package org.egov.tlcalculator.web.models.demand;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.*;
 import lombok.Builder.Default;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,116 +22,111 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BillDetail   {
-        @JsonProperty("id")
-        private String id;
+public class BillDetail {
 
-        @JsonProperty("tenantId")
-        private String tenantId;
+    @JsonProperty("id")
+    private String id = null;
 
-        @JsonProperty("demandId")
-        private String demandId;
+    @JsonProperty("tenantId")
+    private String tenantId = null;
 
-        @JsonProperty("bill")
-        private String bill;
+    @JsonProperty("demandId")
+    private String demandId = null;
 
-        @JsonProperty("businessService")
-        private String businessService;
+    @JsonProperty("bill")
+    private String bill = null;
 
-        @JsonProperty("billNumber")
-        private String billNumber;
+    @JsonProperty("businessService")
+    private String businessService = null;
 
-        @JsonProperty("billDate")
-        private Long billDate;
+    @JsonProperty("billNumber")
+    private String billNumber = null;
 
-        @JsonProperty("consumerCode")
-        private String consumerCode;
+    @JsonProperty("billDate")
+    private Long billDate = null;
 
-        @JsonProperty("consumerType")
-        private String consumerType;
+    @JsonProperty("consumerCode")
+    private String consumerCode = null;
 
-        @JsonProperty("minimumAmount")
-        private BigDecimal minimumAmount;
+    @JsonProperty("consumerType")
+    private String consumerType = null;
 
-        @JsonProperty("totalAmount")
-        private BigDecimal totalAmount;
+    @JsonProperty("minimumAmount")
+    private BigDecimal minimumAmount = null;
 
-        @JsonProperty("fromPeriod")
-        private Long fromPeriod;
+    @JsonProperty("totalAmount")
+    @NotNull
+    private BigDecimal totalAmount = null;
 
-        @JsonProperty("toPeriod")
-        private Long toPeriod;
+    @JsonProperty("amountPaid")
+    @NotNull
+    private BigDecimal amountPaid = null;
 
-        @JsonProperty("collectedAmount")
-        private BigDecimal collectedAmount;
+    @JsonProperty("fromPeriod")
+    private Long fromPeriod = null;
 
-        @JsonProperty("collectionModesNotAllowed")
-        @Valid
-        private List<String> collectionModesNotAllowed;
+    @JsonProperty("toPeriod")
+    private Long toPeriod = null;
 
-        @JsonProperty("partPaymentAllowed")
-        private Boolean partPaymentAllowed;
+    @JsonProperty("collectedAmount")
+    private BigDecimal collectedAmount = null;
 
-        @JsonProperty("additionalDetails")
-        private Object additionalDetails;
+    @JsonProperty("collectionModesNotAllowed")
+    private List<String> collectionModesNotAllowed = null;
 
-        @JsonProperty("billAccountDetails")
-        @Valid
-        @Default
-        private List<BillAccountDetail> billAccountDetails = new ArrayList<>();
+    @JsonProperty("partPaymentAllowed")
+    private Boolean partPaymentAllowed = null;
 
-              /**
-   * status if the bill detail
-   */
-  public enum StatusEnum {
-    CREATED("CREATED"),
-    
-    CANCELLED("CANCELLED"),
-    
-    INSTRUMENT_BOUNCED("INSTRUMENT_BOUNCED");
+    @JsonProperty("additionalDetails")
+    private JsonNode additionalDetails = null;
 
-    private String value;
+    @JsonProperty("receiptNumber")
+    private String receiptNumber = null;
 
-    StatusEnum(String value) {
-      this.value = value;
-    }
+    @JsonProperty("receiptDate")
+    private Long receiptDate = null;
 
-    @Override
-    @JsonValue
-    public String toString() {
-      return String.valueOf(value);
-    }
+    @JsonProperty("receiptType")
+    private String receiptType = null;
 
-    @JsonCreator
-    public static StatusEnum fromValue(String text) {
-      for (StatusEnum b : StatusEnum.values()) {
-        if (String.valueOf(b.value).equals(text)) {
-          return b;
-        }
-      }
-      return null;
-    }
-  }
+    @JsonProperty("channel")
+    private String channel = null;
 
-        @JsonProperty("status")
-        private StatusEnum status;
+    @JsonProperty("voucherHeader")
+    private String voucherHeader = null;
 
+    @JsonProperty("boundary")
+    private String boundary = null;
 
-        public BillDetail addCollectionModesNotAllowedItem(String collectionModesNotAllowedItem) {
-            if (this.collectionModesNotAllowed == null) {
-            this.collectionModesNotAllowed = new ArrayList<>();
-            }
-        this.collectionModesNotAllowed.add(collectionModesNotAllowedItem);
-        return this;
-        }
+    @JsonProperty("reasonForCancellation")
+    private String reasonForCancellation = null;
 
-        public BillDetail addBillAccountDetailsItem(BillAccountDetail billAccountDetailsItem) {
-            if (this.billAccountDetails == null) {
-            this.billAccountDetails = new ArrayList<>();
-            }
-        this.billAccountDetails.add(billAccountDetailsItem);
-        return this;
-        }
+    @JsonProperty("manualReceiptNumber")
+    private String manualReceiptNumber = null;
+
+    @JsonProperty("manualReceiptDate")
+    private Long manualReceiptDate = null;
+
+    @JsonProperty("stateId")
+    private String stateId = null;
+
+    @JsonProperty("fund")
+    private String fund = null;
+
+    @JsonProperty("function")
+    private String function = null;
+
+    @JsonProperty("department")
+    private String department = null;
+
+    @JsonProperty("billAccountDetails")
+    private List<BillAccountDetail> billAccountDetails = null;
+
+    @JsonProperty("status")
+    private String status = null;
+
+    @JsonProperty("collectionType")
+    private CollectionType collectionType = null;
+
 
 }
-
