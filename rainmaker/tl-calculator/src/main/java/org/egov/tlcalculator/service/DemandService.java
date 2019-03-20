@@ -1,6 +1,7 @@
 package org.egov.tlcalculator.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
 import org.egov.tlcalculator.config.TLCalculatorConfigs;
@@ -20,6 +21,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.egov.tlcalculator.utils.TLCalculatorConstants.MDMS_ROUNDOFF_TAXHEAD;
 
@@ -69,14 +71,22 @@ public class DemandService {
         List<Calculation> updateCalculations = new LinkedList<>();
 
         if(!CollectionUtils.isEmpty(calculations)){
+
+            //Collect required parameters for demand search
+            String tenantId = calculations.get(0).getTenantId();
+            Set<String> applicationNumbers = calculations.stream().map(Calculation::getApplicationNumber).collect(Collectors.toSet());
+            List<Demand> demands = searchDemand(tenantId,applicationNumbers,requestInfo);
+            Set<String> applicationNumbersFromDemands = demands.stream().map(Demand::getConsumerCode).collect(Collectors.toSet());
+
+            //If demand already exists add it updateCalculations else createCalculations
             for(Calculation calculation : calculations)
-            {      if(CollectionUtils.isEmpty(searchDemand(calculation.getTenantId(),
-                            calculation.getTradeLicense().getApplicationNumber(),requestInfo)))
+            {      if(!applicationNumbersFromDemands.contains(calculation.getApplicationNumber()))
                         createCalculations.add(calculation);
                     else
                         updateCalculations.add(calculation);
             }
         }
+
         if(!CollectionUtils.isEmpty(createCalculations))
             createDemand(requestInfo,createCalculations,mdmsData);
 
@@ -187,7 +197,7 @@ public class DemandService {
         List<Demand> demands = new LinkedList<>();
         for(Calculation calculation : calculations) {
 
-            List<Demand> searchResult = searchDemand(calculation.getTenantId(), calculation.getTradeLicense().getApplicationNumber()
+            List<Demand> searchResult = searchDemand(calculation.getTenantId(),Collections.singleton(calculation.getTradeLicense().getApplicationNumber())
                     , requestInfo);
 
             Demand demand = searchResult.get(0);
@@ -203,15 +213,15 @@ public class DemandService {
     /**
      * Searches demand for the given consumerCode and tenantIDd
      * @param tenantId The tenantId of the tradeLicense
-     * @param consumerCode The consumerCode of the demand
+     * @param consumerCodes The set of consumerCode of the demands
      * @param requestInfo The RequestInfo of the incoming request
      * @return Lis to demands for the given consumerCode
      */
-    private List<Demand> searchDemand(String tenantId,String consumerCode,RequestInfo requestInfo){
+    private List<Demand> searchDemand(String tenantId,Set<String> consumerCodes,RequestInfo requestInfo){
         String uri = utils.getDemandSearchURL();
         uri = uri.replace("{1}",tenantId);
         uri = uri.replace("{2}",config.getBusinessService());
-        uri = uri.replace("{3}",consumerCode);
+        uri = uri.replace("{3}",StringUtils.join(consumerCodes, ','));
 
         Object result = serviceRequestRepository.fetchResult(new StringBuilder(uri),RequestInfoWrapper.builder()
                                                       .requestInfo(requestInfo).build());
@@ -243,7 +253,7 @@ public class DemandService {
         String consumerCode = billCriteria.getConsumerCode();
         String tenantId = billCriteria.getTenantId();
 
-        List<Demand> demands = searchDemand(tenantId,consumerCode,requestInfo);
+        List<Demand> demands = searchDemand(tenantId,Collections.singleton(consumerCode),requestInfo);
 
         if(CollectionUtils.isEmpty(demands))
             throw new CustomException("INVALID CONSUMERCODE","Bill cannot be generated.No demand exists for the given consumerCode");
@@ -359,7 +369,7 @@ public class DemandService {
         * If roundOff already exists in previous demand create a new roundOff taxHead with roundOff amount
         * equal to difference between them so that it will be balanced when bill is generated. eg: If the
         * previous roundOff amount was of -0.36 and the new roundOff excluding the previous roundOff is
-        * 0.2 then the new roundOff will be created with 0.2 so that the net roundOff will be 0.2 - (0.36)
+        * 0.2 then the new roundOff will be created with 0.2 so that the net roundOff will be 0.2 -(-0.36)
         * */
         if(prevRoundOffDemandDetail!=null){
             roundOff = roundOff.subtract(prevRoundOffDemandDetail.getTaxAmount());
