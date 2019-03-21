@@ -182,7 +182,7 @@ public class MasterDataService {
 				String objStartDay = ((String) objMap.get(CalculatorConstants.STARTING_DATE_APPLICABLES));
 				if (assessmentYear.split("-")[0].compareTo(objFinYear) >= 0 && maxYearFromTheList.compareTo(objFinYear) <= 0) {
 					maxYearFromTheList = objFinYear;
-					Long startTime = getStartDayInMillis(objStartDay,objFinYear);
+					Long startTime = getStartDayInMillis(objStartDay);
 					Long currentTime = System.currentTimeMillis();
 					if(startTime < currentTime && maxStartTime < startTime){
 						objToBeReturned = objMap;
@@ -197,29 +197,14 @@ public class MasterDataService {
 	/**
 	 * Converts startDay to epoch
 	 * @param startDay StartDay of applicable
-	 * @param fromFY starting financial year
 	 * @return
 	 */
-	private Long getStartDayInMillis(String startDay,String fromFY){
-		String day = startDay.split("/")[0];
-		if(day.length()==1)
-			day = "0"+day;
-		String month = startDay.split("/")[1];
-		if(month.length()==1)
-			month = "0"+month;
-		String financialYear;
-		if(month.compareTo(config.getFinancialYearStartMonth())>=0)
-			financialYear = fromFY;
-		else {
-			Integer nextYear = (Integer.parseInt(fromFY)+1);
-			financialYear = nextYear.toString();
-		}
+	private Long getStartDayInMillis(String startDay){
 
-		String startDate = day+"-"+month+"-"+financialYear;
 		Long startTime = null;
 		try{
-			SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
-			Date date = df.parse(startDate);
+			SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+			Date date = df.parse(startDay);
 			startTime = date.getTime();
 		}
 		catch (ParseException e) {
