@@ -156,6 +156,7 @@ public class TradeLicenseService {
 		else
 			workflowService.updateStatus(tradeLicenseRequest);
 
+		enrichmentService.postStatusEnrichment(tradeLicenseRequest);
         userService.createUser(tradeLicenseRequest);
         calculationService.addCalculation(tradeLicenseRequest);
         repository.update(tradeLicenseRequest);
