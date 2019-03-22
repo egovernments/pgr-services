@@ -351,8 +351,8 @@ public class CalculationService {
 
       //Average
       if(calculationType.equals(CalculationType.AVERAGE))
-          totalFee = fees.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
-                  .divide(new BigDecimal(fees.size()));
+          totalFee = (fees.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
+                  .divide(new BigDecimal(fees.size()))).setScale(2,2);
 
       //Max
       if(calculationType.equals(CalculationType.MAX))

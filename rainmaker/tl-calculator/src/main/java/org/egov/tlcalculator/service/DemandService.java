@@ -76,7 +76,9 @@ public class DemandService {
             String tenantId = calculations.get(0).getTenantId();
             Set<String> applicationNumbers = calculations.stream().map(Calculation::getApplicationNumber).collect(Collectors.toSet());
             List<Demand> demands = searchDemand(tenantId,applicationNumbers,requestInfo);
-            Set<String> applicationNumbersFromDemands = demands.stream().map(Demand::getConsumerCode).collect(Collectors.toSet());
+            Set<String> applicationNumbersFromDemands = new HashSet<>();
+            if(!CollectionUtils.isEmpty(demands))
+                applicationNumbersFromDemands = demands.stream().map(Demand::getConsumerCode).collect(Collectors.toSet());
 
             //If demand already exists add it updateCalculations else createCalculations
             for(Calculation calculation : calculations)
@@ -123,8 +125,7 @@ public class DemandService {
         criteria.setAplicationNumber(billCriteria.getConsumerCode());
 
         String query = calculationQueryBuilder.getSearchQuery(criteria,preparedStmtList);
-        BillingSlabIds billingSlabIds = calculationRepository.getDataFromDB(query,preparedStmtList);
-        return billingSlabIds;
+        return calculationRepository.getDataFromDB(query,preparedStmtList);
     }
 
 
@@ -142,7 +143,7 @@ public class DemandService {
             if(calculation.getTradeLicense()!=null)
                 license = calculation.getTradeLicense();
 
-            else if(calculation.getTradeLicense()==null && calculation.getApplicationNumber()!=null)
+            else if(calculation.getApplicationNumber()!=null)
                 license = utils.getTradeLicense(requestInfo, calculation.getApplicationNumber()
                         , calculation.getTenantId());
 
@@ -200,6 +201,9 @@ public class DemandService {
             List<Demand> searchResult = searchDemand(calculation.getTenantId(),Collections.singleton(calculation.getTradeLicense().getApplicationNumber())
                     , requestInfo);
 
+            if(CollectionUtils.isEmpty(searchResult))
+                throw new CustomException("INVALID UPDATE","No demand exists for applicationNumber: "+calculation.getTradeLicense().getApplicationNumber());
+
             Demand demand = searchResult.get(0);
             List<DemandDetail> demandDetails = demand.getDemandDetails();
             List<DemandDetail> updatedDemandDetails = getUpdatedDemandDetails(calculation,demandDetails);
@@ -226,7 +230,7 @@ public class DemandService {
         Object result = serviceRequestRepository.fetchResult(new StringBuilder(uri),RequestInfoWrapper.builder()
                                                       .requestInfo(requestInfo).build());
 
-        DemandResponse response = null;
+        DemandResponse response;
         try {
              response = mapper.convertValue(result,DemandResponse.class);
         }
@@ -265,7 +269,7 @@ public class DemandService {
 
         Object result = serviceRequestRepository.fetchResult(new StringBuilder(uri),RequestInfoWrapper.builder()
                                                              .requestInfo(requestInfo).build());
-        BillResponse response = null;
+        BillResponse response;
          try{
               response = mapper.convertValue(result,BillResponse.class);
          }
@@ -339,7 +343,7 @@ public class DemandService {
         * Sum all taxHeads except RoundOff as new roundOff will be calculated
         * */
         for (DemandDetail demandDetail : demandDetails){
-            if(demandDetail.getTaxHeadMasterCode()!=MDMS_ROUNDOFF_TAXHEAD)
+            if(!demandDetail.getTaxHeadMasterCode().equalsIgnoreCase(MDMS_ROUNDOFF_TAXHEAD))
                 totalTax = totalTax.add(demandDetail.getTaxAmount());
             else prevRoundOffDemandDetail = demandDetail;
         }
