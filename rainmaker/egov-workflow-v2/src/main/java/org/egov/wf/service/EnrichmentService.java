@@ -77,7 +77,7 @@ public class EnrichmentService {
             enrichAndUpdateSlaForTransition(processStateAndAction,isStateChanging);
             setNextActions(requestInfo,processStateAndActions,true);
         });
-        enrichUsers(processStateAndActions);
+        enrichUsers(requestInfo,processStateAndActions);
     }
 
 
@@ -110,9 +110,10 @@ public class EnrichmentService {
 
     /**
      * Enriches the assignee and assigner user object from user search response
+     * @param requestInfo The RequestInfo of the request
      * @param processStateAndActions The List of ProcessStateAndAction containing processInstanceFromRequest to be enriched
      */
-    public void enrichUsers(List<ProcessStateAndAction> processStateAndActions){
+    public void enrichUsers(RequestInfo requestInfo,List<ProcessStateAndAction> processStateAndActions){
         List<String> uuids = new LinkedList<>();
         processStateAndActions.forEach(processStateAndAction -> {
             if(processStateAndAction.getProcessInstanceFromRequest().getAssignee()!=null)
@@ -120,7 +121,7 @@ public class EnrichmentService {
             uuids.add(processStateAndAction.getProcessInstanceFromRequest().getAssigner().getUuid());
         });
 
-        Map<String,User> idToUserMap = userService.searchUser(uuids);
+        Map<String,User> idToUserMap = userService.searchUser(requestInfo,uuids);
         Map<String,String> errorMap = new HashMap<>();
         processStateAndActions.forEach(processStateAndAction -> {
             User assignee=null,assigner;
@@ -143,14 +144,14 @@ public class EnrichmentService {
      * Enriches processInstanceFromRequest from the search response
      * @param processInstances The list of processInstances from search
      */
-    public void enrichUsersFromSearch(List<ProcessInstance> processInstances){
+    public void enrichUsersFromSearch(RequestInfo requestInfo,List<ProcessInstance> processInstances){
         List<String> uuids = new LinkedList<>();
         processInstances.forEach(processInstance -> {
             if(processInstance.getAssignee()!=null)
                 uuids.add(processInstance.getAssignee().getUuid());
             uuids.add(processInstance.getAssigner().getUuid());
         });
-        Map<String,User> idToUserMap = userService.searchUser(uuids);
+        Map<String,User> idToUserMap = userService.searchUser(requestInfo,uuids);
         Map<String,String> errorMap = new HashMap<>();
         processInstances.forEach(processInstance -> {
             User assignee=null,assigner;

@@ -16,6 +16,8 @@ public class TLConstants {
 
     public static final String NOTIFICATION_APPLIED = "tl.en.counter.submit";
 
+    public static final String NOTIFICATION_FIELD_INSPECTION = "tl.en.field.inspection";
+
     public static final String NOTIFICATION_PAYMENT_OWNER = "tl.en.counter.payment.successful.owner";
 
     public static final String NOTIFICATION_PAYMENT_PAYER = "tl.en.counter.payment.successful.payer";
@@ -110,9 +112,28 @@ public class TLConstants {
 
     public static final String STATUS_REJECTED  = "REJECTED";
 
+    public static final String STATUS_FIELDINSPECTION  = "FIELDINSPECTION";
+
     public static final String STATUS_CANCELLED  = "CANCELLED";
 
     public static final String STATUS_PAID  = "PAID";
+
+    public static final String BILL_AMOUNT_JSONPATH = "$.billResponse.Bill[0].billDetails[0].totalAmount";
+
+
+    // ACTION_STATUS combinations for notification
+
+    public static final String ACTION_STATUS_INITIATED = "INITIATE_INITIATED";
+
+    public static final String ACTION_STATUS_APPLIED  = "APPLY_APPLIED";
+
+    public static final String ACTION_STATUS_APPROVED  = "APPROVE_PENDINGPAYMENT";
+
+    public static final String ACTION_STATUS_REJECTED  = "REJECT_REJECTED";
+
+    public static final String ACTION_STATUS_FIELDINSPECTION  = "FORWARD_PENDINGPAYMENT";
+
+    public static final String ACTION_STATUS_PAID  = "PAID";
 
 
     public TLConstants() {}

@@ -9,14 +9,7 @@ import org.egov.common.contract.request.User;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -27,10 +20,10 @@ import java.util.Map;
 //@RunWith(SpringJUnit4ClassRunner.class)
 //@EnableConfigurationProperties
 //@SpringBootTest(classes = TestConfiguration.class)
-public class EncryptionServiceTest {
+public class EncryptionServiceImplTest {
 
     @Autowired
-    private EncryptionService encryptionService;
+    private EncryptionServiceImpl encryptionServiceImpl;
 
     ObjectMapper mapper;
     User user;
@@ -49,7 +42,7 @@ public class EncryptionServiceTest {
     @Ignore
     @Test
     public void encryptValueTest() throws IOException {
-        log.info( encryptionService.encryptValue(1, "pb", "Normal") );
+        log.info( encryptionServiceImpl.encryptValue(1, "pb", "Normal") );
     }
 
     @Ignore
@@ -60,7 +53,7 @@ public class EncryptionServiceTest {
                 "\"auth_token\":null},\"User\":{\"userName\":\"ajay\",\"name\":\"ajay\",\"gender\":\"male\"," +
                 "\"mobileNumber\":\"12312312\",\"active\":true,\"type\":\"CITIZEN\",\"password\":\"password\"}}");
 
-        JsonNode ciphertext = encryptionService.encryptJson(plaintext, "User", "pb");
+        JsonNode ciphertext = encryptionServiceImpl.encryptJson(plaintext, "User", "pb");
         log.info(ciphertext.toString());
     }
 
@@ -75,7 +68,7 @@ public class EncryptionServiceTest {
                 "\"ts\":null,\"action\":\"create\",\"did\":\"\",\"key\":\"\",\"msg_id\":\"\",\"requester_id\":\"\"," +
                 "\"auth_token\":null}}]");
         User user = User.builder().roles(Arrays.asList(Role.builder().code("GRO").build())).build();
-        JsonNode plaintext = encryptionService.decryptJson(ciphertext, "PGR-Complaints-Report", user);
+        JsonNode plaintext = encryptionServiceImpl.decryptJson(ciphertext, "PGR-Complaints-Report", user);
         log.info(plaintext.toString());
     }
 
@@ -89,7 +82,7 @@ public class EncryptionServiceTest {
                 "\"ts\":null,\"action\":\"create\",\"did\":\"\",\"key\":\"\",\"msg_id\":\"\",\"requester_id\":\"\"," +
                 "\"auth_token\":null}}");
         User user = User.builder().roles(Arrays.asList(Role.builder().code("GRO").build())).build();
-        JsonNode plaintext = encryptionService.decryptJson(ciphertext, "PGR-Complaints-Report", user, JsonNode.class);
+        JsonNode plaintext = encryptionServiceImpl.decryptJson(ciphertext, "PGR-Complaints-Report", user, JsonNode.class);
         log.info(plaintext.toString());
     }
 
@@ -101,7 +94,7 @@ public class EncryptionServiceTest {
         data.put("mobileNumber", "341642|WfYfJPRug15R2wFh17PlQr5d9YhNkFk1");
         user.setRoles(Arrays.asList(Role.builder().code("CITIZEN").build()));
 
-        data = encryptionService.decryptJson(data, "User", user, Map.class);
+        data = encryptionServiceImpl.decryptJson(data, "User", user, Map.class);
         log.info(String.valueOf(data));
     }
 

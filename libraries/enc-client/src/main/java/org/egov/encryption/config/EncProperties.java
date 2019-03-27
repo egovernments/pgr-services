@@ -5,15 +5,12 @@ import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Component;
 
 @Getter
 @Configuration
 @PropertySource("classpath:enc.properties")
 public class EncProperties {
 
-    @Value("${kafka.config.bootstrap_server_config}")
-    private String kafkaBootstrapServerConfig;
     @Value("${kafka.topic.audit}")
     private String auditTopicName;
 

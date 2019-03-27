@@ -1,6 +1,5 @@
 package org.egov.encryption;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.encryption.config.EncProperties;

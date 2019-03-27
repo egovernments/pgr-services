@@ -6,6 +6,7 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.tl.config.TLConfiguration;
 import org.egov.tl.producer.Producer;
 import org.egov.tl.repository.ServiceRequestRepository;
+import org.egov.tl.web.models.RequestInfoWrapper;
 import org.egov.tl.web.models.SMSRequest;
 import org.egov.tl.web.models.TradeLicense;
 import org.egov.tracer.model.CustomException;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -52,39 +54,46 @@ public class NotificationUtil {
      * @param localizationMessage The messages from localization
      * @return customized message based on tradelicense
      */
-    public String getCustomizedMsg(TradeLicense license, String localizationMessage){
+    public String getCustomizedMsg(RequestInfo requestInfo,TradeLicense license, String localizationMessage){
         String message = null,messageTemplate;
-        switch (license.getStatus()){
+        String ACTION_STATUS = license.getAction()+"_"+license.getStatus();
+        switch (ACTION_STATUS){
 
-            case STATUS_INITIATED :
+            case ACTION_STATUS_INITIATED :
                 messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_INITIATED,localizationMessage);
                 message = getInitiatedMsg(license,messageTemplate);
                 break;
 
-            case STATUS_APPLIED :
+            case ACTION_STATUS_APPLIED :
                 messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_APPLIED,localizationMessage);
                 message = getAppliedMsg(license,messageTemplate);
                 break;
 
-            case STATUS_PAID :
+        /*    case ACTION_STATUS_PAID :
                 messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_PAID,localizationMessage);
                 message = getApprovalPendingMsg(license,messageTemplate);
-                break;
+                break;*/
 
-            case STATUS_APPROVED :
+            case ACTION_STATUS_APPROVED :
+                BigDecimal amountToBePaid = getAmountToBePaid(requestInfo,license);
                 messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_APPROVED,localizationMessage);
-                message = getApprovedMsg(license,messageTemplate);
+                message = getApprovedMsg(license,amountToBePaid,messageTemplate);
                 break;
 
-            case STATUS_REJECTED :
+            case ACTION_STATUS_REJECTED :
                 messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_REJECTED,localizationMessage);
                 message = getRejectedMsg(license,messageTemplate);
                 break;
 
-            case STATUS_CANCELLED :
+            case ACTION_STATUS_FIELDINSPECTION :
+                messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_FIELD_INSPECTION,localizationMessage);
+                message = getFieldInspectionMsg(license,messageTemplate);
+                break;
+
+           /* case STATUS_CANCELLED :
                 messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_CANCELLED,localizationMessage);
                 message = getCancelledMsg(license,messageTemplate);
-                break;
+                break;*/
         }
 
         return message;
@@ -196,17 +205,9 @@ public class NotificationUtil {
      * @param message Message from localization for approved
      * @return customized message for approved
      */
-    private String getApprovedMsg(TradeLicense license,String message){
-      //  message = message.replace("<1>",);
-
-        String pattern = "dd-MM-yyyy";
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-
-        String expiryDate = simpleDateFormat.format(license.getValidTo());
+    private String getApprovedMsg(TradeLicense license,BigDecimal amountToBePaid,String message){
         message = message.replace("<2>",license.getTradeName());
-        message = message.replace("<3>",license.getLicenseNumber());
-        message = message.replace("<4>",expiryDate);
-
+        message = message.replace("<3>",amountToBePaid.toString());
         return message;
     }
 
@@ -223,6 +224,20 @@ public class NotificationUtil {
 
         return message;
     }
+
+
+    /**
+     Creates customized message for rejected
+     * @param license tenantId of the tradeLicense
+     * @param message Message from localization for rejected
+     * @return customized message for rejected
+     */
+    private String getFieldInspectionMsg(TradeLicense license,String message){
+        message = message.replace("<2>",license.getTradeName());
+        return message;
+    }
+
+
 
 
     /**
@@ -246,10 +261,11 @@ public class NotificationUtil {
      * @param localizationMessages Message from localization
      * @return message for completed payment for owners
      */
-    public String getOwnerPaymentMsg(Map<String,String> valMap, String localizationMessages){
+    public String getOwnerPaymentMsg(TradeLicense license,Map<String,String> valMap, String localizationMessages){
         String messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_PAYMENT_OWNER,localizationMessages);
         messageTemplate = messageTemplate.replace("<2>",valMap.get(amountPaidKey));
-        messageTemplate = messageTemplate.replace("<3>",valMap.get(receiptNumberKey));
+        messageTemplate = messageTemplate.replace("<3>",license.getTradeName());
+        messageTemplate = messageTemplate.replace("<4>",valMap.get(receiptNumberKey));
         return messageTemplate;
     }
 
@@ -260,10 +276,11 @@ public class NotificationUtil {
      * @param localizationMessages Message from localization
      * @return message for completed payment for payer
      */
-    public String getPayerPaymentMsg(Map<String,String> valMap, String localizationMessages){
+    public String getPayerPaymentMsg(TradeLicense license,Map<String,String> valMap, String localizationMessages){
         String messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_PAYMENT_PAYER,localizationMessages);
         messageTemplate = messageTemplate.replace("<2>",valMap.get(amountPaidKey));
-        messageTemplate = messageTemplate.replace("<3>",valMap.get(receiptNumberKey));
+        messageTemplate = messageTemplate.replace("<3>",license.getTradeName());
+        messageTemplate = messageTemplate.replace("<4>",valMap.get(receiptNumberKey));
         return messageTemplate;
     }
 
@@ -285,6 +302,46 @@ public class NotificationUtil {
         }
     }
 
+
+    /**
+     * Fetches the amount to be paid from getBill API
+     * @param requestInfo The RequestInfo of the request
+     * @param license The TradeLicense object for which
+     * @return
+     */
+    private BigDecimal getAmountToBePaid(RequestInfo requestInfo,TradeLicense license){
+
+        LinkedHashMap responseMap = (LinkedHashMap)serviceRequestRepository.fetchResult(getBillUri(license),new RequestInfoWrapper(requestInfo));
+        String jsonString = new JSONObject(responseMap).toString();
+
+        BigDecimal amountToBePaid = null;
+        try {
+            Object obj = JsonPath.parse(jsonString).read(BILL_AMOUNT_JSONPATH);
+            amountToBePaid = new BigDecimal(obj.toString());
+        }
+        catch (Exception e){
+            throw new CustomException("PARSING ERROR","Failed to parse the response using jsonPath: "+BILL_AMOUNT_JSONPATH);
+        }
+        return amountToBePaid;
+    }
+
+
+    /**
+     * Creates the uri for getBill by adding query params from the license
+     * @param license The TradeLicense for which getBill has to be called
+     * @return The uri for the getBill
+     */
+    private StringBuilder getBillUri(TradeLicense license){
+        StringBuilder builder = new StringBuilder(config.getCalculatorHost());
+        builder.append(config.getGetBillEndpoint());
+        builder.append("?tenantId=");
+        builder.append(license.getTenantId());
+        builder.append("&consumerCode=");
+        builder.append(license.getApplicationNumber());
+        builder.append("&businessService=");
+        builder.append(TRADE_LICENSE_MODULE_CODE);
+        return builder;
+    }
 
 
 

@@ -8,4 +8,5 @@ public class EncClientConstants {
 
     public static final String MDMS_DECRYPTION_MASTER_NAME = "DecryptionABAC";
 
+    public static final String STRING_FOR_NONE_ACCESS = "NotAllowed";
 }

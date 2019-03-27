@@ -124,6 +124,10 @@ public class TLConfiguration {
     @Value("${egov.tl.calculator.calculate.endpoint}")
     private String calculateEndpoint;
 
+    @Value("${egov.tl.calculator.getBill.endpoint}")
+    private String getBillEndpoint;
+
+
 
     //Institutional key word
     @Value("${egov.ownershipcategory.institutional}")

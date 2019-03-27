@@ -1,6 +1,7 @@
 package org.egov.wf.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
 import org.egov.tracer.model.CustomException;
 import org.egov.wf.config.WorkflowConfig;
@@ -40,8 +41,9 @@ public class UserService {
      * @param uuids The list of uuid of the user's
      * @return OwnerInfo of the user with the given uuid
      */
-    public Map<String,User> searchUser(List<String> uuids){
+    public Map<String,User> searchUser(RequestInfo requestInfo,List<String> uuids){
         UserSearchRequest userSearchRequest =new UserSearchRequest();
+        userSearchRequest.setRequestInfo(requestInfo);
         userSearchRequest.setUuid(uuids);
         StringBuilder url = new StringBuilder(config.getUserHost());
         url.append(config.getUserSearchEndpoint());

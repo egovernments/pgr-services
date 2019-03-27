@@ -109,7 +109,7 @@ serviceMaps:
 
 
 
-       - query: INSERT INTO eg_wf_state_v2(uuid, tenantid, businessserviceid, state,applicationStatus,sla,docuploadrequired, isstartstate, isterminatestate, createdby, createdtime, lastmodifiedby, lastmodifiedtime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+       - query: INSERT INTO eg_wf_state_v2(seq, uuid, tenantid, businessserviceid, state,applicationStatus,sla,docuploadrequired, isstartstate, isterminatestate, createdby, createdtime, lastmodifiedby, lastmodifiedtime) VALUES (nextval('seq_eg_wf_state_v2'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
          basePath: BusinessServices.*.states.*
          jsonMaps:
           - jsonPath: $.BusinessServices.*.states.*.uuid
@@ -187,13 +187,13 @@ serviceMaps:
           - jsonPath: $.BusinessServices.*.auditDetails.lastModifiedBy
 
           - jsonPath: $.BusinessServices.*.auditDetails.lastModifiedTime
-          
+
           - jsonPath: $.BusinessServices.*.uuid
 
 
 
 
-       - query: INSERT INTO eg_wf_state_v2(uuid, tenantid, businessserviceid, state,applicationStatus,sla,docuploadrequired, isstartstate, isterminatestate, createdby, createdtime, lastmodifiedby, lastmodifiedtime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (uuid) DO UPDATE SET state=EXCLUDED.state, docuploadrequired=EXCLUDED.docuploadrequired, isstartstate=EXCLUDED.isstartstate, isterminatestate=EXCLUDED.isterminatestate, lastmodifiedby=EXCLUDED.lastmodifiedby, lastmodifiedtime=EXCLUDED.lastmodifiedtime;
+       - query: INSERT INTO eg_wf_state_v2(seq, uuid, tenantid, businessserviceid, state,applicationStatus,sla,docuploadrequired, isstartstate, isterminatestate, createdby, createdtime, lastmodifiedby, lastmodifiedtime) VALUES (nextval('seq_eg_wf_state_v2'),?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (uuid) DO UPDATE SET state=EXCLUDED.state, docuploadrequired=EXCLUDED.docuploadrequired, isstartstate=EXCLUDED.isstartstate, isterminatestate=EXCLUDED.isterminatestate, lastmodifiedby=EXCLUDED.lastmodifiedby, lastmodifiedtime=EXCLUDED.lastmodifiedtime;
          basePath: BusinessServices.*.states.*
          jsonMaps:
 

@@ -127,12 +127,12 @@ public class EmployeeValidator {
 		HashSet < String> codes = new HashSet<>();
 		employees.forEach(employee -> {
 			if(mobileNos.contains(employee.getUser().getMobileNumber()))
-				errorMap.put(ErrorConstants.HRMS_BULK_CREATE_DUPLICATE_MOBILE_CODE, ErrorConstants.HRMS_BULK_CREATE_DUPLICATE_MOBILE_MSG + employee.getUser().getMobileNumber());
+				errorMap.put(ErrorConstants.HRMS_BULK_CREATE_DUPLICATE_MOBILE_CODE, ErrorConstants.HRMS_BULK_CREATE_DUPLICATE_MOBILE_MSG );
 			else
 				mobileNos.add(employee.getUser().getMobileNumber());
 			if(null != employee.getCode()){
 				if (codes.contains(employee.getCode()))
-					errorMap.put(ErrorConstants.HRMS_BULK_CREATE_DUPLICATE_EMPCODE_CODE,ErrorConstants.HRMS_BULK_CREATE_DUPLICATE_EMPCODE_MSG+ employee.getCode());
+					errorMap.put(ErrorConstants.HRMS_BULK_CREATE_DUPLICATE_EMPCODE_CODE,ErrorConstants.HRMS_BULK_CREATE_DUPLICATE_EMPCODE_MSG);
 				else
 					codes.add(employee.getCode());
 			}
@@ -154,7 +154,7 @@ public class EmployeeValidator {
 			UserResponse userResponse = userService.getUser(requestInfo, userSearchCriteria);
             if(!CollectionUtils.isEmpty(userResponse.getUser())){
                 errorMap.put(ErrorConstants.HRMS_USER_EXIST_MOB_CODE,
-                		ErrorConstants.HRMS_USER_EXIST_MOB_MSG+userResponse.getUser().get(0).getMobileNumber());
+                		ErrorConstants.HRMS_USER_EXIST_MOB_MSG);
             }
         });
     }
@@ -175,7 +175,7 @@ public class EmployeeValidator {
 				UserResponse userResponse = userService.getUser(requestInfo, userSearchCriteria);
 				if(!CollectionUtils.isEmpty(userResponse.getUser())){
                     errorMap.put(ErrorConstants.HRMS_USER_EXIST_USERNAME_CODE,
-                    		ErrorConstants.HRMS_USER_EXIST_USERNAME_MSG+userResponse.getUser().get(0).getUserName());
+                    		ErrorConstants.HRMS_USER_EXIST_USERNAME_MSG);
                 }
             }
         });
@@ -266,7 +266,7 @@ public class EmployeeValidator {
 		else {
 			for(org.egov.hrms.model.Role role: employee.getUser().getRoles()) {
 				if(!mdmsData.get(HRMSConstants.HRMS_MDMS_ROLES_CODE).contains(role.getCode()))
-					errorMap.put(ErrorConstants.HRMS_INVALID_ROLE_CODE, ErrorConstants.HRMS_INVALID_ROLE_MSG + role.getCode());
+					errorMap.put(ErrorConstants.HRMS_INVALID_ROLE_CODE, ErrorConstants.HRMS_INVALID_ROLE_MSG );
 			}
 		}
 		if(!mdmsData.get(HRMSConstants.HRMS_MDMS_EMP_STATUS_CODE).contains(employee.getEmployeeStatus()))
@@ -364,7 +364,7 @@ public class EmployeeValidator {
 				if((null == history.getIsCurrentPosition() || !history.getIsCurrentPosition()) && null == history.getServiceTo())
 					errorMap.put(ErrorConstants.HRMS_INVALID_SERVICE_NON_CURRENT_TO_DATE_CODE,ErrorConstants.HRMS_INVALID_SERVICE_NON_CURRENT_TO_DATE_MSG);
 				if(!StringUtils.isEmpty(history.getServiceStatus()) && !mdmsData.get(HRMSConstants.HRMS_MDMS_EMP_STATUS_CODE).contains(history.getServiceStatus()))
-					errorMap.put(ErrorConstants.HRMS_INVALID_SERVICE_STATUS_CODE, ErrorConstants.HRMS_INVALID_SERVICE_STATUS_MSG+history.getServiceStatus());
+					errorMap.put(ErrorConstants.HRMS_INVALID_SERVICE_STATUS_CODE, ErrorConstants.HRMS_INVALID_SERVICE_STATUS_MSG);
 				if( (null != history.getServiceFrom() &&  history.getServiceFrom() > new Date().getTime()) || (null != history.getServiceTo() && history.getServiceTo() > new Date().getTime())
 						|| (null != history.getServiceFrom() && null != history.getServiceTo() && history.getServiceFrom() > history.getServiceTo()))
 					errorMap.put(ErrorConstants.HRMS_INVALID_SERVICE_PERIOD_CODE, ErrorConstants.HRMS_INVALID_SERVICE_PERIOD_MSG);
@@ -389,9 +389,9 @@ public class EmployeeValidator {
 		if(!CollectionUtils.isEmpty(employee.getEducation())){
 			for(EducationalQualification education : employee.getEducation()) {
 				if(null!= education.getQualification() && !mdmsData.get(HRMSConstants.HRMS_MDMS_QUALIFICATION_CODE).contains(education.getQualification()))
-					errorMap.put(ErrorConstants.HRMS_INVALID_QUALIFICATION_CODE, ErrorConstants.HRMS_INVALID_QUALIFICATION_MSG+education.getQualification());
+					errorMap.put(ErrorConstants.HRMS_INVALID_QUALIFICATION_CODE, ErrorConstants.HRMS_INVALID_QUALIFICATION_MSG);
 				if(null != education.getStream() && !mdmsData.get(HRMSConstants.HRMS_MDMS_STREAMS_CODE).contains(education.getStream()))
-					errorMap.put(ErrorConstants.HRMS_INVALID_EDUCATIONAL_STREAM_CODE, ErrorConstants.HRMS_INVALID_EDUCATIONAL_STREAM_MSG+education.getStream());
+					errorMap.put(ErrorConstants.HRMS_INVALID_EDUCATIONAL_STREAM_CODE, ErrorConstants.HRMS_INVALID_EDUCATIONAL_STREAM_MSG);
 				if(null != education.getYearOfPassing() && education.getYearOfPassing() > new Date().getTime()){
 					errorMap.put(ErrorConstants.HRMS_INVALID_EDUCATIONAL_PASSING_YEAR_CODE, ErrorConstants.HRMS_INVALID_EDUCATIONAL_PASSING_YEAR_MSG);
 				}
@@ -444,7 +444,7 @@ public class EmployeeValidator {
 		if(!CollectionUtils.isEmpty(employee.getTests())) {
 			for (DepartmentalTest test : employee.getTests()) {
 				if (null!=test.getTest() && !mdmsData.get(HRMSConstants.HRMS_MDMS_DEPT_TEST_CODE).contains(test.getTest()))
-					errorMap.put(ErrorConstants.HRMS_INVALID_DEPARTMENTAL_TEST_CODE, ErrorConstants.HRMS_INVALID_DEPARTMENTAL_TEST_MSG + test.getTest());
+					errorMap.put(ErrorConstants.HRMS_INVALID_DEPARTMENTAL_TEST_CODE, ErrorConstants.HRMS_INVALID_DEPARTMENTAL_TEST_MSG );
 				if (null!= test.getYearOfPassing() && test.getYearOfPassing() > new Date().getTime()) {
 					errorMap.put(ErrorConstants.HRMS_INVALID_DEPARTMENTAL_TEST_PASSING_YEAR_CODE, ErrorConstants.HRMS_INVALID_DEPARTMENTAL_TEST_PASSING_YEAR_MSG);
 				}

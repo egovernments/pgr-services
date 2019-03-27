@@ -1,6 +1,5 @@
 package org.egov.encryption.config;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import net.minidev.json.JSONArray;
