@@ -1,11 +1,6 @@
 package org.egov.wf.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.Role;
@@ -104,6 +99,8 @@ public class EnrichmentService {
                         nextAction.add(action);
                 });
             }
+            if(!CollectionUtils.isEmpty(nextAction))
+                nextAction.sort(Comparator.comparing(Action::getAction));
             processStateAndAction.getProcessInstanceFromRequest().setNextActions(nextAction);
         });
     }
