@@ -68,9 +68,9 @@ public class TradeLicenseService {
      */
     public List<TradeLicense> create(TradeLicenseRequest tradeLicenseRequest){
         Object mdmsData = util.mDMSCall(tradeLicenseRequest);
-        tlValidator.validateCreate(tradeLicenseRequest,mdmsData);
         actionValidator.validateCreateRequest(tradeLicenseRequest);
         enrichmentService.enrichTLCreateRequest(tradeLicenseRequest,mdmsData);
+        tlValidator.validateCreate(tradeLicenseRequest,mdmsData);
         userService.createUser(tradeLicenseRequest);
         calculationService.addCalculation(tradeLicenseRequest);
 		
@@ -145,10 +145,10 @@ public class TradeLicenseService {
      */
     public List<TradeLicense> update(TradeLicenseRequest tradeLicenseRequest){
         Object mdmsData = util.mDMSCall(tradeLicenseRequest);
-        tlValidator.validateUpdate(tradeLicenseRequest,mdmsData);
         actionValidator.validateUpdateRequest(tradeLicenseRequest);
         enrichmentService.enrichTLUpdateRequest(tradeLicenseRequest);
-	/*
+        tlValidator.validateUpdate(tradeLicenseRequest,mdmsData);
+        /*
 	 * call workflow service if it's enable else uses internal workflow process
 	 */
 		if (isExternalWorkFlowEnabled)
