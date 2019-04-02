@@ -75,10 +75,6 @@ public class ReceiptValidator {
 
         validateInstrument(receipt.getInstrument(), errorMap);
 
-
-//        if(isNull(receipt.getInstrument().getTransactionDateInput()))
-//            errorMap.put("INSTRUMENT_DATE_INPUT_INVALID", "Instrument Date Input cannot be empty");
-
 //      Compute total amount paid by summing all billDetail amounts and compare with instrument amount
         BigDecimal totalAmountPaid = BigDecimal.ZERO;
 
@@ -121,10 +117,6 @@ public class ReceiptValidator {
             validateBillAccountDetails(billDetails.getBillAccountDetails(), errorMap);
 
             totalAmountPaid = totalAmountPaid.add(amountPaid);
-
-
-            if (isBlank(billDetails.getBillDescription()))
-                errorMap.put("INVALID_BILL_DESC", "Bill description cannot be empty");
 
             if (org.apache.commons.lang3.StringUtils.isEmpty(billDetails.getBusinessService())) {
                 errorMap.put("INVALID_BUSINESS_DETAILS", "Business details code cannot be empty");
@@ -180,15 +172,15 @@ public class ReceiptValidator {
                 if( ! isEmpty(bill.getPaidBy()))
                     billFromDb.setPaidBy(bill.getPaidBy());
 
-                if( ! isEmpty(bill.getPayeeAddress()))
-                    billFromDb.setPayeeAddress(bill.getPayeeAddress());
+                if( ! isEmpty(bill.getPayerAddress()))
+                    billFromDb.setPayerAddress(bill.getPayerAddress());
 
-                if( ! isEmpty(bill.getPayeeEmail()))
-                    billFromDb.setPayeeEmail(bill.getPayeeEmail());
+                if( ! isEmpty(bill.getPayerEmail()))
+                    billFromDb.setPayerEmail(bill.getPayerEmail());
 
-                if( ! isEmpty(bill.getPayeeName())) {
-                    billFromDb.setPayeeName(bill.getPayeeName());
-                    receiptFromDb.getInstrument().setPayee(bill.getPayeeName());
+                if( ! isEmpty(bill.getPayerName())) {
+                    billFromDb.setPayerName(bill.getPayerName());
+                    receiptFromDb.getInstrument().setPayee(bill.getPayerName());
                 }
 
                 billDetailFromDb.setAdditionalDetails(jsonMerge(billDetailFromDb.getAdditionalDetails(),

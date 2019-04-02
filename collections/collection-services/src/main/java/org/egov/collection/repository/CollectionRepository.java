@@ -64,6 +64,7 @@ public class CollectionRepository {
     
     public void updateReceipt(List<Receipt> receipts){
         List<MapSqlParameterSource> receiptHeaderSource = new ArrayList<>();
+        List<MapSqlParameterSource> receiptDetailSource = new ArrayList<>();
         List<MapSqlParameterSource> instrumentHeaderSource = new ArrayList<>();
         try {
 
@@ -71,10 +72,15 @@ public class CollectionRepository {
             for (Receipt receipt : receipts) {
                 BillDetail billDetail = receipt.getBill().get(0).getBillDetails().get(0);
                 receiptHeaderSource.add(getParametersForReceiptHeaderUpdate(receipt, billDetail));
+                for (BillAccountDetail billAccountDetail : billDetail.getBillAccountDetails()) {
+                    receiptDetailSource.add(getParametersForReceiptDetails(billAccountDetail, billDetail.getId()));
+                }
                 instrumentHeaderSource.add(getParametersForInstrumentHeaderUpdate(receipt.getInstrument(),
                         receipt.getAuditDetails()));
             }
-
+            namedParameterJdbcTemplate.batchUpdate(COPY_RCPT_HEADER_SQL, receiptHeaderSource.toArray(new MapSqlParameterSource[0]));
+            namedParameterJdbcTemplate.batchUpdate(COPY_RCPT_DETALS_SQL, receiptDetailSource.toArray(new MapSqlParameterSource[0]));
+            namedParameterJdbcTemplate.batchUpdate(COPY_INSTRUMENT_HEADER_SQL, instrumentHeaderSource.toArray(new MapSqlParameterSource[0]));
             namedParameterJdbcTemplate.batchUpdate(UPDATE_RECEIPT_HEADER_SQL, receiptHeaderSource.toArray(new MapSqlParameterSource[0]));
             namedParameterJdbcTemplate.batchUpdate(UPDATE_INSTRUMENT_HEADER_SQL, instrumentHeaderSource.toArray(new MapSqlParameterSource[0]));
 
@@ -86,16 +92,23 @@ public class CollectionRepository {
 
     public void updateStatus(List<Receipt> receipts){
         List<MapSqlParameterSource> receiptHeaderSource = new ArrayList<>();
+        List<MapSqlParameterSource> receiptDetailSource = new ArrayList<>();
         List<MapSqlParameterSource> instrumentHeaderSource = new ArrayList<>();
         try {
 
             for(Receipt receipt : receipts){
                 BillDetail billDetail = receipt.getBill().get(0).getBillDetails().get(0);
                 receiptHeaderSource.add(getParametersForReceiptStatusUpdate(billDetail, receipt.getAuditDetails()));
+                for (BillAccountDetail billAccountDetail : billDetail.getBillAccountDetails()) {
+                    receiptDetailSource.add(getParametersForReceiptDetails(billAccountDetail, billDetail.getId()));
+                }
                 instrumentHeaderSource.add(getParametersForInstrumentStatusUpdate(receipt.getInstrument(), receipt.getAuditDetails
                         ()));
             }
 
+            namedParameterJdbcTemplate.batchUpdate(COPY_RCPT_HEADER_SQL, receiptHeaderSource.toArray(new MapSqlParameterSource[0]));
+            namedParameterJdbcTemplate.batchUpdate(COPY_RCPT_DETALS_SQL, receiptDetailSource.toArray(new MapSqlParameterSource[0]));
+            namedParameterJdbcTemplate.batchUpdate(COPY_INSTRUMENT_HEADER_SQL, instrumentHeaderSource.toArray(new MapSqlParameterSource[0]));
             namedParameterJdbcTemplate.batchUpdate(UPDATE_RECEIPT_STATUS_SQL, receiptHeaderSource.toArray(new MapSqlParameterSource[0]));
             namedParameterJdbcTemplate.batchUpdate(UPDATE_INSTRUMENT_STATUS_SQL, instrumentHeaderSource.toArray(new MapSqlParameterSource[0]));
         }

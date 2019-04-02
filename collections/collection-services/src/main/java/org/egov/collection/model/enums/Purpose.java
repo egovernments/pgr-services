@@ -1,4 +1,4 @@
-package org.egov.collection.web.contract;
+package org.egov.collection.model.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -29,6 +29,7 @@ public enum Purpose {
 		this.value = value;
 	}
 
+	
 	@Override
 	@JsonValue
 	public String toString() {

@@ -122,6 +122,7 @@ public class ApplicationProperties {
 
     @Value("${kafka.topics.bankaccountservicemapping.create.name}")
     private String createBankAccountServiceMappingTopicName;
+    
     @Value("${receiptnumber.idname}")
     private String receiptNumberIdName;
 
@@ -136,5 +137,11 @@ public class ApplicationProperties {
 
     @Value("${collection.receipts.search.default.size}")
     private Integer receiptsSearchDefaultLimit;
+    
+    @Value("${egov.apportion.service.host}")
+    private String apportionHost;
+    
+    @Value("${egov.apportion.apportion.endpoint}")
+    private String apportionURI;
 
 }
