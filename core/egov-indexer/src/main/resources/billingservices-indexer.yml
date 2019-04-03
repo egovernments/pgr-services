@@ -10,7 +10,7 @@ ServiceMaps:
       id: $.id, $.tenantId
       isBulk: true
       jsonPath: $.Demands
-      timeStampField: $.auditDetails.createdTime
+      timeStampField: $.auditDetail.createdTime
       
   - topic: demand-reindex
     configKey: REINDEX
@@ -20,5 +20,5 @@ ServiceMaps:
       id: $.id, $.tenantId
       isBulk: true
       jsonPath: $.hits
-      timeStampField: $.auditDetails.createdTime
+      timeStampField: $.auditDetail.createdTime
 
