@@ -3,6 +3,7 @@ ServiceMaps:
  version: 1.0.0
  mappings:
   - topic: save-tl-tradelicense
+    configKey: INDEX
     indexes:
     - name: tradelicense-v1
       type: licenses
@@ -12,6 +13,7 @@ ServiceMaps:
       jsonPath: $.Licenses
       
   - topic: update-tl-tradelicense
+    configKey: INDEX
     indexes:
     - name: tradelicense-v1
       type: licenses
