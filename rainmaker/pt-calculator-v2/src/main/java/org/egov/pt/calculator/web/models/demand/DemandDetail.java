@@ -70,7 +70,7 @@ public class DemandDetail {
 	@Builder.Default
 	private BigDecimal collectionAmount = BigDecimal.valueOf(0d);
 
-	private AuditDetails auditDetail;
+	private AuditDetails auditDetails;
 
 	private String tenantId;
 }
