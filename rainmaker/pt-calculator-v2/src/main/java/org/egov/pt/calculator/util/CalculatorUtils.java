@@ -1,12 +1,8 @@
 package org.egov.pt.calculator.util;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.mdms.model.MasterDetail;
@@ -14,6 +10,7 @@ import org.egov.mdms.model.MdmsCriteria;
 import org.egov.mdms.model.MdmsCriteriaReq;
 import org.egov.mdms.model.ModuleDetail;
 import org.egov.pt.calculator.web.models.Assessment;
+import org.egov.pt.calculator.web.models.DemandDetailAndCollection;
 import org.egov.pt.calculator.web.models.GetBillCriteria;
 import org.egov.pt.calculator.web.models.demand.Demand;
 import org.egov.pt.calculator.web.models.demand.DemandDetail;
@@ -22,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
+import org.springframework.util.CollectionUtils;
 
 @Component
 @Getter
@@ -340,4 +338,37 @@ public class CalculatorUtils {
 		else
 			return AuditDetails.builder().lastModifiedBy(by).lastModifiedTime(time).build();
 	}
+
+
+	public DemandDetailAndCollection getLatestDemandDetailByTaxHead(String taxHeadCode, List<DemandDetail> demandDetails){
+		List<DemandDetail> details = demandDetails.stream().filter(demandDetail -> demandDetail.getTaxHeadMasterCode().equalsIgnoreCase(taxHeadCode))
+				.collect(Collectors.toList());
+		if(CollectionUtils.isEmpty(details))
+			return null;
+
+		BigDecimal taxAmountForTaxHead = BigDecimal.ZERO;
+		BigDecimal collectionAmountForTaxHead = BigDecimal.ZERO;
+		DemandDetail latestDemandDetail = null;
+		long maxCreatedTime = 0l;
+
+		for(DemandDetail detail : details){
+			taxAmountForTaxHead = taxAmountForTaxHead.add(detail.getTaxAmount());
+			collectionAmountForTaxHead = collectionAmountForTaxHead.add(detail.getCollectionAmount());
+			if(detail.getAuditDetails().getCreatedTime()>maxCreatedTime){
+				maxCreatedTime = detail.getAuditDetails().getCreatedTime();
+				latestDemandDetail = detail;
+			}
+		}
+
+		return DemandDetailAndCollection.builder()
+				.taxHeadCode(taxHeadCode)
+				.latestDemandDetail(latestDemandDetail)
+				.taxAmountForTaxHead(taxAmountForTaxHead)
+				.collectionAmountForTaxHead(collectionAmountForTaxHead)
+				.build();
+
+		}
+
+
+
 }

@@ -47,9 +47,11 @@ public class CalculatorConstants {
 
 	public static final String PT_ADHOC_REBATE = "PT_ADHOC_REBATE";
 
-	public static final String PT_DECIMAL_CEILING_CREDIT = "PT_DECIMAL_CEILING_CREDIT";
+//	public static final String PT_DECIMAL_CEILING_CREDIT = "PT_DECIMAL_CEILING_CREDIT";
 	
-	public static final String PT_DECIMAL_CEILING_DEBIT = "PT_DECIMAL_CEILING_DEBIT";
+//	public static final String PT_DECIMAL_CEILING_DEBIT = "PT_DECIMAL_CEILING_DEBIT";
+
+	public static final String PT_ROUNDOFF = "PT_ROUNDOFF";
 	
 	public static final String RECEIPT_STATUS_APPROVED = "APPROVED";
 

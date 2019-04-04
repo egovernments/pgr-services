@@ -405,7 +405,7 @@ public class EstimationService {
         if (null != decimalEstimate) {
 			decimalEstimate.setCategory(taxHeadCategoryMap.get(decimalEstimate.getTaxHeadCode()));
             estimates.add(decimalEstimate);
-            if (PT_DECIMAL_CEILING_CREDIT.equalsIgnoreCase(decimalEstimate.getTaxHeadCode()))
+            if (decimalEstimate.getEstimateAmount().compareTo(BigDecimal.ZERO)>=0)
                 taxAmt = taxAmt.add(decimalEstimate.getEstimateAmount());
             else
                 rebate = rebate.add(decimalEstimate.getEstimateAmount());
