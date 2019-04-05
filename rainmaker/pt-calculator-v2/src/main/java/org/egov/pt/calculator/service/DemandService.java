@@ -494,30 +494,47 @@ public class DemandService {
 	}
 
 
-
+	/**
+	 * Creates demandDetails for the new demand by adding all old demandDetails and then adding demandDetails
+	 * using the difference between the new and old tax amounts for each taxHead
+	 * @param tenantId The tenantId of the property
+	 * @param calculation The calculation object for the property
+	 * @param oldDemand The oldDemand against the property
+	 * @return List of DemanDetails for the new demand
+	 */
 	private List<DemandDetail> getAdjustedDemandDetails(String tenantId,Calculation calculation,Demand oldDemand){
 
 		List<DemandDetail> details = new ArrayList<>();
 
-		Map<String, DemandDetail> taxHeadCodeDetailMap = new LinkedHashMap<>();
-		if(oldDemand!=null){
-			taxHeadCodeDetailMap = oldDemand.getDemandDetails().stream()
-					.collect(Collectors.toMap(DemandDetail::getTaxHeadMasterCode,Function.identity()));
-		}
+		/*Create map of taxHead to list of DemandDetail*/
 
+		Map<String, List<DemandDetail>> taxHeadCodeDetailMap = new LinkedHashMap<>();
+		if(oldDemand!=null){
+			for(DemandDetail detail : oldDemand.getDemandDetails()){
+				if(taxHeadCodeDetailMap.containsKey(detail.getTaxHeadMasterCode()))
+					taxHeadCodeDetailMap.get(detail.getTaxHeadMasterCode()).add(detail);
+				else {
+					List<DemandDetail> detailList  = new LinkedList<>();
+					detailList.add(detail);
+					taxHeadCodeDetailMap.put(detail.getTaxHeadMasterCode(),detailList);
+				}
+			}
+		}
 
 		for (TaxHeadEstimate estimate : calculation.getTaxHeadEstimates()) {
 
-			DemandDetail detail = taxHeadCodeDetailMap.get(estimate.getTaxHeadCode());
+			List<DemandDetail> detailList = taxHeadCodeDetailMap.get(estimate.getTaxHeadCode());
 			taxHeadCodeDetailMap.remove(estimate.getTaxHeadCode());
 
 			if (estimate.getTaxHeadCode().equalsIgnoreCase(CalculatorConstants.PT_ADVANCE_CARRYFORWARD))
 				continue;
 
-			if(detail!=null){
-				details.add(detail);
+			if(!CollectionUtils.isEmpty(detailList)){
+				details.addAll(detailList);
+				BigDecimal amount= detailList.stream().map(DemandDetail::getTaxAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+
 				details.add(DemandDetail.builder().taxHeadMasterCode(estimate.getTaxHeadCode())
-						.taxAmount(estimate.getEstimateAmount().subtract(detail.getTaxAmount()))
+						.taxAmount(estimate.getEstimateAmount().subtract(amount))
 						.collectionAmount(BigDecimal.ZERO)
 						.tenantId(tenantId).build());
 			}
@@ -529,17 +546,31 @@ public class DemandService {
 			}
 		}
 
-		for(Map.Entry<String, DemandDetail> entry : taxHeadCodeDetailMap.entrySet()){
-			DemandDetail detail = entry.getValue();
-			BigDecimal netAmount = detail.getCollectionAmount().subtract(detail.getTaxAmount());
-			detail.setTaxAmount(netAmount);
-			detail.setCollectionAmount(BigDecimal.ZERO);
+		/*
+		* If some taxHeads are in old demand but not in new one a new demandetail
+		*  is added for each taxhead to balance it out during apportioning
+		* */
+
+		for(Map.Entry<String, List<DemandDetail>> entry : taxHeadCodeDetailMap.entrySet()){
+			List<DemandDetail> demandDetails = entry.getValue();
+			BigDecimal taxAmount= demandDetails.stream().map(DemandDetail::getTaxAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+			BigDecimal collectionAmount= demandDetails.stream().map(DemandDetail::getCollectionAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+			BigDecimal netAmount = collectionAmount.subtract(taxAmount);
+			details.add(DemandDetail.builder().taxHeadMasterCode(entry.getKey())
+					.taxAmount(netAmount)
+					.collectionAmount(BigDecimal.ZERO)
+					.tenantId(tenantId).build());
 		}
 
 		return details;
 	}
 
-
+	/**
+	 * Updates the amount in the latest demandDetail by adding the diff between
+	 * new and old amounts to it
+	 * @param newAmount The new tax amount for the taxHead
+	 * @param latestDetailInfo The latest demandDetail for the particular taxHead
+	 */
 	private void updateTaxAmount(BigDecimal newAmount,DemandDetailAndCollection latestDetailInfo){
 		BigDecimal diff = newAmount.subtract(latestDetailInfo.getTaxAmountForTaxHead());
 		BigDecimal newTaxAmountForLatestDemandDetail = latestDetailInfo.getLatestDemandDetail().getTaxAmount().add(diff);
