@@ -7,10 +7,7 @@ import org.egov.tl.repository.TLRepository;
 import org.egov.tl.service.TradeLicenseService;
 import org.egov.tl.util.TLConstants;
 import org.egov.tl.util.TradeUtil;
-import org.egov.tl.web.models.TradeLicense;
-import org.egov.tl.web.models.TradeLicenseRequest;
-import org.egov.tl.web.models.TradeLicenseSearchCriteria;
-import org.egov.tl.web.models.TradeUnit;
+import org.egov.tl.web.models.*;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -150,6 +147,7 @@ public class TLValidator {
       valideDates(request,mdmsData);
       validateDuplicateDocuments(request);
       setFieldsFromSearch(request,searchResult);
+      validateOwnerActiveStatus(request);
    }
 
 
@@ -461,6 +459,31 @@ public class TLValidator {
             }
         });
     }
+
+
+    /**
+     * Checks if atleast one owner is active in TL
+     * @param request The update request
+     */
+   private void validateOwnerActiveStatus(TradeLicenseRequest request){
+        Map<String,String> errorMap = new HashMap<>();
+        request.getLicenses().forEach(license -> {
+            Boolean flag = false;
+            for(OwnerInfo ownerInfo : license.getTradeLicenseDetail().getOwners()){
+                if(ownerInfo.getUserActive()){
+                    flag=true;
+                    break;
+                }
+            }
+            if(!flag)
+                errorMap.put("INVALID OWNER","All owners are inactive for application:  "+license.getApplicationNumber());
+        });
+        if(!errorMap.isEmpty())
+            throw new CustomException(errorMap);
+   }
+
+
+
 
 
 
