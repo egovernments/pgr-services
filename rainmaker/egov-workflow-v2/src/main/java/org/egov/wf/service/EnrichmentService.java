@@ -342,5 +342,25 @@ public class EnrichmentService {
     }
 
 
+    /**
+     * Sets tenantId when stateLevel flag is on
+     * @param tenantId The tenantId of the request
+     * @param businessServices The businessService returned for stateLevel
+     */
+    public void enrichTenantIdForStateLevel(String tenantId,List<BusinessService> businessServices){
+        businessServices.forEach(businessService -> {
+            businessService.setTenantId(tenantId);
+            businessService.getStates().forEach(state -> {
+                state.setTenantId(tenantId);
+                if(!CollectionUtils.isEmpty(state.getActions())){
+                    state.getActions().forEach(action -> {
+                        action.setTenantId(tenantId);
+                    });
+                }
+            });
+        });
+    }
+
+
 
 }
