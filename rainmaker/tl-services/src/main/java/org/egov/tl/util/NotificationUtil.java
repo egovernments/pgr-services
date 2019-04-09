@@ -90,10 +90,10 @@ public class NotificationUtil {
                 message = getFieldInspectionMsg(license,messageTemplate);
                 break;
 
-           /* case STATUS_CANCELLED :
+            case ACTION_CANCEL_CANCELLED :
                 messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_CANCELLED,localizationMessage);
                 message = getCancelledMsg(license,messageTemplate);
-                break;*/
+                break;
         }
 
         return message;
@@ -246,8 +246,7 @@ public class NotificationUtil {
      * @param message Message from localization for cancelled
      * @return customized message for cancelled
      */
-    private String getCancelledMsg(TradeLicense license,String message){
-     //   message = message.replace("<1>",);
+    private String  getCancelledMsg(TradeLicense license,String message){
         message = message.replace("<2>",license.getTradeName());
         message = message.replace("<3>",license.getLicenseNumber());
 
