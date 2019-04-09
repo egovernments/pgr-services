@@ -1,5 +1,6 @@
 package org.egov.filters.pre;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.zuul.context.RequestContext;
 import com.netflix.zuul.monitoring.MonitoringHelper;
 import org.egov.contract.Action;
@@ -42,7 +43,7 @@ public class RbacFilterTest {
     public void init(){
         MockitoAnnotations.initMocks(this);
         request = new MockHttpServletRequest();
-        rbacFilter = new RbacFilter(restTemplate, "http://localhost:8091/access/v1/actions/_authorize");
+        rbacFilter = new RbacFilter(restTemplate, "http://localhost:8091/access/v1/actions/_authorize", new ObjectMapper());
 
         RequestContext.getCurrentContext().clear();
     }
@@ -66,7 +67,7 @@ public class RbacFilterTest {
         Action action1  = new Action();
         action1.setUrl("/pgr/seva");
         user.setActions(new ArrayList<>(Collections.singletonList(action1)));
-        user.setRoles(Collections.singletonList(new Role(10L, "CITIZEN", "CITIZEN")));
+        user.setRoles(Collections.singletonList(new Role(10L, "CITIZEN", "CITIZEN", "default")));
         RequestContext ctx = RequestContext.getCurrentContext();
         ctx.set(USER_INFO_KEY, user);
 
@@ -92,7 +93,7 @@ public class RbacFilterTest {
         Action action1  = new Action();
         action1.setUrl("/pgr/seva");
         user.setActions(new ArrayList<>(Arrays.asList(action1)));
-        user.setRoles(Collections.singletonList(new Role(10L, "CITIZEN", "CITIZEN")));
+        user.setRoles(Collections.singletonList(new Role(10L, "CITIZEN", "CITIZEN", "default")));
         RequestContext ctx = RequestContext.getCurrentContext();
         ctx.set(USER_INFO_KEY, user);
 
@@ -115,7 +116,7 @@ public class RbacFilterTest {
         ctx.setRequest(request);
         User user = new User();
         user.setActions(new ArrayList<>());
-        user.setRoles(Collections.singletonList(new Role(10L, "CITIZEN", "CITIZEN")));
+        user.setRoles(Collections.singletonList(new Role(10L, "CITIZEN", "CITIZEN", "default")));
         ctx.set(USER_INFO_KEY, user);
 
         mockServer.expect(requestTo("http://localhost:8091/access/v1/actions/_authorize"))

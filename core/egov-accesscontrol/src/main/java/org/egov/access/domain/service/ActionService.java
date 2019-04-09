@@ -6,7 +6,8 @@ import org.egov.access.domain.criteria.ValidateActionCriteria;
 import org.egov.access.domain.model.Action;
 import org.egov.access.domain.model.ActionContainer;
 import org.egov.access.domain.model.ActionValidation;
-import org.egov.access.domain.model.AuthorizationRequest;
+import org.egov.access.domain.model.authorize.AuthorizationRequest;
+import org.egov.access.domain.model.authorize.Role;
 import org.egov.access.persistence.repository.ActionRepository;
 import org.egov.access.persistence.repository.BaseRepository;
 import org.egov.access.persistence.repository.MdmsRepository;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -96,13 +98,14 @@ public class ActionService {
 	public boolean isAuthorized(AuthorizationRequest authorizeRequest){
 
 		Map<String, ActionContainer>  roleActions = mdmsRepository.fetchRoleActionData(getStateLevelTenant
-                (authorizeRequest.getTenantId()));
+                (authorizeRequest.getTenantIds().iterator().next()));
 
 		String uriToBeAuthorized = authorizeRequest.getUri();
+		Set<String> applicableRoles = getApplicableRoles(authorizeRequest);
 		Set<String> uris = new HashSet<>();
 		List<String> regexUris = new ArrayList<>();
 
-		for(String roleCode : authorizeRequest.getRoleCodes()){
+		for(String roleCode : applicableRoles){
 			if(roleActions.containsKey(roleCode))
 				uris.addAll(roleActions.get(roleCode).getUris());
 
@@ -112,10 +115,26 @@ public class ActionService {
 
 		boolean isAuthorized = uris.contains(uriToBeAuthorized) || containsRegexUri(regexUris, uriToBeAuthorized);
 
-		log.info("Role {} has access to requested URI {} : {}", authorizeRequest.getRoleCodes(), uriToBeAuthorized,
+		log.info("Request tenant ids:  " + authorizeRequest.getTenantIds());
+		log.info("Role {} has access to requested URI {} : {}", applicableRoles, uriToBeAuthorized,
                 isAuthorized);
 
 		return isAuthorized;
+	}
+
+	private Set<String> getApplicableRoles(AuthorizationRequest authorizationRequest){
+		Set<String> requestTenantIds = authorizationRequest.getTenantIds();
+		String stateLevelTenantId = getStateLevelTenant(requestTenantIds.iterator().next());
+		Set<Role> roles = authorizationRequest.getRoles();
+		Set<Role> applicableRoles = new HashSet<>();
+
+		for(Role role : roles){
+			if(requestTenantIds.contains(role.getTenantId()) || role.getTenantId().equalsIgnoreCase(stateLevelTenantId)){
+				applicableRoles.add(role);
+			}
+		}
+
+		return applicableRoles.stream().map(Role::getCode).collect(Collectors.toSet());
 	}
 
 	private boolean containsRegexUri(List<String> actionUris, String requestUri){

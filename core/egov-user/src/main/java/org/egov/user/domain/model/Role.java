@@ -1,19 +1,17 @@
 package org.egov.user.domain.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.Date;
 
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
-@EqualsAndHashCode(of = "code")
+@ToString
+@EqualsAndHashCode(of = {"code", "tenantId"})
 public class Role {
 	private static final String CITIZEN = "CITIZEN";
-	private Long id;
     private String name;
     private String code;
     private String description;

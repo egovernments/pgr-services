@@ -3,8 +3,9 @@ ServiceMaps:
  version: 1.0.0
  mappings:
   - topic: save-tl-tradelicense
+    configKey: INDEX
     indexes:
-    - name: tradelicense
+    - name: tradelicense-v1
       type: licenses
       id: $.id, $.tenantId
       isBulk: true
@@ -12,8 +13,9 @@ ServiceMaps:
       jsonPath: $.Licenses
       
   - topic: update-tl-tradelicense
+    configKey: INDEX
     indexes:
-    - name: tradelicense
+    - name: tradelicense-v1
       type: licenses
       id: $.id, $.tenantId
       isBulk: true

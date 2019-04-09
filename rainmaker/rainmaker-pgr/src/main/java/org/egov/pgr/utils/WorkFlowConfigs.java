@@ -71,17 +71,17 @@ public class WorkFlowConfigs {
 	}
 
 	/**
-	 * This map has the mapping between Role 'names' and actions. not Role 'codes'.
+	 * This map has the mapping between Role 'codes' and actions.
 	 * @return
 	 */
 	private static Map<String, List<String>> prepareRoleActionMap() {
 
 		Map<String, List<String>> map = new HashMap<>();
-		map.put(PGRConstants.ROLE_NAME_EMPLOYEE, Arrays.asList(ACTION_RESOLVE, ACTION_REQUEST_FOR_REASSIGN));
-		map.put(PGRConstants.ROLE_NAME_CITIZEN, Arrays.asList(ACTION_OPEN, ACTION_CLOSE, ACTION_REOPEN));
-		map.put(PGRConstants.ROLE_NAME_GRO, Arrays.asList(ACTION_ASSIGN, ACTION_REJECT, ACTION_REASSIGN));
-		map.put(PGRConstants.ROLE_NAME_DGRO, Arrays.asList(ACTION_ASSIGN, ACTION_REJECT, ACTION_REASSIGN));
-		map.put(PGRConstants.ROLE_NAME_CSR, Arrays.asList(ACTION_OPEN, ACTION_CLOSE, ACTION_REOPEN));
+		map.put(PGRConstants.ROLE_EMPLOYEE, Arrays.asList(ACTION_RESOLVE, ACTION_REQUEST_FOR_REASSIGN));
+		map.put(PGRConstants.ROLE_CITIZEN, Arrays.asList(ACTION_OPEN, ACTION_CLOSE, ACTION_REOPEN));
+		map.put(PGRConstants.ROLE_GRO, Arrays.asList(ACTION_ASSIGN, ACTION_REJECT, ACTION_REASSIGN));
+		map.put(PGRConstants.ROLE_DGRO, Arrays.asList(ACTION_ASSIGN, ACTION_REJECT, ACTION_REASSIGN));
+		map.put(PGRConstants.ROLE_CSR, Arrays.asList(ACTION_OPEN, ACTION_CLOSE, ACTION_REOPEN));
 		return map;
 	}
 	

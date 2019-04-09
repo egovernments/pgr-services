@@ -187,7 +187,7 @@ public class TradeUtil {
 
         // filter to only get code field from master data
 
-        final String filterCodeForUom = "$.[?(@.active==true)]";
+        final String filterCodeForUom = "$.[?(@.active==true && @.module=='TL')]";
 
         tlMasterDetails.add(MasterDetail.builder().name(TLConstants.MDMS_FINANCIALYEAR).filter(filterCodeForUom).build());
 

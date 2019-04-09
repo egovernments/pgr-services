@@ -40,7 +40,6 @@
       "tenantId": "",
       "roles": [
         {
-          "id": 1,
           "code": "roleCode",
           "name": "name of the role 1"
         }

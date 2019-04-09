@@ -291,10 +291,10 @@ public class PGRRequestValidator {
 				return;
 			}else {
 				String role = pgrUtils.getPrecedentRole(requestInfo.getUserInfo()
-						.getRoles().stream().map(Role::getName).collect(Collectors.toList()));
+						.getRoles().stream().map(Role::getCode).collect(Collectors.toList()));
 				if(StringUtils.isEmpty(role)) {
 					errorMap.put(ErrorConstants.INVALID_ROLE_CODE, ErrorConstants.INVALID_ROLE_MSG+ requestInfo.getUserInfo()
-							.getRoles().stream().map(Role::getName).collect(Collectors.toList()));
+							.getRoles().stream().map(Role::getCode).collect(Collectors.toList()));
 				}
 			}
 		} else {
@@ -318,14 +318,14 @@ public class PGRRequestValidator {
 	public void validateAction(ServiceRequest serviceRequest, Map<String, String> errorMap) {
 		Map<String, List<String>> roleActionMap = WorkFlowConfigs.getRoleActionMap();
 		List<String> roles = serviceRequest.getRequestInfo().getUserInfo().getRoles().stream()
-				.map(Role::getName).collect(Collectors.toList());
+				.map(Role::getCode).collect(Collectors.toList());
 		List<String> actions = null;
 		actions = roleActionMap.get(pgrUtils.getPrecedentRole(serviceRequest.getRequestInfo().getUserInfo()
-				.getRoles().stream().map(Role::getName).collect(Collectors.toList())));
+				.getRoles().stream().map(Role::getCode).collect(Collectors.toList())));
 		final List<String> actionsAllowedForTheRole = actions;
 		String role = pgrUtils.getPrecedentRole(roles);
 		List<String> serviceCodes = new ArrayList<>();
-		if(role.equals(PGRConstants.ROLE_NAME_DGRO)) {
+		if(role.equals(PGRConstants.ROLE_DGRO)) {
 			if(!serviceRequest.getServices().get(0).getTenantId().equals(serviceRequest.getRequestInfo().getUserInfo().getTenantId())) {
 				errorMap.put(ErrorConstants.INVALID_ACTION_FOR_GRO_CODE, ErrorConstants.INVALID_ACTION_FOR_GRO_MSG);
 			}
@@ -348,7 +348,7 @@ public class PGRRequestValidator {
 					errorMap.put(ErrorConstants.INVALID_ACTION_FOR_DGRO_CODE, ErrorConstants.INVALID_ACTION_FOR_DGRO_MSG+ " for serviceRequest: "+service.getServiceRequestId());
 				}
 			}
-		}else if(role.equals(PGRConstants.ROLE_NAME_GRO)) {
+		}else if(role.equals(PGRConstants.ROLE_GRO)) {
 			if(!serviceRequest.getServices().get(0).getTenantId().equals(serviceRequest.getRequestInfo().getUserInfo().getTenantId())) {
 				errorMap.put(ErrorConstants.INVALID_ACTION_FOR_GRO_CODE, ErrorConstants.INVALID_ACTION_FOR_GRO_MSG);
 			}

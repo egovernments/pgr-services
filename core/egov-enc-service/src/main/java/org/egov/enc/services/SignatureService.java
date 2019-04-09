@@ -22,7 +22,7 @@ public class SignatureService {
     public SignResponse hashAndSign(SignRequest signRequest) throws InvalidKeySpecException, NoSuchAlgorithmException,
             SignatureException, InvalidKeyException {
         AsymmetricKey asymmetricKey = keyStore.getAsymmetricKey(signRequest.getTenantId());
-        PrivateKey privateKey = keyStore.generatePrivateKey(asymmetricKey);
+        PrivateKey privateKey = keyStore.getPrivateKey(asymmetricKey);
 
         byte[] signBytes = SignatureUtil.hashAndSign(signRequest.getValue().getBytes(StandardCharsets.UTF_8), privateKey);
         String sign = Base64.getEncoder().encodeToString(signBytes);
@@ -35,7 +35,7 @@ public class SignatureService {
     public VerifyResponse hashAndVerify(VerifyRequest verifyRequest) throws InvalidKeySpecException, NoSuchAlgorithmException,
             SignatureException, InvalidKeyException {
         AsymmetricKey asymmetricKey = keyStore.getAsymmetricKey(verifyRequest.getSignature().getKeyId());
-        PublicKey publicKey = keyStore.generatePublicKey(asymmetricKey);
+        PublicKey publicKey = keyStore.getPublicKey(asymmetricKey);
 
         boolean verified = SignatureUtil.hashAndVerify(verifyRequest.getValue().getBytes(StandardCharsets.UTF_8), Base64.getDecoder()
                 .decode(verifyRequest.getSignature().getSignatureValue()), publicKey);

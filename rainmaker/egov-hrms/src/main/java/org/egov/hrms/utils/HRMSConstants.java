@@ -36,4 +36,14 @@ public class HRMSConstants {
 
 	public static final String HRMS_MDMS_AC_ROLES_FILTER = "[?(@.code != \"CITIZEN\")].code";
 	public static final String HRMS_MDMS_CODE_FLITER = "[?(@.active == true)].code";
+
+	public static final String HRMS_USER_SEARCH_CRITERA_UUID = "uuid";
+	public static final String HRMS_USER_SEARCH_CRITERA_ROLECODES = "roleCodes";
+	public static final String HRMS_USER_SEARCH_CRITERA_TENANTID = "tenantId";
+	public static final String HRMS_USER_SEARCH_CRITERA_MOBILENO = "mobileNumber";
+	public static final String HRMS_USER_SEARCH_CRITERA_NAME = "name";
+	public static final String HRMS_USER_SEARCH_CRITERA_USERNAME = "UserName";
+	public static final String HRMS_USER_SERACH_CRITERIA_USERTYPE = "EMPLOYEE";
+	public static final String HRMS_USER_SERACH_CRITERIA_USERTYPE_CODE = "userType";
+
 }

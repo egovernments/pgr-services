@@ -10,10 +10,12 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.hrms.config.PropertiesManager;
 import org.egov.hrms.model.Employee;
 import org.egov.hrms.repository.RestCallRepository;
+import org.egov.hrms.utils.ErrorConstants;
 import org.egov.hrms.web.contract.EmployeeRequest;
 import org.egov.hrms.web.contract.IdGenerationRequest;
 import org.egov.hrms.web.contract.IdGenerationResponse;
 import org.egov.hrms.web.contract.IdRequest;
+import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -80,6 +82,8 @@ public class IdGenService {
 		}catch(Exception e) {
 			log.error("Exception while generating ids: ",e);
 			log.error("Request: "+request);
+			throw new CustomException(ErrorConstants.HRMS_GENERATE_ID_ERROR_CODE,ErrorConstants.HRMS_GENERATE_ID_ERROR_MSG);
+
 		}
 		return response;
 	}

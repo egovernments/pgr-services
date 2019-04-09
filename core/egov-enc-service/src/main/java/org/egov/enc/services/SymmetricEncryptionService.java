@@ -27,9 +27,9 @@ public class SymmetricEncryptionService implements EncryptionServiceInterface {
 
     public Ciphertext encrypt(Plaintext plaintext) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
         SymmetricKey symmetricKey = keyStore.getSymmetricKey(plaintext.getTenantId());
-        SecretKey secretKey = keyStore.generateSecretKey(symmetricKey);
+        SecretKey secretKey = keyStore.getSecretKey(symmetricKey);
 
-        byte[] initialVectorsBytes = keyStore.generateInitialVector(symmetricKey);
+        byte[] initialVectorsBytes = keyStore.getInitialVector(symmetricKey);
 
         byte[] cipherBytes = SymmetricEncryptionUtil.encrypt(plaintext.getPlaintext().getBytes(StandardCharsets.UTF_8), secretKey, initialVectorsBytes);
 
@@ -41,9 +41,9 @@ public class SymmetricEncryptionService implements EncryptionServiceInterface {
 
     public Plaintext decrypt(Ciphertext ciphertext) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
         SymmetricKey symmetricKey = keyStore.getSymmetricKey(ciphertext.getKeyId());
-        SecretKey secretKey = keyStore.generateSecretKey(symmetricKey);
+        SecretKey secretKey = keyStore.getSecretKey(symmetricKey);
 
-        byte[] initialVectorsBytes = keyStore.generateInitialVector(symmetricKey);
+        byte[] initialVectorsBytes = keyStore.getInitialVector(symmetricKey);
 
         byte[] plainBytes = SymmetricEncryptionUtil.decrypt(Base64.getDecoder().decode(ciphertext.getCiphertext()), secretKey, initialVectorsBytes);
         String plain = new String(plainBytes, StandardCharsets.UTF_8);

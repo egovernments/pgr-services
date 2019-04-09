@@ -75,4 +75,6 @@ public class Jurisdiction {
 
     private AuditDetails auditDetails;
 
+    private Boolean isActive;
+
 }

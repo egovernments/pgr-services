@@ -3,8 +3,10 @@ package org.egov.hrms.utils;
 import java.util.List;
 import java.util.Random;
 
+import org.egov.hrms.web.contract.EmployeeSearchCriteria;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class HRMSUtils {
@@ -46,4 +48,8 @@ public class HRMSUtils {
 		return password.toString().replaceAll("\\s+", "");
 	}
 
+	public boolean isAssignmentSearchReqd(EmployeeSearchCriteria criteria) {
+		return (! CollectionUtils.isEmpty(criteria.getPositions()) || null != criteria.getAsOnDate()
+				|| !CollectionUtils.isEmpty(criteria.getDepartments()) || !CollectionUtils.isEmpty(criteria.getDesignations()));
+	}
 }

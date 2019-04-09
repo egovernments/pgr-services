@@ -81,7 +81,6 @@ public class TokenServiceTest {
 
 	private Set<Role> getRoles() {
 		org.egov.user.domain.model.Role roleModel = org.egov.user.domain.model.Role.builder()
-				.id(15L)
 				.name("Employee")
 				.code("Employee")
 				.tenantId("default")

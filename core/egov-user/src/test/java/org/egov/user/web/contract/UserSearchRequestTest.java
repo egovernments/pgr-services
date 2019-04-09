@@ -33,9 +33,7 @@ public class UserSearchRequestTest {
         assertThat(userSearch.getUserName()).isEqualTo("userName");
         assertThat(userSearch.getName()).isEqualTo("name");
         assertThat(userSearch.getMobileNumber()).isEqualTo("mobileNumber");
-        assertThat(userSearch.getAadhaarNumber()).isEqualTo("aadhaarNumber");
         assertThat(userSearch.getEmailId()).isEqualTo("emailId");
-        assertThat(userSearch.getPan()).isEqualTo("pan");
         assertThat(userSearch.isFuzzyLogic()).isFalse();
         assertThat(userSearch.getActive()).isTrue();
         assertThat(userSearch.getLimit()).isEqualTo(0);

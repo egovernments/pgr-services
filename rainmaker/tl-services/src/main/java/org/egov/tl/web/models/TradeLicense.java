@@ -132,8 +132,8 @@ public class  TradeLicense   {
         @JsonProperty("assignee")
         private String assignee = null;
         
-        @JsonProperty("wfDocumnets")
-        private List<Document> wfDocumnets;
+        @JsonProperty("wfDocuments")
+        private List<Document> wfDocuments;
 
         @JsonProperty("status")
         private String status = null;

@@ -16,16 +16,16 @@ public class EmployeeQueries {
 			+ "assignment.createdby as assignment_createdby, assignment.createddate as assignment_createddate, assignment.lastmodifiedby as assignment_lastmodifiedby, "
 			+ "assignment.lastmodifieddate as assignment_lastmodifieddate, education.uuid as education_uuid, education.qualification as education_qualification, "
 			+ "education.stream as education_stream, education.yearofpassing as education_yearofpassing, education.university as education_university, "
-			+ "education.remarks as education_remarks, education.tenantid as education_tenantid, education.createdby as education_createdby, "
+			+ "education.remarks as education_remarks,education.isactive as education_isactive ,education.tenantid as education_tenantid, education.createdby as education_createdby, "
 			+ "education.createddate as education_createddate, education.lastmodifiedby as education_lastmodifiedby, education.lastmodifieddate as education_lastmodifieddate, "
 			+ "depttest.uuid as depttest_uuid, depttest.test as depttest_test, depttest.yearofpassing as depttest_yearofpassing, depttest.remarks as depttest_remarks, "
-			+ "depttest.tenantid as depttest_tenantid, depttest.createdby as depttest_createdby, depttest.createddate as depttest_createddate, "
+			+ "depttest.isactive as depttest_isactive, depttest.tenantid as depttest_tenantid, depttest.createdby as depttest_createdby, depttest.createddate as depttest_createddate, "
 			+ "depttest.lastmodifiedby as depttest_lastmodifiedby, depttest.lastmodifieddate as depttest_lastmodifieddate, docs.uuid as docs_uuid, "
 			+ "docs.documentid as docs_documentid, docs.documentname as docs_documentname, docs.referencetype as docs_referencetype, "
 			+ "docs.referenceid as docs_referenceid, docs.tenantid as docs_tenantid, docs.createdby as docs_createdby, docs.createddate as docs_createddate, "
 			+ "docs.lastmodifiedby as docs_lastmodifiedby, docs.lastmodifieddate as docs_lastmodifieddate, jurisdiction.uuid as jurisdiction_uuid, "
 			+ "jurisdiction.hierarchy as jurisdiction_hierarchy, jurisdiction.boundarytype as jurisdiction_boundarytype, jurisdiction.boundary as jurisdiction_boundary, "
-			+ "jurisdiction.tenantid as jurisdiction_tenantid, jurisdiction.createdby as jurisdiction_createdby, jurisdiction.createddate as jurisdiction_createddate, "
+			+ "jurisdiction.isactive as jurisdiction_isactive, jurisdiction.tenantid as jurisdiction_tenantid, jurisdiction.createdby as jurisdiction_createdby, jurisdiction.createddate as jurisdiction_createddate, "
 			+ "jurisdiction.lastmodifiedby as jurisdiction_lastmodifiedby, jurisdiction.lastmodifieddate as jurisdiction_lastmodifieddate, history.uuid as history_uuid, "
 			+ "history.servicestatus as history_servicestatus, history.servicefrom as history_servicefrom, history.serviceto as history_serviceto, "
 			+ "history.ordernumber as history_ordernumber, history.iscurrentposition as history_iscurrentposition, history.location as history_location, "
@@ -44,4 +44,6 @@ public class EmployeeQueries {
 			+ "WHERE offset_ > $offset AND offset_ <= $limit";
 	
 	public static final String HRMS_POSITION_SEQ = "SELECT NEXTVAL('EG_HRMS_POSITION')";
+
+	public static final String HRMS_GET_ASSIGNMENT = "select distinct(employeeid)  from eg_hrms_assignment assignment where assignment.tenantid notnull  ";
 }

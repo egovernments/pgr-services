@@ -136,7 +136,8 @@ public class UserController {
 	 * @return
 	 */
 	@PostMapping("/users/_updatenovalidate")
-	public UserDetailResponse updateUserWithoutValidation(@RequestBody final CreateUserRequest createUserRequest, @RequestHeader HttpHeaders headers) {
+	public UserDetailResponse updateUserWithoutValidation(@RequestBody final CreateUserRequest createUserRequest,
+														  @RequestHeader HttpHeaders headers) {
 		User user = createUserRequest.toDomain(false);
 		user.setMobileValidationMandatory(isMobileValidationRequired(headers));
 		final User updatedUser = userService.updateWithoutOtpValidation( user);
@@ -173,7 +174,8 @@ public class UserController {
                 searchCriteria.setLimit(defaultSearchSize);
         }
 
-		List<User> userModels = userService.searchUsers(searchCriteria);
+
+		List<User> userModels = userService.searchUsers(searchCriteria, isInterServiceCall(headers));
 
 
 		List<UserSearchResponseContent> userContracts = userModels.stream().map(UserSearchResponseContent::new)

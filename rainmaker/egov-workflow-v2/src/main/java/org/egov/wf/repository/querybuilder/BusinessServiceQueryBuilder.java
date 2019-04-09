@@ -58,6 +58,8 @@ public class BusinessServiceQueryBuilder {
             addToPreparedStatement(preparedStmtList, actionUuids);
         }
 
+        builder.append(" ORDER BY seq");
+
         return builder.toString();
     }
 

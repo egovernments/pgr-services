@@ -80,7 +80,7 @@ serviceMaps:
 
 
 
-    - query: INSERT INTO eg_hrms_educationaldetails(tenantid, uuid, employeeid, qualification, stream, yearofpassing, university, remarks, createdby, createddate, lastmodifiedby, lastModifiedDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    - query: INSERT INTO eg_hrms_educationaldetails(tenantid, uuid, employeeid, qualification, stream, yearofpassing, university, remarks, isactive, createdby, createddate, lastmodifiedby, lastModifiedDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
       basePath: Employees.*.education.*
       jsonMaps:
@@ -102,6 +102,8 @@ serviceMaps:
 
       - jsonPath: $.Employees.*.education.*.remarks
 
+      - jsonPath: $.Employees.*.education.*.isActive
+
       - jsonPath: $.Employees.*.education.*.auditDetails.createdBy
 
       - jsonPath: $.Employees.*.education.*.auditDetails.createdDate
@@ -111,7 +113,7 @@ serviceMaps:
       - jsonPath: $.Employees.*.education.*.auditDetails.lastModifiedDate
 
 
-    - query: INSERT INTO eg_hrms_departmentaltests(tenantid, uuid, employeeid, test, yearofpassing, remarks, createdby, createddate, lastmodifiedby, lastModifiedDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    - query: INSERT INTO eg_hrms_departmentaltests(tenantid, uuid, employeeid, test, yearofpassing, remarks, isactive, createdby, createddate, lastmodifiedby, lastModifiedDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
       basePath: Employees.*.tests.*
       jsonMaps:
@@ -128,6 +130,8 @@ serviceMaps:
       - jsonPath: $.Employees.*.tests.*.yearOfPassing
 
       - jsonPath: $.Employees.*.tests.*.remarks
+
+      - jsonPath: $.Employees.*.tests.*.isActive
 
       - jsonPath: $.Employees.*.tests.*.auditDetails.createdBy
 
@@ -200,7 +204,7 @@ serviceMaps:
       - jsonPath: $.Employees.*.serviceHistory.*.auditDetails.lastModifiedDate
 
 
-    - query: INSERT INTO eg_hrms_jurisdiction (uuid, employeeid, hierarchy, boundarytype, boundary, tenantid, createdby, createddate, lastmodifiedby, lastModifiedDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    - query: INSERT INTO eg_hrms_jurisdiction (uuid, employeeid, hierarchy, boundarytype, boundary, tenantid, isActive, createdby, createddate, lastmodifiedby, lastModifiedDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
       basePath: Employees.*.jurisdictions.*
       jsonMaps:
@@ -216,6 +220,8 @@ serviceMaps:
       - jsonPath: $.Employees.*.jurisdictions.*.boundary
 
       - jsonPath: $.Employees[*][?({id} in @.jurisdictions[*].id)].tenantId
+
+      - jsonPath: $.Employees.*.jurisdictions.*.isActive
 
       - jsonPath: $.Employees.*.jurisdictions.*.auditDetails.createdBy
 
@@ -313,7 +319,8 @@ serviceMaps:
 
 
 
-    - query: INSERT INTO eg_hrms_educationaldetails(tenantid, uuid, employeeid, qualification, stream, yearofpassing, university, remarks, createdby, createddate, lastmodifiedby, lastModifiedDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+    - query: INSERT INTO eg_hrms_educationaldetails(tenantid, uuid, employeeid, qualification, stream, yearofpassing, university, remarks, isactive, createdby, createddate, lastmodifiedby, lastModifiedDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
       basePath: Employees.*.education.*
       jsonMaps:
@@ -335,6 +342,8 @@ serviceMaps:
 
       - jsonPath: $.Employees.*.education.*.remarks
 
+      - jsonPath: $.Employees.*.education.*.isActive
+
       - jsonPath: $.Employees.*.education.*.auditDetails.createdBy
 
       - jsonPath: $.Employees.*.education.*.auditDetails.createdDate
@@ -344,7 +353,7 @@ serviceMaps:
       - jsonPath: $.Employees.*.education.*.auditDetails.lastModifiedDate
 
 
-    - query: INSERT INTO eg_hrms_departmentaltests(tenantid, uuid, employeeid, test, yearofpassing, remarks, createdby, createddate, lastmodifiedby, lastModifiedDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    - query: INSERT INTO eg_hrms_departmentaltests(tenantid, uuid, employeeid, test, yearofpassing, remarks, isactive, createdby, createddate, lastmodifiedby, lastModifiedDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
       basePath: Employees.*.tests.*
       jsonMaps:
@@ -361,6 +370,8 @@ serviceMaps:
       - jsonPath: $.Employees.*.tests.*.yearOfPassing
 
       - jsonPath: $.Employees.*.tests.*.remarks
+
+      - jsonPath: $.Employees.*.tests.*.isActive
 
       - jsonPath: $.Employees.*.tests.*.auditDetails.createdBy
 
@@ -433,7 +444,7 @@ serviceMaps:
       - jsonPath: $.Employees.*.serviceHistory.*.auditDetails.lastModifiedDate
 
 
-    - query: INSERT INTO eg_hrms_jurisdiction (uuid, employeeid, hierarchy, boundarytype, boundary, tenantid, createdby, createddate, lastmodifiedby, lastModifiedDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    - query: INSERT INTO eg_hrms_jurisdiction (uuid, employeeid, hierarchy, boundarytype, boundary, tenantid, isActive, createdby, createddate, lastmodifiedby, lastModifiedDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
       basePath: Employees.*.jurisdictions.*
       jsonMaps:
@@ -449,6 +460,8 @@ serviceMaps:
       - jsonPath: $.Employees.*.jurisdictions.*.boundary
 
       - jsonPath: $.Employees[*][?({id} in @.jurisdictions[*].id)].tenantId
+
+      - jsonPath: $.Employees.*.jurisdictions.*.isActive
 
       - jsonPath: $.Employees.*.jurisdictions.*.auditDetails.createdBy
 
@@ -486,4 +499,3 @@ serviceMaps:
       - jsonPath: $.Employees.*.deactivationDetails.*.auditDetails.lastModifiedBy
 
       - jsonPath: $.Employees.*.deactivationDetails.*.auditDetails.lastModifiedDate
-

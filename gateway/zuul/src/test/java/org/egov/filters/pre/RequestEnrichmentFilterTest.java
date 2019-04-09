@@ -142,10 +142,12 @@ public class RequestEnrichmentFilterTest {
         mockRole1.setId(1L);
         mockRole1.setName("Employee");
         mockRole1.setCode("EMPLOYEE");
+        mockRole1.setTenantId("default");
         Role mockRole2 = new Role();
         mockRole2.setId(2L);
         mockRole2.setName("ULB Operator");
         mockRole2.setCode("ULB");
+        mockRole2.setTenantId("default");
         List<Role> roles = new ArrayList<>();
         roles.add(mockRole1);
         roles.add(mockRole2);

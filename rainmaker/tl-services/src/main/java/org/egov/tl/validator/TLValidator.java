@@ -7,10 +7,7 @@ import org.egov.tl.repository.TLRepository;
 import org.egov.tl.service.TradeLicenseService;
 import org.egov.tl.util.TLConstants;
 import org.egov.tl.util.TradeUtil;
-import org.egov.tl.web.models.TradeLicense;
-import org.egov.tl.web.models.TradeLicenseRequest;
-import org.egov.tl.web.models.TradeLicenseSearchCriteria;
-import org.egov.tl.web.models.TradeUnit;
+import org.egov.tl.web.models.*;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -63,6 +60,8 @@ public class TLValidator {
      */
     private void valideDates(TradeLicenseRequest request,Object mdmsData){
         request.getLicenses().forEach(license -> {
+            if(license.getValidTo()==null)
+                throw new CustomException("INVALID VALIDTO DATE"," Validto cannot be null");
             Map<String,Long> taxPeriods = tradeUtil.getTaxPeriods(license,mdmsData);
             if(license.getValidTo()!=null && license.getValidTo()>taxPeriods.get(TLConstants.MDMS_ENDDATE)){
                 Date expiry = new Date(license.getValidTo());
@@ -147,7 +146,8 @@ public class TLValidator {
       validateTradeUnits(request);
       valideDates(request,mdmsData);
       validateDuplicateDocuments(request);
-      setFieldsFromSearch(request,searchResult);
+      setFieldsFromSearch(request,searchResult,mdmsData);
+      validateOwnerActiveStatus(request);
    }
 
 
@@ -294,14 +294,21 @@ public class TLValidator {
      * @param request The input TradeLicenseRequest
      * @param searchResult The list of searched licenses
      */
-    private void setFieldsFromSearch(TradeLicenseRequest request,List<TradeLicense> searchResult){
+    private void setFieldsFromSearch(TradeLicenseRequest request,List<TradeLicense> searchResult,Object mdmsData){
         Map<String,TradeLicense> idToTradeLicenseFromSearch = new HashMap<>();
         searchResult.forEach(tradeLicense -> {
             idToTradeLicenseFromSearch.put(tradeLicense.getId(),tradeLicense);
         });
         request.getLicenses().forEach(license -> {
+            license.getAuditDetails().setCreatedBy(idToTradeLicenseFromSearch.get(license.getId()).getAuditDetails().getCreatedBy());
+            license.getAuditDetails().setCreatedTime(idToTradeLicenseFromSearch.get(license.getId()).getAuditDetails().getCreatedTime());
             license.setStatus(idToTradeLicenseFromSearch.get(license.getId()).getStatus());
             license.setLicenseNumber(idToTradeLicenseFromSearch.get(license.getId()).getLicenseNumber());
+            if(!idToTradeLicenseFromSearch.get(license.getId()).getFinancialYear().equalsIgnoreCase(license.getFinancialYear())
+                    && license.getLicenseType().equals(TradeLicense.LicenseTypeEnum.PERMANENT)){
+                Map<String,Long> taxPeriods = tradeUtil.getTaxPeriods(license,mdmsData);
+                license.setValidTo(taxPeriods.get(TLConstants.MDMS_ENDDATE));
+            }
         });
     }
 
@@ -320,6 +327,11 @@ public class TLValidator {
         Map<String,String> errorMap = new HashMap<>();
         licenses.forEach(license -> {
             TradeLicense searchedLicense = idToTradeLicenseFromSearch.get(license.getId());
+
+            if(!searchedLicense.getApplicationNumber().equalsIgnoreCase(license.getApplicationNumber()))
+                errorMap.put("INVALID UPDATE","The application number from search: "+searchedLicense.getApplicationNumber()
+                        +" and from update: "+license.getApplicationNumber()+" does not match");
+
             if(!searchedLicense.getTradeLicenseDetail().getId().
                     equalsIgnoreCase(license.getTradeLicenseDetail().getId()))
                 errorMap.put("INVALID UPDATE","The id "+license.getTradeLicenseDetail().getId()+" does not exist");
@@ -349,9 +361,9 @@ public class TLValidator {
      */
     private void compareIdList(List<String> searchIds,List<String> updateIds,Map<String,String> errorMap){
         if(!CollectionUtils.isEmpty(searchIds))
-            updateIds.forEach(id -> {
-                if(id!=null && !searchIds.contains(id))
-                    errorMap.put("INVALID UPDATE","The id "+id+" does not exist in database");
+            searchIds.forEach(searchId -> {
+                if(!updateIds.contains(searchId))
+                    errorMap.put("INVALID UPDATE","The id: "+searchId+" was not present in update request");
             });
     }
 
@@ -454,6 +466,31 @@ public class TLValidator {
             }
         });
     }
+
+
+    /**
+     * Checks if atleast one owner is active in TL
+     * @param request The update request
+     */
+   private void validateOwnerActiveStatus(TradeLicenseRequest request){
+        Map<String,String> errorMap = new HashMap<>();
+        request.getLicenses().forEach(license -> {
+            Boolean flag = false;
+            for(OwnerInfo ownerInfo : license.getTradeLicenseDetail().getOwners()){
+                if(ownerInfo.getUserActive()){
+                    flag=true;
+                    break;
+                }
+            }
+            if(!flag)
+                errorMap.put("INVALID OWNER","All owners are inactive for application:  "+license.getApplicationNumber());
+        });
+        if(!errorMap.isEmpty())
+            throw new CustomException(errorMap);
+   }
+
+
+
 
 
 

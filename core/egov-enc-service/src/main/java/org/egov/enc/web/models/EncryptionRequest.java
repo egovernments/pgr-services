@@ -3,8 +3,7 @@ package org.egov.enc.web.models;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,6 +13,6 @@ import java.util.LinkedList;
 public class EncryptionRequest {
 
     @JsonProperty("encryptionRequests")
-    private ArrayList<EncReqObject> encryptionRequests;
+    private List<EncReqObject> encryptionRequests;
 
 }

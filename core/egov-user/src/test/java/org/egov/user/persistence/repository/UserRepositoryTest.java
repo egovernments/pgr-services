@@ -1,5 +1,7 @@
 package org.egov.user.persistence.repository;
 
+import org.egov.tracer.model.CustomException;
+import org.egov.user.Resources;
 import org.egov.user.domain.exception.InvalidRoleCodeException;
 import org.egov.user.domain.model.Address;
 import org.egov.user.domain.model.Role;
@@ -17,20 +19,27 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.test.web.client.ExpectedCount.once;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class UserRepositoryTest {
 
 	@Autowired
@@ -56,8 +65,21 @@ public class UserRepositoryTest {
 
 	private UserRepository userRepository;
 
+	private MockRestServiceServer server;
+
+	@Autowired
+	private RestTemplate restTemplate;
+
 	@Before
 	public void before() {
+
+		server = MockRestServiceServer.bindTo(restTemplate).build();
+
+		server.expect(once(), requestTo("http://localhost:8094/egov-mdms-service/v1/_search"))
+				.andExpect(method(HttpMethod.POST))
+				.andRespond(withSuccess(new Resources().getFileContents("roleSearchValidatedResponse.json"),
+						MediaType.APPLICATION_JSON_UTF8));
+
 		userRepository = new UserRepository(roleRepository, userTypeQueryBuilder,  addressRepository,
                 userResultSetExtractor,
 				jdbcTemplate, namedParameterJdbcTemplate);
@@ -97,7 +119,7 @@ public class UserRepositoryTest {
 	public void test_should_save_entity_user() {
 		final Set<Role> roles = new HashSet<>();
 		final String roleCode = "EMP";
-		roles.add(Role.builder().code(roleCode).build());
+		roles.add(Role.builder().code(roleCode).tenantId("ap.public").build());
 		User domainUser = User.builder().roles(roles).name("test1").username("TestUserName").password("password")
 				.emailId("Test@gmail.com").aadhaarNumber("AadharNumber").mobileNumber("1234567890").active(true)
 				.gender(Gender.FEMALE).bloodGroup(BloodGroup.A_NEGATIVE).accountLocked(true).loggedInUserId(10l)
@@ -125,7 +147,7 @@ public class UserRepositoryTest {
 				.addressType("CORRESPONDENCE").city("city").pinCode("123").build();
 		final Set<Role> roles = new HashSet<>();
 		final String roleCode = "EMP";
-		roles.add(Role.builder().code(roleCode).build());
+		roles.add(Role.builder().code(roleCode).tenantId("ap.public").build());
 		User domainUser = User.builder().roles(roles)
 				.username("TestUserName").password("password").tenantId("ap.public")
 				.correspondenceAddress(correspondenceAddress).build();
@@ -151,7 +173,7 @@ public class UserRepositoryTest {
 				.addressType("PERMANENT").city("city").pinCode("123").build();
 		final Set<Role> roles = new HashSet<>();
 		final String roleCode = "EMP";
-		roles.add(Role.builder().code(roleCode).build());
+		roles.add(Role.builder().code(roleCode).tenantId("ap.public").build());
 		User domainUser = User.builder().roles(roles)
 				.username("TestUserName").password("password").tenantId("ap.public").permanentAddress(permanentAddress)
 				.build();
@@ -169,12 +191,13 @@ public class UserRepositoryTest {
 		assertThat(actualUser.getPermanentAddress().getPinCode().equals("123"));
 	}
 
-	@Test(expected = InvalidRoleCodeException.class)
+	@Test(expected = CustomException.class)
 	public void test_should_throw_exception_when_role_does_not_exist_for_given_role_code() {
 		final String roleCode = "roleCode1";
 		final org.egov.user.domain.model.Role domainRole = org.egov.user.domain.model.Role.builder().name(roleCode)
 				.build();
 		User domainUser = User.builder()
+				.tenantId("ap.p")
 				.roles(Collections.singleton(domainRole)).build();
 		userRepository.create(domainUser);
 	}
@@ -185,7 +208,7 @@ public class UserRepositoryTest {
 	public void test_should_set_encrypted_password_to_new_user() {
 		final Set<Role> roles = new HashSet<>();
 		final String roleCode = "EMP";
-		roles.add(org.egov.user.domain.model.Role.builder().code(roleCode).build());
+		roles.add(org.egov.user.domain.model.Role.builder().code(roleCode).tenantId("ap.public").build());
 		final String rawPassword = "rawPassword";
 		User domainUser = User.builder().roles(roles)
 				.username("Test UserName").password(rawPassword).tenantId("ap.public").build();
@@ -274,25 +297,25 @@ public class UserRepositoryTest {
 		assertThat(actualList.size() == 7);
 	}
 	
-	@Test
-	@Sql(scripts = { "/sql/clearUserRoles.sql", "/sql/clearUsers.sql", "/sql/clearRoles.sql", "/sql/createRoles.sql",
-			"/sql/clearAddresses.sql", "/sql/createUsers.sql" })
-	public void test_search_user_byadharnumberumber() {
-
-		UserSearchCriteria userSearch = UserSearchCriteria.builder().tenantId("ap.public").aadhaarNumber("12346789011").build();
-		List<User> actualList = userRepository.findAll(userSearch);
-		assertThat(actualList.size() == 7);
-	}
-	
-	@Test
-	@Sql(scripts = { "/sql/clearUserRoles.sql", "/sql/clearUsers.sql", "/sql/clearRoles.sql", "/sql/createRoles.sql",
-			"/sql/clearAddresses.sql", "/sql/createUsers.sql" })
-	public void test_search_user_bypan() {
-
-		UserSearchCriteria userSearch = UserSearchCriteria.builder().tenantId("ap.public").pan("ABCDE1234F").build();
-		List<User> actualList = userRepository.findAll(userSearch);
-		assertThat(actualList.size() == 7);
-	}
+//	@Test
+//	@Sql(scripts = { "/sql/clearUserRoles.sql", "/sql/clearUsers.sql", "/sql/clearRoles.sql", "/sql/createRoles.sql",
+//			"/sql/clearAddresses.sql", "/sql/createUsers.sql" })
+//	public void test_search_user_byadharnumberumber() {
+//
+//		UserSearchCriteria userSearch = UserSearchCriteria.builder().tenantId("ap.public").aadhaarNumber("12346789011").build();
+//		List<User> actualList = userRepository.findAll(userSearch);
+//		assertThat(actualList.size() == 7);
+//	}
+//
+//	@Test
+//	@Sql(scripts = { "/sql/clearUserRoles.sql", "/sql/clearUsers.sql", "/sql/clearRoles.sql", "/sql/createRoles.sql",
+//			"/sql/clearAddresses.sql", "/sql/createUsers.sql" })
+//	public void test_search_user_bypan() {
+//
+//		UserSearchCriteria userSearch = UserSearchCriteria.builder().tenantId("ap.public").pan("ABCDE1234F").build();
+//		List<User> actualList = userRepository.findAll(userSearch);
+//		assertThat(actualList.size() == 7);
+//	}
 	
 	@Ignore
 	@Sql(scripts = { "/sql/clearUserRoles.sql", "/sql/clearUsers.sql", "/sql/clearRoles.sql", "/sql/createRoles.sql",

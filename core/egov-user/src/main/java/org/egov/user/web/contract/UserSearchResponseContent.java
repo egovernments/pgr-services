@@ -44,6 +44,7 @@ public class UserSearchResponseContent {
     private String locale;
     private UserType type;
     private Boolean accountLocked;
+    private Long accountLockedDate;
     private String fatherOrHusbandName;
     private String signature;
     private String bloodGroup;
@@ -82,6 +83,7 @@ public class UserSearchResponseContent {
         this.locale = user.getLocale();
         this.type = user.getType();
         this.accountLocked = user.getAccountLocked();
+        this.accountLockedDate = user.getAccountLockedDate();
         this.signature = user.getSignature();
         this.bloodGroup = user.getBloodGroup() != null ? user.getBloodGroup().getValue() : null;
         this.photo = user.getPhoto();

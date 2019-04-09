@@ -64,6 +64,14 @@ public class NotificationService {
 	
 	public static Map<String, Map<String, String>> localizedMessageMap = new HashMap<>();
 
+	/**
+	 * Fetches the Service type and sla hours for the respective service type
+	 * 
+	 * @param serviceReq
+	 * @param requestInfo
+	 * @param locale
+	 * @return
+	 */
 	public List<Object> getServiceType(Service serviceReq, RequestInfo requestInfo, String locale) {
 		StringBuilder uri = new StringBuilder();
 		List<Object> listOfValues = new ArrayList<>();
@@ -92,6 +100,14 @@ public class NotificationService {
 		return listOfValues;
 	}
 
+	/**
+	 * Fetches Employee Details
+	 * 
+	 * @param tenantId
+	 * @param id
+	 * @param requestInfo
+	 * @return
+	 */
 	public Map<String, String> getEmployeeDetails(String tenantId, String id, RequestInfo requestInfo) {
 		StringBuilder uri = new StringBuilder();
 		RequestInfoWrapper requestInfoWrapper = new RequestInfoWrapper();
@@ -151,6 +167,14 @@ public class NotificationService {
 		 return department;
 	}
 
+	/**
+	 * 	Fetches designation for notification text
+	 * 
+	 * @param serviceReq
+	 * @param code
+	 * @param requestInfo
+	 * @return
+	 */
 	public String getDesignation(Service serviceReq, String code, RequestInfo requestInfo) {
 		StringBuilder uri = new StringBuilder();
 		MdmsCriteriaReq mdmsCriteriaReq = pGRUtils.prepareMdMsRequestForDesignation(uri, serviceReq.getTenantId(), code,
@@ -168,6 +192,14 @@ public class NotificationService {
 		return designations.get(0);
 	}
 
+	/**
+	 * Populates the localized msg cache
+	 * 
+	 * @param requestInfo
+	 * @param tenantId
+	 * @param locale
+	 * @param module
+	 */
 	public void getLocalisedMessages(RequestInfo requestInfo, String tenantId, String locale, String module) {
 		Map<String, String> mapOfCodesAndMessages = new HashMap<>();
 		StringBuilder uri = new StringBuilder();
@@ -191,6 +223,16 @@ public class NotificationService {
 		}
 	}
 	
+	/**
+	 * Fetches phone number for notification based on the recepient of the notif.
+	 * 
+	 * @param requestInfo
+	 * @param userId
+	 * @param tenantId
+	 * @param assignee
+	 * @param role
+	 * @return
+	 */
 	public String getPhoneNumberForNotificationService(RequestInfo requestInfo, String userId, String tenantId, String assignee, String role) {
 		String phoneNumber = null;
 		Object response = null;
@@ -218,6 +260,13 @@ public class NotificationService {
 		return phoneNumber;
 	}
 	
+	/**
+	 * Returns current assignee for a complaint
+	 * 
+	 * @param serviceReq
+	 * @param requestInfo
+	 * @return
+	 */
 	public String getCurrentAssigneeForTheServiceRequest(Service serviceReq, RequestInfo requestInfo) {
 		ServiceReqSearchCriteria serviceReqSearchCriteria = ServiceReqSearchCriteria.builder().tenantId(serviceReq.getTenantId())
 				.serviceRequestId(Arrays.asList(serviceReq.getServiceRequestId())).build();

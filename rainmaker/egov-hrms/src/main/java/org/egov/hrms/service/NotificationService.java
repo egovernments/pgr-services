@@ -42,7 +42,7 @@ public class NotificationService {
 
 	@Value("${egov.localization.search.endpoint}")
 	private String localizationSearchEndpoint;
-    
+
 	/**
 	 * Sends notification by putting the sms content onto the core-sms topic
 	 * 
@@ -69,7 +69,7 @@ public class NotificationService {
 	 * @return
 	 */
 	public String getMessage(EmployeeRequest request) {
-		String tenantId = request.getEmployees().get(0).getTenantId();
+		String tenantId = request.getEmployees().get(0).getTenantId().split("\\.")[0];
 		Map<String, Map<String, String>> localizedMessageMap = getLocalisedMessages(request.getRequestInfo(), tenantId, 
 				HRMSConstants.HRMS_LOCALIZATION_ENG_LOCALE_CODE, HRMSConstants.HRMS_LOCALIZATION_MODULE_CODE);
 		return localizedMessageMap.get(HRMSConstants.HRMS_LOCALIZATION_ENG_LOCALE_CODE +"|"+tenantId).get(HRMSConstants.HRMS_EMP_CREATE_LOCLZN_CODE);
@@ -84,7 +84,8 @@ public class NotificationService {
 	 * @return
 	 */
 	public String buildMessage(Employee employee, String message, Map<String, String> pwdMap) {
-		message = message.replace("$username", employee.getCode()).replace("$password", pwdMap.get(employee.getUuid()));
+		message = message.replace("$username", employee.getCode()).replace("$password", pwdMap.get(employee.getUuid()))
+				.replace("$employeename", employee.getUser().getName());
 		message = message.replace("$applink", appLink);
 		return message;
 	}
@@ -104,6 +105,7 @@ public class NotificationService {
 		StringBuilder uri = new StringBuilder();
 		RequestInfoWrapper requestInfoWrapper = new RequestInfoWrapper();
 		requestInfoWrapper.setRequestInfo(requestInfo);
+		tenantId = tenantId.split("\\.")[0];
 		uri.append(localizationHost).append(localizationSearchEndpoint).append("?tenantId=" + tenantId)
 				.append("&module=" + module).append("&locale=" + locale);
 		List<String> codes = null;

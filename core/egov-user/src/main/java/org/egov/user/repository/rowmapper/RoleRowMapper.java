@@ -12,6 +12,6 @@ public class RoleRowMapper implements RowMapper<Role> {
 
 	@Override
 	public Role mapRow(final ResultSet rs, final int rowNum) throws SQLException {
-		return Role.builder().id(rs.getLong("id")).tenantId(rs.getString("tenantid")).code(rs.getString("code")).description(rs.getString("description")).name(rs.getString("name")).build();
+		return Role.builder().tenantId(rs.getString("tenantid")).code(rs.getString("code")).description(rs.getString("description")).name(rs.getString("name")).build();
 	}
 }

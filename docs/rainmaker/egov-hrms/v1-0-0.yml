@@ -66,7 +66,7 @@
           description: Epoch Date of assignment
           required: false
           type: number
-        - name: id
+        - name: ids
           in: query
           description: List of Unique Id of employee
           required: false
@@ -89,7 +89,7 @@
           type: array
           items:
             type: string
-        - name: uuid
+        - name: uuids
           in: query
           description: List of Unique uuid of employee
           required: false
@@ -103,6 +103,33 @@
           type: array
           items:
             type: integer
+        - name: roles
+          in: query
+          description: List of Roles of employee
+          required: false
+          type: array
+          items:
+            type: string
+        - name: phone
+          in: query
+          description: Phone Number
+          required: true
+          type: string
+        - name: isActive
+          in: query
+          description: True will return active employees, False otherwise
+          required: true
+          type: boolean
+        - name: offset
+          in: query
+          description: Offset of the search result
+          required: true
+          type: integer
+        - name: limit
+          in: query
+          description: No of records to be returned from the offset
+          required: true
+          type: integer
         - name: tenantid
           in: query
           description: Tenant id

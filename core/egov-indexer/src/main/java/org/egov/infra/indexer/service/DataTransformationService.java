@@ -188,7 +188,7 @@ public class DataTransformationService {
 					if (null == response)
 						continue;
 				} catch (Exception e) {
-					log.error("Exception while trying to hit: " + uri, e);
+					log.error("Exception while trying to hit: " + uri);
 					continue;
 				}
 				log.debug("Response: " + response + " from the URI: " + uriMapping.getPath());
@@ -200,7 +200,7 @@ public class DataTransformationService {
 						documentContext.put(expression, expressionArray[expressionArray.length - 1], value);
 					} catch (Exception e) {
 						log.error("Value: " + fieldMapping.getInjsonpath() + " is not found!");
-						log.info("URI: " + uri);
+						log.debug("URI: " + uri);
 						documentContext.put(expression, expressionArray[expressionArray.length - 1], null);
 						continue;
 					}
@@ -234,7 +234,7 @@ public class DataTransformationService {
 					if (null == response)
 						continue;
 				} catch (Exception e) {
-					log.error("Exception while trying to hit: " + uri, e);
+					log.error("Exception while trying to hit: " + uri);
 					log.info("MDMS Request: " + request);
 					continue;
 				}
@@ -252,7 +252,7 @@ public class DataTransformationService {
 						documentContext.put(expression, expressionArray[expressionArray.length - 1], value);
 					} catch (Exception e) {
 						log.error("Value: " + fieldMapping.getInjsonpath() + " is not found!");
-						log.info("MDMS Request: " + request);
+						log.debug("MDMS Request: " + request);
 						documentContext.put(expression, expressionArray[expressionArray.length - 1], null);
 						continue;
 					}

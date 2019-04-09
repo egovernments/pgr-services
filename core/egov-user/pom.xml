@@ -48,7 +48,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jdbc</artifactId>
 		</dependency>
-		
+
 
 		<dependency>
 			<groupId>org.springframework.security.oauth</groupId>
@@ -103,6 +103,22 @@
 			<version>4.1.0</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.egov</groupId>
+			<artifactId>mdms-client</artifactId>
+			<version>0.0.2-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-devtools</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.dataformat</groupId>
+					<artifactId>jackson-dataformat-yaml</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
         <!--Test dependencies-->
 
 		<dependency>
@@ -116,13 +132,6 @@
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-jpamodelgen</artifactId>
-            <version>5.2.6.Final</version>
-            <optional>true</optional>
-        </dependency>
 
 		<dependency>
 			<groupId>org.springframework.security</groupId>

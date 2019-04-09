@@ -21,8 +21,6 @@ public class UserSearchCriteria {
     private String userName;
     private String name;
     private String mobileNumber;
-    private String aadhaarNumber;
-    private String pan;
     private String emailId;
     private boolean fuzzyLogic;
     private Boolean active;
@@ -33,9 +31,29 @@ public class UserSearchCriteria {
     private String tenantId;
     private List<String> roleCodes;
 
-    public void validate() {
-        if (CollectionUtils.isEmpty(uuid) && CollectionUtils.isEmpty(id) && isEmpty(tenantId)) {
+    public void validate(boolean isInterServiceCall) {
+        if (validateIfEmptySearch(isInterServiceCall) || validateIfTenantIdExists(isInterServiceCall)) {
             throw new InvalidUserSearchCriteriaException(this);
         }
+    }
+
+    private boolean validateIfEmptySearch(boolean isInterServiceCall){
+        if(isInterServiceCall)
+            return isEmpty(userName) && isEmpty(name) && isEmpty(mobileNumber) && isEmpty(emailId) &&
+                CollectionUtils.isEmpty(uuid) && CollectionUtils.isEmpty(id)  && CollectionUtils.isEmpty(roleCodes);
+        else
+            return isEmpty(userName) && isEmpty(name) && isEmpty(mobileNumber) && isEmpty(emailId) &&
+                    CollectionUtils.isEmpty(uuid) && CollectionUtils.isEmpty(id);
+    }
+
+    private boolean validateIfTenantIdExists(boolean isInterServiceCall){
+        if(isInterServiceCall)
+            return (!isEmpty(userName) || !isEmpty(name) || !isEmpty(mobileNumber)  ||
+                    !CollectionUtils.isEmpty(roleCodes))
+                && isEmpty(tenantId);
+        else
+            return (!isEmpty(userName) || !isEmpty(name) || !isEmpty(mobileNumber))
+                    && isEmpty(tenantId);
+
     }
 }

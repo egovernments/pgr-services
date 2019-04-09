@@ -93,7 +93,7 @@ public class PaymentNotificationService {
      */
     private List<SMSRequest> getSMSRequests(TradeLicense license, Map<String,String> valMap,String localizationMessages){
             List<SMSRequest> ownersSMSRequest = getOwnerSMSRequest(license,valMap,localizationMessages);
-            SMSRequest payerSMSRequest = getPayerSMSRequest(valMap,localizationMessages);
+            SMSRequest payerSMSRequest = getPayerSMSRequest(license,valMap,localizationMessages);
 
             List<SMSRequest> totalSMS = new LinkedList<>();
             totalSMS.addAll(ownersSMSRequest);
@@ -111,7 +111,7 @@ public class PaymentNotificationService {
      * @return The list of the SMS Requests
      */
     private List<SMSRequest> getOwnerSMSRequest(TradeLicense license, Map<String,String> valMap,String localizationMessages){
-        String message = util.getOwnerPaymentMsg(valMap,localizationMessages);
+        String message = util.getOwnerPaymentMsg(license,valMap,localizationMessages);
 
         HashMap<String,String> mobileNumberToOwnerName = new HashMap<>();
         license.getTradeLicenseDetail().getOwners().forEach(owner -> {
@@ -135,8 +135,8 @@ public class PaymentNotificationService {
      * @param localizationMessages The localization message to be sent
      * @return
      */
-    private SMSRequest getPayerSMSRequest(Map<String,String> valMap,String localizationMessages){
-        String message = util.getPayerPaymentMsg(valMap,localizationMessages);
+    private SMSRequest getPayerSMSRequest(TradeLicense license,Map<String,String> valMap,String localizationMessages){
+        String message = util.getPayerPaymentMsg(license,valMap,localizationMessages);
         String customizedMsg = message.replace("<1>",valMap.get(paidByKey));
         SMSRequest smsRequest = new SMSRequest(valMap.get(payerMobileNumberKey),customizedMsg);
         return smsRequest;

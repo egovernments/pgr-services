@@ -17,4 +17,6 @@ public class RequestContextConstants {
     public static final String CORRELATION_ID_KEY = "CORRELATION_ID";
     public static final String RBAC_BOOLEAN_FLAG_NAME = "shouldDoRbac";
     public static final String SKIP_RBAC = "RBAC check skipped";
+    public static final String REQUEST_TENANT_ID_KEY = "tenantId";
+    public static final String TENANT_ID_KEY = "TENANT_ID";
 }

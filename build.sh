@@ -6,7 +6,7 @@ db=`sudo docker run -d postgres:9.6`
 echo "Started db container: $db"
 
 pwd=`pwd`
-ci=`sudo docker run -d -v $HOME/.m2:/root/.m2 -v $pwd:/var/lib/egov-services:rw -w /var/lib/egov-services --net=container:${db} ${ci_image} /bin/bash -c "set -e; cd $1; mvn clean verify package -U -s /var/lib/egov-services/settings.xml;"`
+ci=`sudo docker run -d -v $HOME/.m2:/root/.m2 -v $pwd:/var/lib/egov-services:rw -w /var/lib/egov-services --net=container:${db} ${ci_image} /bin/bash -c "set -e; cd $1;mvn clean verify package -U -s /var/lib/egov-services/settings.xml;"`
 echo "Started ci container to run build: $ci"
 
 echo "Attaching to ci container: $ci"

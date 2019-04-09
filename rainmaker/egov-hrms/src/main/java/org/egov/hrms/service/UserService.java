@@ -40,19 +40,14 @@
 
 package org.egov.hrms.service;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.hrms.config.PropertiesManager;
 import org.egov.hrms.model.Employee;
 import org.egov.hrms.model.enums.UserType;
 import org.egov.hrms.repository.RestCallRepository;
+import org.egov.hrms.utils.HRMSConstants;
 import org.egov.hrms.web.contract.UserRequest;
 import org.egov.hrms.web.contract.UserResponse;
 import org.egov.tracer.model.CustomException;
@@ -60,9 +55,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.extern.slf4j.Slf4j;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -112,11 +107,13 @@ public class UserService {
 		return userResponse;
 	}
 	
-	public UserResponse getUser(RequestInfo requestInfo, List<String> uuids) {
+	public UserResponse getUser(RequestInfo requestInfo, Map<String, Object> UserSearchCriteria ) {
 		StringBuilder uri = new StringBuilder();
 		Map<String, Object> userSearchReq = new HashMap<>();
 		userSearchReq.put("RequestInfo", requestInfo);
-		userSearchReq.put("uuid", uuids);
+		userSearchReq.put(HRMSConstants.HRMS_USER_SERACH_CRITERIA_USERTYPE_CODE,HRMSConstants.HRMS_USER_SERACH_CRITERIA_USERTYPE);
+		for( String key: UserSearchCriteria.keySet())
+			userSearchReq.put(key, UserSearchCriteria.get(key));
 		uri.append(propertiesManager.getUserHost()).append(propertiesManager.getUserSearchEndpoint());
 		UserResponse userResponse = new UserResponse();
 		try {
@@ -125,36 +122,6 @@ public class UserService {
 			log.error("User search failed: ",e);
 		}
 
-		return userResponse;
-	}
-
-
-	public UserResponse getSingleUser(RequestInfo requestInfo, Employee employee, String type) {
-		StringBuilder uri = new StringBuilder();
-		Map<String, Object> userSearchReq = new HashMap<>();
-		userSearchReq.put("RequestInfo", requestInfo);
-		switch (type){
-			case "MobileNumber":
-				userSearchReq.put("mobileNumber", employee.getUser().getMobileNumber());
-				break;
-			case "UserName":
-				userSearchReq.put("userName",employee.getCode());
-				break;
-			case "Name":
-				userSearchReq.put("name",employee.getUser().getName());
-				break;
-			
-		}
-		userSearchReq.put("userType", UserType.EMPLOYEE);
-		userSearchReq.put("tenantID",employee.getTenantId());
-		uri.append(propertiesManager.getUserHost()).append(propertiesManager.getUserSearchEndpoint());
-		UserResponse userResponse = new UserResponse();
-		try {
-			userResponse = userCall(userSearchReq,uri);
-		}catch(Exception e) {
-			log.error("User search failed: ",e);
-			log.info("req: "+(userSearchReq));
-		}
 		return userResponse;
 	}
 

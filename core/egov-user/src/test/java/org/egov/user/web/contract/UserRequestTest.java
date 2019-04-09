@@ -196,7 +196,6 @@ public class UserRequestTest {
         calendar.set(1990, Calendar.JULY, 1);
 
         Role role1 = Role.builder()
-                .id(1L)
                 .name("name of the role 1")
                 .description("description")
                 .createdBy(1L)
@@ -206,7 +205,6 @@ public class UserRequestTest {
                 .build();
 
         Role role2 = Role.builder()
-                .id(2L)
                 .name("name of the role 2")
                 .description("description")
                 .createdBy(1L)

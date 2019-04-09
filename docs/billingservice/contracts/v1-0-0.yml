@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 1.0.0
+  version: 1.1.0
   title: eGov Billing Service APIs
   description: |-
     eGov Billing Service manages head wise demand and Demand Bill information for all the revenue modules from eGov solution. It manages
@@ -11,399 +11,10 @@ info:
     name: eGovernments Foundation
 schemes:
   - https
-basePath: /billingservice/v1
+basePath: /billingservice/
 x-common-path: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml'
 paths:
-  /taxheads/_search:
-    post:
-      description: Returns a 'TaxHeadMaster' By default results will be sorted by service and name
-      parameters:
-        - $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/parameters/requestInfo'
-        - $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/parameters/tenantId'
-        - name: service
-          in: query
-          description: Name of the business service for which 'TaxHeadMaster' to be returned.
-          required: true
-          type: string
-        - name: catgegory
-          in: query
-          description: Name of the tax cagtegory for which 'TaxHeadMaster' to be returned.
-          required: false
-          type: string
-        - name: name
-          in: query
-          description: Name of the tax head for which 'TaxHeadMaster' to be returned.
-          required: false
-          type: string
-        - name: code
-          in: query
-          description: Code of the tax head for which 'TaxHeadMaster' to be returned.
-          required: false
-          type: array
-          items:
-            type: string
-        - name: isDebit
-          in: query
-          description: isDebit value of the tax head for which 'TaxHeadMaster' to be returned.
-          required: false
-          type: boolean
-        - name: isActualDemand
-          in: query
-          description: isActualDemand value of the tax head for which 'TaxHeadMaster' to be returned.
-          required: false
-          type: boolean
-        - name: validFrom
-          in: query
-          description: period from date
-          required: false
-          type: integer
-        - name: validTill
-          in: query
-          description: period to.
-          required: false
-          type: integer
-        - name: size
-          in: query
-          description: size of the result set.
-          required: false
-          type: integer
-        - name: offset
-          in: query
-          description: starting index of the result set.
-          required: false
-          type: integer
-        - name: id
-          in: query
-          description: Id(s) of the TaxHeadMaster(s) to be returned
-          required: false
-          type: array
-          items:
-            type: string
-      tags:
-        - Master
-      responses:
-        '200':
-          description: returns a 'TaxHeadMaster'.
-          schema:
-            $ref: '#/definitions/TaxHeadMasterResponse'
-        '400':
-          description: Invalid input
-          schema:
-            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
-  /taxheads/_create:
-    post:
-      description: Creates a 'TaxHeadMaster'
-      parameters:
-        - name: TaxHeadMaster
-          in: body
-          description: Request header for the 'TaxHeadMaster'.
-          required: true
-          schema:
-            $ref: '#/definitions/TaxHeadMasterRequest'
-      tags:
-        - Master
-      responses:
-        '201':
-          description: created BusinessServiceDetail(s) successfully.
-          schema:
-            $ref: '#/definitions/TaxHeadMasterResponse'
-        '400':
-          description: Invalid input
-          schema:
-            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
-  /taxheads/_update:
-    post:
-      description: Updates a 'TaxHeadMaster'.
-      parameters:
-        - name: TaxHeadMaster
-          in: body
-          description: Request header for the 'TaxHeadMaster'.
-          required: true
-          schema:
-            $ref: '#/definitions/TaxHeadMasterRequest'
-      tags:
-        - Master
-      responses:
-        '200':
-          description: update a BusinessServiceDetail(s) successful.
-          schema:
-            $ref: '#/definitions/TaxHeadMasterResponse'
-        '400':
-          description: Invalid input
-          schema:
-            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
-  /businessservices/_search:
-    post:
-      description: Returns a 'BusinessServiceDetails' By default results will be sorted by businessService
-      parameters:
-        - $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/parameters/requestInfo'
-        - $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/parameters/tenantId'
-        - name: businessService
-          in: query
-          description: Code of the businessservice(s) for which 'BusinessServiceDetails' to be returned.
-          required: true
-          type: array
-          items:
-            type: string
-        - name: id
-          in: query
-          description: Id(s) of the BusinessServiceDetail(s) to be returned
-          required: false
-          type: array
-          items:
-            type: string
-      tags:
-        - Master
-      responses:
-        '200':
-          description: returns a 'BusinessServiceDetails'.
-          schema:
-            $ref: '#/definitions/BusinessServiceDetailResponse'
-        '400':
-          description: Invalid input
-          schema:
-            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
-  /businessservices/_create:
-    post:
-      description: Creates a 'BusinessServiceDetails'
-      parameters:
-        - name: businessServiceDetails
-          in: body
-          description: Request header for the 'BusinessServiceDetails'.
-          required: true
-          schema:
-            $ref: '#/definitions/BusinessServiceDetailRequest'
-      tags:
-        - Master
-      responses:
-        '201':
-          description: created BusinessServiceDetail(s) successfully.
-          schema:
-            $ref: '#/definitions/BusinessServiceDetailResponse'
-        '400':
-          description: Invalid input
-          schema:
-            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
-  /businessservices/_update:
-    post:
-      description: Updates a 'BusinessServiceDetails'.
-      parameters:
-        - name: businessServiceDetails
-          in: body
-          description: Request header for the 'BusinessServiceDetails'.
-          required: true
-          schema:
-            $ref: '#/definitions/BusinessServiceDetailRequest'
-      tags:
-        - Master
-      responses:
-        '200':
-          description: update a BusinessServiceDetail(s) successful.
-          schema:
-            $ref: '#/definitions/BusinessServiceDetailResponse'
-        '400':
-          description: Invalid input
-          schema:
-            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
-  /taxperiods/_search:
-    post:
-      description: 'Returns a ''TaxPeriod''. By default, results will be sorted by service and description'
-      parameters:
-        - $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/parameters/requestInfo'
-        - $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/parameters/tenantId'
-        - name: service
-          in: query
-          description: Name of the business service for which 'TaxPeriod' is to be returned.
-          required: true
-          type: string
-        - name: id
-          in: query
-          description: Id(s) of the TaxPeriod(s) to be returned
-          required: false
-          type: array
-          items:
-            type: string
-        - name: periodCycle
-          in: query
-          description: cycle of the tax period for which 'TaxPeriod' is to be returned.
-          required: false
-          type: string
-        - name: code
-          in: query
-          description: code of the tax period for which 'TaxPeriod' is to be returned.
-          required: false
-          type: string
-        - name: date
-          in: query
-          description: date to search Tax period where this date falls for the range of dates defined in tax period.
-          required: false
-          type: integer
-        - name: fromDate
-          in: query
-          description: period from date
-          required: false
-          type: integer
-        - name: toDate
-          in: query
-          description: period to.
-          required: false
-          type: integer
-      tags:
-        - Master
-      responses:
-        '200':
-          description: returns 'TaxPeriod'.
-          schema:
-            $ref: '#/definitions/TaxPeriodResponse'
-        '400':
-          description: Invalid input
-          schema:
-            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
-  /taxperiods/_create:
-    post:
-      description: Creates a 'TaxPeriod'
-      parameters:
-        - name: TaxPeriod
-          in: body
-          description: Request header for the 'TaxPeriod'.
-          required: true
-          schema:
-            $ref: '#/definitions/TaxPeriodRequest'
-      tags:
-        - Master
-      responses:
-        '201':
-          description: created TaxPeriod(s) successfully.
-          schema:
-            $ref: '#/definitions/TaxPeriodResponse'
-        '400':
-          description: Invalid input
-          schema:
-            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
-  /taxperiods/_update:
-    post:
-      description: Updates a 'TaxPeriod'.
-      parameters:
-        - name: TaxPeriod
-          in: body
-          description: Request header for the 'TaxPeriod'.
-          required: true
-          schema:
-            $ref: '#/definitions/TaxPeriodRequest'
-      tags:
-        - Master
-      responses:
-        '200':
-          description: update a TaxPeriod(s) successful.
-          schema:
-            $ref: '#/definitions/TaxPeriodResponse'
-        '400':
-          description: Invalid input
-          schema:
-            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
-  /glcodemasters/_search:
-    post:
-      description: 'Returns a ''GlcodeMaster''. By default, results will be sorted by service and description'
-      parameters:
-        - $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/parameters/requestInfo'
-        - $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/parameters/tenantId'
-        - name: service
-          in: query
-          description: Name of the business service for which 'GlcodeMaster' is to be returned.
-          required: true
-          type: string
-        - name: glCode
-          in: query
-          description: glCode for which 'GlcodeMaster' is to be returned.
-          required: false
-          type: string
-        - name: taxHead
-          in: query
-          description: Name of the Tax Head for which 'GlcodeMaster' is to be returned.
-          required: true
-          type: array
-          items:
-            type: string
-        - name: id
-          in: query
-          description: Id(s) of the GlcodeMaster(s) to be returned
-          required: false
-          type: array
-          items:
-            type: string
-        - name: fromDate
-          in: query
-          description: period from date
-          required: false
-          type: integer
-        - name: toDate
-          in: query
-          description: period to.
-          required: false
-          type: integer
-        - name: size
-          in: query
-          description: size of the result set.
-          required: false
-          type: integer
-        - name: offset
-          in: query
-          description: starting index of the result set.
-          required: false
-          type: integer
-      tags:
-        - Master
-      responses:
-        '200':
-          description: returns 'GlcodeMaster'.
-          schema:
-            $ref: '#/definitions/GlcodeMasterResponse'
-        '400':
-          description: Invalid input
-          schema:
-            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
-  /glcodemasters/_create:
-    post:
-      description: Creates a 'GlcodeMaster'
-      parameters:
-        - name: GlcodeMaster
-          in: body
-          description: Request header for the 'GlcodeMaster'.
-          required: true
-          schema:
-            $ref: '#/definitions/GlcodeMasterRequest'
-      tags:
-        - Master
-      responses:
-        '201':
-          description: created GlcodeMaster(s) successfully.
-          schema:
-            $ref: '#/definitions/GlcodeMasterResponse'
-        '400':
-          description: Invalid input
-          schema:
-            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
-  /glcodemasters/_update:
-    post:
-      description: Updates a 'GlcodeMaster'.
-      parameters:
-        - name: GlcodeMaster
-          in: body
-          description: Request header for the 'GlcodeMaster'.
-          required: true
-          schema:
-            $ref: '#/definitions/GlcodeMasterRequest'
-      tags:
-        - Master
-      responses:
-        '200':
-          description: update a GlcodeMaster(s) successful.
-          schema:
-            $ref: '#/definitions/GlcodeMasterResponse'
-        '400':
-          description: Invalid input
-          schema:
-            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
+
   /demand/_search:
     post:
       description: 'Returns a demand along with its list of demand details. Along with tenantId, any one parameter is mandatory. In case search is performed based on the demand amounts, then demandFrom and demandTo parameters will be mandatory. When both demandFrom and demandTo parameters are passed, the type parameter will be mandatory. By default results will be sorted by fromDate'
@@ -439,34 +50,6 @@ paths:
           description: 'Billing system details e.g., PropertyTax,Water Charges etc.'
           required: true
           type: string
-        - name: demandFrom
-          in: query
-          description: Starting range of the demand amount to be searched for
-          required: false
-          type: number
-          format: double
-        - name: receiptRequired
-          in: query
-          description: indicates whether receipt is required or not
-          required: false
-          type: boolean
-        - name: demandTo
-          in: query
-          description: Ending range of the demand amount to be searched for
-          required: false
-          type: number
-          format: double
-        - name: type
-          in: query
-          description: 'Determines the type of the demand., Ex- Arrears or Current or Dues. This field will be mandatory if both demandFrom and demandTo amounts are sent'
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - ARREARS
-              - CURRENT
-              - DUES
       tags:
         - Demand
       responses:
@@ -516,127 +99,6 @@ paths:
           description: updated a collection amount for demand.
           schema:
             $ref: '#/definitions/DemandResponse'
-        '400':
-          description: Invalid input
-          schema:
-            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
-  /demand/collection/_update:
-    post:
-      description: Updates a demand. This only for DCB back update. When we update DCB after collection
-      parameters:
-        - name: demand
-          in: body
-          description: Request header for the demand.
-          required: true
-          schema:
-            $ref: '#/definitions/DemandRequest'
-      tags:
-        - Demand
-      responses:
-        '200':
-          description: updated a collection amount for demand.
-          schema:
-            $ref: '#/definitions/DemandResponse'
-        '400':
-          description: Invalid input
-          schema:
-            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
-  /demand/_updatemis:
-    post:
-      description: Updates a mis data for the demand. As of now this API updates the consumerCode in demand.
-      parameters:
-        - $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/parameters/tenantId'
-        - name: demandId
-          in: query
-          description: Id(s) of the Demand(s) to be updated
-          required: true
-          type: array
-          items:
-            type: string
-        - name: consumerCode
-          in: query
-          description: 'Unique identification to be updated, provided by business details.'
-          required: true
-          type: string
-      tags:
-        - Demand
-      responses:
-        '200':
-          description: updated a collection amount for demand.
-          schema:
-            $ref: '#/definitions/DemandResponse'
-        '400':
-          description: Invalid input
-          schema:
-            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
-  /demand/_dues:
-    post:
-      description: Returns the demand dues for the unique identification(consumercode). The busines service and the consumercode will be mandatory.
-      parameters:
-        - $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/parameters/requestInfo'
-        - $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/parameters/tenantId'
-        - name: consumerCode
-          in: query
-          description: Unique identification provided by business details.
-          required: true
-          type: string
-        - name: businessService
-          in: query
-          description: 'Billing system details e.g., PropertyTax(PT),Water Charges(WC) etc.'
-          required: true
-          type: string
-      tags:
-        - Demand
-      responses:
-        '200':
-          description: returns a demand along with its demand details.
-          schema:
-            $ref: '#/definitions/DemandDueResponse'
-        '400':
-          description: Invalid input
-          schema:
-            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
-  /demanddetail/_search:
-    post:
-      description: Returns a demand details By default results will be sorted by fromDate of 'Demand' and tax head.
-      parameters:
-        - $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/parameters/requestInfo'
-        - $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/parameters/tenantId'
-        - name: demandId
-          in: query
-          description: Primary key of Demand object.
-          required: false
-          type: integer
-          format: int64
-        - name: taxHeadCode
-          in: query
-          description: tax head reason code.
-          required: false
-          type: string
-        - name: periodFrom
-          in: query
-          description: tax period from date
-          required: false
-          type: integer
-        - name: periodTo
-          in: query
-          description: tax period to.
-          required: false
-          type: integer
-        - name: detailsId
-          in: query
-          description: Id(s) of the DemandDetail(s) to be returned
-          required: false
-          type: array
-          items:
-            type: string
-      tags:
-        - Demand
-      responses:
-        '200':
-          description: returns a demand along with its demand details.
-          schema:
-            $ref: '#/definitions/DemandDetailResponse'
         '400':
           description: Invalid input
           schema:
@@ -714,12 +176,12 @@ paths:
           format: int64
         - name: consumerCode
           in: query
-          description: A unique identification for a billing entity.
+          description: A unique identification for a demand entity with respect to the consumer and the service being consumer.
           required: false
           type: string
         - name: businessService
           in: query
-          description: 'Billing system details e.g., PropertyTax,Water Charges etc.'
+          description: 'The service which demand is generated e.g., PropertyTax,Water Charges etc.'
           required: false
           type: string
         - name: email
@@ -745,7 +207,7 @@ paths:
             $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
   /bill/_fetchBill:
     post:
-      description: 'Creates a Bill for collections. By default active bill will be created. Along with tenantId, any one parameter is mandatory. Trigers bill generate internally, wrap over the bill generate api.'
+      description: 'Creates a Bill for collections. By default active bill will be created. Along with tenantId, any one parameter is mandatory. Trigers bill generate internally, Checks whether a demand exists for the given data in db else creates a new one throught the revenue services.'
       parameters:
         - $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/parameters/requestInfo'
         - $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/parameters/tenantId'
@@ -785,56 +247,8 @@ paths:
         '400':
           description: Invalid input
           schema:
-            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'  
-  /bill/_create:
-    post:
-      description: Creates a bill along with its list of bill details. The bill type is MANUAL here.
-      parameters:
-        - name: bill
-          in: body
-          description: Request header for the bill.
-          required: true
-          schema:
-            $ref: '#/definitions/BillRequest'
-      tags:
-        - Bill
-      responses:
-        '201':
-          description: Created Bill(s) successfully.
-          schema:
-            $ref: '#/definitions/BillResponse'
-        '400':
-          description: Invalid input
-          schema:
             $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
-  /bill/_apportion:
-    post:
-      summary: Apportion Paid Amount.
-      description: This API is used to apportion the paid amount.
-      parameters:
-        - name: billInfo
-          in: body
-          description: Request to update the demand details with the receipt info.
-          required: true
-          schema:
-            $ref: '#/definitions/BillRequest'
-        - name: tenantId
-          in: query
-          description: Unique id for ulb.
-          required: true
-          type: string
-          format: varchar
-      tags:
-        - Bill
-      responses:
-        '200':
-          description: Paid Amount Apportioned successfully.
-          schema:
-            $ref: '#/definitions/BillResponse'
-        '400':
-          description: tenantId was not provided or General service error
-          schema:
-            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ErrorRes'
+
 definitions:
   Demand:
     type: object
@@ -859,7 +273,7 @@ definitions:
         description: 'Billing system e.g., Property Tax, Water Charges etc.'
         maxLength: 256
         minLength: 4
-      owner:
+      payer:
         $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/egov-user/contracts/v1-1-0.yml#/definitions/User'
       taxPeriodFrom:
         type: integer
@@ -872,12 +286,14 @@ definitions:
       demandDetails:
         type: array
         items:
-          $ref: '#/definitions/DemandDetails'
+          $ref: '#/definitions/DemandDetail'
       auditDetails:
         $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/AuditDetails'
+      additionalDetails:  
+        type: object
+        description: field for capturing any additional details.
       minimumAmountPayable:
         type: number
-        format: double
         description: Minimum bill amount to be paid.
       status:
         type: string
@@ -895,13 +311,16 @@ definitions:
       - tenantId
       - consumerType
       - owner
-  DemandDetails:
+  DemandDetail:
     type: object
     description: A object holds a demand and collection values for a tax head and period.
     properties:
       id:
         type: string
         description: primary key of a DemandDetails.
+      demandId:
+        type: string
+        description: foriegn key of a DemandDetails from demand.        
       taxHeadMasterCode:
         type: string
         description: Tax Head code.
@@ -913,9 +332,11 @@ definitions:
         description: demand amount.
       collectionAmount:
         type: number
-        format: double
         default: 0
         description: collection against taxAmount.
+      additionalDetails:  
+        type: object
+        description: field for capturing any additional details.
       auditDetails:
         $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/AuditDetails'
       tenantId:
@@ -927,44 +348,6 @@ definitions:
       - taxHead
       - taxAmount
       - collectionAmount
-  DemandDue:
-    type: object
-    description: 'The object holds the demand, collection and balance information, along with list of demands.'
-    properties:
-      consolidatedTax:
-        $ref: '#/definitions/ConsolidatedTax'
-      demands:
-        type: array
-        items:
-          $ref: '#/definitions/Demand'
-  ConsolidatedTax:
-    type: object
-    description: 'The object holds the demand, collection and balance information for the current and arrear tax periods.'
-    properties:
-      arrearsDemand:
-        type: number
-        format: double
-        description: demand amount of arrear taxperiods(s).
-      arrearsCollection:
-        type: number
-        format: double
-        description: collection amount of arrear taxperiods(s).
-      arrearsBalance:
-        type: number
-        format: double
-        description: balance amount of arrear taxperiods(s).
-      currentDemand:
-        type: number
-        format: double
-        description: demand amount of current taxperiod.
-      currentCollection:
-        type: number
-        format: double
-        description: collection amount of current taxperiod.
-      currentBalance:
-        type: number
-        format: double
-        description: balance amount of current taxperiod.
   TaxHeadMaster:
     type: object
     description: 'A object holds a tax heads for each reason category and service along with glcodes for financial posting, for example General tax, Edu cess, lib cess for TAX.'
@@ -1004,9 +387,7 @@ definitions:
         maxLength: 64
         minLength: 2
       glcodes:
-        type: array
-        items:
-          $ref: '#/definitions/GlcodeMaster'
+        type: string
       order:
         type: integer
         format: int64
@@ -1035,48 +416,6 @@ definitions:
       - validFrom
       - validTill
       - tenantId
-  GlcodeMaster:
-    type: object
-    description: A object holds a glcode for a tax head for financial posting
-    properties:
-      id:
-        type: string
-        description: primary key of a GlcodeMaster.
-      tenantId:
-        type: string
-        description: Unique Identifier of the tenant
-        maxLength: 128
-        minLength: 4
-      taxHead:
-        type: string
-        description: Tax head for which the glcode is.
-      service:
-        type: string
-        description: Service for which the Tax Head is defined.
-        maxLength: 64
-        minLength: 2
-      glCode:
-        type: string
-        minLength: 1
-        maxLength: 64
-        description: A general ledger code for demand head for financial posting.
-      fromDate:
-        type: integer
-        format: int64
-        description: 'Time in epoch, From date for glcode to be applied for tax. Date is inclduing timestamp, dd/MM/yyyy hh24:mi:ss'
-      toDate:
-        type: integer
-        format: int64
-        description: 'Time in epoch, To date for glcode to be applied for tax. Date is inclduing timestamp, dd/MM/yyyy hh24:mi:ss'
-      auditDetails:
-        $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/AuditDetails'
-    required:
-      - tenantId
-      - taxHead
-      - service
-      - glCode
-      - fromDate
-      - toDate
   TaxPeriod:
     type: object
     description: An object which holds the tax period info
@@ -1131,23 +470,33 @@ definitions:
         description: Id of the bill
       mobileNumber:
         type: string
-        description: MobileNumber for whom the bill is generated.
-      payeeAddress:
+        description: MobileNumber of the payer.
+      payerName:
         type: string
-        description: Consumer address for whom the bill is generated.
-      payeeEmail:
+        description: name of the payer.        
+      payerAddress:
         type: string
-        description: Consumer email for whom the bill is generated.
+        description: Address details from the payer.
+      payerEmail:
+        type: string
+        description: email address of the payer.
       isActive:
         type: boolean
         description: 'true when active bill is created, false when inactive bill is created.'
       isCancelled:
         type: boolean
         description: 'true when cancelled bill is cancelled, false when non-cancelled bill is created.'
+      additionalDetails:  
+        type: object
+        description: field for capturing any additional details.
+      taxAndPayments:
+        type: array
+        items:
+          $ref: '#/definitions/taxAndPayment'
       billDetails:
         type: array
         items:
-          $ref: '#/definitions/BillDetails'
+          $ref: '#/definitions/BillDetail'
       tenantId:
         type: string
         description: Unique Identifier of the tenant
@@ -1155,7 +504,7 @@ definitions:
         minLength: 4
       auditDetails:
         $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/AuditDetails'
-  BillDetails:
+  BillDetail:
     type: object
     properties:
       id:
@@ -1164,8 +513,11 @@ definitions:
       tenantId:
         type: string
         description: Unique Identifier of the tenant
-        maxLength: 128
+        maxLength: 256
         minLength: 4
+      demandId:
+        type: string
+        description: Unique Identifier of the demand associated with the bill detail
       bill:
         type: string
         description: Id of bill
@@ -1176,8 +528,8 @@ definitions:
         type: string
         description: Bill number.
       billDate:
-        type: string
-        format: date
+        type: number
+        format: int64
         description: Bill date.
       consumerCode:
         type: string
@@ -1185,46 +537,38 @@ definitions:
       consumerType:
         type: string
         description: Type of the entity for which the bill is being created.
-      billDescription:
-        type: string
-        description: Description from the billing system.
-      displayMessage:
-        type: string
-        description: Additional information from the billing system.
-      receiptDate:
-        type: integer
-        format: int64
-        description: Date of receipt.
-      receiptNumber:
-        type: string
-        description: readable value of the receipt.
       minimumAmount:
         type: number
-        format: double
         description: Minimum bill amount to be paid.
       totalAmount:
         type: number
-        format: double
         description: Total bill amount to be paid.
+      fromPeriod:
+        type: number
+        format: int64
+        description: starting date of the demand period referred by the bill detail.
+      toPeriod:
+        type: number
+        format: int64
+        description: ending date of the demand period referred by the bill detail.
       collectedAmount:
         type: number
-        format: double
-        description: collected amount from the payee for the bill detail
+        description: sum of the amount which has been collected for the demand.
       collectionModesNotAllowed:
         type: array
         items:
           type: string
         description: List of collection modes not allowed.
-      callBackForApportioning:
-        type: boolean
-        description: 'true if call back for apportioning is required, false if call back for apportioning is not required.'
       partPaymentAllowed:
         type: boolean
         description: 'true if part payment allowed, false if part payment is not allowed.'
+      additionalDetails:  
+        type: object
+        description: field for capturing any additional details.
       billAccountDetails:
         type: array
         items:
-          $ref: '#/definitions/BillAccountDetails'
+          $ref: '#/definitions/BillAccountDetail'
       status:
         type: string
         description: status if the bill detail
@@ -1232,7 +576,7 @@ definitions:
           - CREATED
           - CANCELLED
           - INSTRUMENT_BOUNCED
-  BillAccountDetails:
+  BillAccountDetail:
     type: object
     properties:
       id:
@@ -1246,46 +590,41 @@ definitions:
       billDetail:
         type: string
         description: Id of billdetail
-      glcode:
+      demandDetailId:
         type: string
-        description: Chart of account code.
+        description: unique id of the demand detail object.
       order:
         type: integer
         format: int32
         description: Order number used for apportioning amount in case of part payment.
-      accountDescription:
-        type: string
-        description: Account description to be printed on receipt.
-      crAmountToBePaid:
+      amount:
         type: number
-        format: double
         description: Credit account head amount to be paid.
-      creditAmount:
+      adjustedAmount:
         type: number
-        format: double
         description: Credit account head amount.
-      debitAmount:
-        type: number
-        format: double
-        description: Debit account head amount.
       isActualDemand:
         type: boolean
         description: True for tax/charges/penalty. False for advances(if any).
+      glcode:
+        type: string
+        description: field for capturing the glcode value.
+      taxHeadCode:
+        type: string
+        description: field for capturing the taxhead-code value.
+      additionalDetails:  
+        type: object
+        description: field for capturing any additional details.        
       purpose:
         type: string
         description: Purpose of Account head.
         enum:
-          - ARREAR_AMOUNT
-          - CURRENT_AMOUNT
-          - ADVANCE_AMOUNT
-          - ARREAR_LATEPAYMENT_CHARGES
-          - CURRENT_LATEPAYMENT_CHARGES
-          - CHEQUE_BOUNCE_PENALTY
-          - REBATE
-          - OTHERS
+          - ARREAR
+          - CURRENT
+          - ADVANCE
   BusinessServiceDetails:
     type: object
-    description: 'The object holds the configuration details for each business service. If callBackForApportioning is true, then value for callBackApportionURL should be sent mandatorily.'
+    description: 'The object holds the configuration details for each business service.'
     properties:
       id:
         type: string
@@ -1303,57 +642,11 @@ definitions:
         items:
           type: string
         description: List of collection modes not allowed.
-      callBackForApportioning:
-        type: boolean
-        description: 'true if call back for apportioning is required, false if call back for apportioning is not required.'
-      callBackApportionURL:
-        type: string
-        description: Provides the URL for Apportioning
       partPaymentAllowed:
         type: boolean
         description: 'true if part payment allowed, false if part payment is not allowed.'
       auditDetails:
         $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/AuditDetails'
-  CollectedReceipts:
-    type: object
-    description: A object holds a payment information against a demand.
-    properties:
-      businessService:
-        type: string
-        description: BusinessService code.
-      consumerCode:
-        type: string
-        description: Consumer code of the entity for which the bill is being created.
-      receiptNumber:
-        type: string
-        description: receipt number.
-      receiptAmount:
-        type: number
-        format: double
-        description: receipt amount.
-      receiptDate:
-        type: string
-        format: date
-        description: discount against taxAmount.
-      status:
-        type: string
-        description: receipt status
-        enum:
-          - CREATED
-          - CANCELLED
-          - INSTRUMENT_BOUNCED
-      auditDetails:
-        $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/AuditDetails'
-      tenantId:
-        type: string
-        description: Unique Identifier of the tenant
-        maxLength: 128
-        minLength: 4
-    required:
-      - receiptNumber
-      - receiptAmount
-      - receiptDate
-      - tenantId
   DemandRequest:
     properties:
       RequestInfo:
@@ -1383,14 +676,7 @@ definitions:
         type: array
         maximum: 500
         items:
-          $ref: '#/definitions/DemandDetails'
-    type: object
-  DemandDueResponse:
-    properties:
-      ResponseInfo:
-        $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ResponseInfo'
-      DemandDue:
-        $ref: '#/definitions/DemandDue'
+          $ref: '#/definitions/DemandDetail'
     type: object
   BillRequest:
     properties:
@@ -1455,27 +741,6 @@ definitions:
         items:
           $ref: '#/definitions/TaxHeadMaster'
     type: object
-  GlcodeMasterRequest:
-    properties:
-      RequestInfo:
-        $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/RequestInfo'
-      glcodeMasters:
-        type: array
-        minimum: 1
-        maximum: 100
-        items:
-          $ref: '#/definitions/GlcodeMaster'
-    type: object
-  GlcodeMasterResponse:
-    properties:
-      ResponseInfo:
-        $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/ResponseInfo'
-      glcodeMasters:
-        type: array
-        maximum: 500
-        items:
-          $ref: '#/definitions/GlcodeMaster'
-    type: object
   TaxPeriodRequest:
     properties:
       RequestInfo:
@@ -1497,3 +762,14 @@ definitions:
         items:
           $ref: '#/definitions/TaxPeriod'
     type: object
+  taxAndPayment:
+    properties:
+      businessService:
+        type: string
+        description: unique code of the business service
+      taxAmount:
+        type: string
+        description: amount to be paid by the payer
+      amountPaid:
+        type: string
+        description: amount paid by the payer

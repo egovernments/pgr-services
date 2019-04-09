@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -114,8 +113,7 @@ public class GrievanceService {
 		log.info("Service layer for createss");
 		enrichserviceRequestForcreate(request);
 		pGRProducer.push(saveTopic, request);
-		for(long i = 0; i < 100000000; i++) { i+=1; i-=1; } //delay loop to ensure data is persisted happens before we push to index.
-		pGRProducer.push(saveIndexTopic, dataTranformationForIndexer(request));
+		pGRProducer.push(saveIndexTopic, dataTranformationForIndexer(request, true));
 		return getServiceResponse(request);
 	}
 
@@ -130,8 +128,7 @@ public class GrievanceService {
 		if (null == request.getActionInfo())
 			request.setActionInfo(new ArrayList<ActionInfo>());
 		pGRProducer.push(updateTopic, request);
-		for(long i = 0; i < 10000000; i++) { i+=1; i-=1; } //delay loop to ensure data is persisted happens before we push to index.
-		pGRProducer.push(updateIndexTopic, dataTranformationForIndexer(request));
+		pGRProducer.push(updateIndexTopic, dataTranformationForIndexer(request, false));
 		return getServiceResponse(request);
 	}
 	
@@ -194,7 +191,7 @@ public class GrievanceService {
 	 */
 	private void overRideCitizenAccountId(ServiceRequest serviceRequest) {
 		User user = serviceRequest.getRequestInfo().getUserInfo();
-		List<String> codes = user.getRoles().stream().map(Role::getName).collect(Collectors.toList());
+		List<String> codes = user.getRoles().stream().map(Role::getCode).collect(Collectors.toList());
 		if (codes.contains(PGRConstants.ROLE_CITIZEN) || codes.contains(PGRConstants.ROLE_NAME_CITIZEN))
 			serviceRequest.getServices().forEach(service -> service.setAccountId(String.valueOf(user.getId())));
 	}
@@ -227,9 +224,9 @@ public class GrievanceService {
 	 */
 	private void validateAndCreateUser(ServiceRequest serviceRequest) {
 		RequestInfo requestInfo = serviceRequest.getRequestInfo();
-		List<String> roleNames = requestInfo.getUserInfo().getRoles().parallelStream().map(Role::getName)
+		List<String> roles = requestInfo.getUserInfo().getRoles().parallelStream().map(Role::getCode)
 				.collect(Collectors.toList());
-		if(roleNames.contains(PGRConstants.ROLE_NAME_CSR) || roleNames.contains(PGRConstants.ROLE_CSR)) {
+		if(roles.contains(PGRConstants.ROLE_NAME_CSR) || roles.contains(PGRConstants.ROLE_CSR)) {
 			serviceRequest.getServices().stream().forEach(request -> {
 				String accId = null;
 				if (null != request.getCitizen()) {
@@ -272,12 +269,46 @@ public class GrievanceService {
 	 * @param request
 	 * @return
 	 */
-	private ServiceResponse dataTranformationForIndexer(ServiceRequest request) {
-		ObjectMapper mapper = pGRUtils.getObjectMapper();
-		List<String> serviceReqIds = request.getServices().stream().map(Service :: getServiceRequestId).collect(Collectors.toList()); 
-		ServiceReqSearchCriteria serviceReqSearchCriteria = ServiceReqSearchCriteria.builder()
-				.tenantId(request.getServices().get(0).getTenantId()).serviceRequestId(serviceReqIds).build();
-		return mapper.convertValue(getServiceRequestDetails(request.getRequestInfo(), serviceReqSearchCriteria), ServiceResponse.class);
+	private ServiceResponse dataTranformationForIndexer(ServiceRequest request, boolean isCreate) {
+		/**
+		 * This might seem inefficient but in our use-case, create and update happen for just one compliant 95% of the times, so loop runs just once.
+		 */
+		List<Service> services = new ArrayList<Service>();
+		List<ActionHistory> actionHistoryList = new ArrayList<ActionHistory>();
+		if(isCreate) {
+			for(int i = 0; i < request.getServices().size(); i++) {
+				ActionHistory actionHistory = new ActionHistory();
+				List<ActionInfo> actions = new ArrayList<>();
+				actions.add(request.getActionInfo().get(i));
+				actionHistory.setActions(actions);
+				actionHistoryList.add(actionHistory);
+				services.add(request.getServices().get(i));
+			}
+		}else {
+			for(int i = 0; i < request.getServices().size(); i++) {
+				ObjectMapper mapper = pGRUtils.getObjectMapper();
+				ActionHistory actionHistory = new ActionHistory();
+				List<ActionInfo> actions = new ArrayList<>();
+				List<String> serviceRequestIds = new ArrayList<String>();
+				serviceRequestIds.add(request.getServices().get(i).getServiceRequestId());
+				ServiceReqSearchCriteria serviceReqSearchCriteria = ServiceReqSearchCriteria.builder()
+						.tenantId(request.getServices().get(i).getTenantId()).serviceRequestId(serviceRequestIds).build();
+				ServiceResponse serviceResponse = mapper.convertValue(getServiceRequestDetails(request.getRequestInfo(), serviceReqSearchCriteria), ServiceResponse.class);
+				actionHistory = serviceResponse.getActionHistory().get(0);
+				actions.add(request.getActionInfo().get(i));
+				actions.addAll(actionHistory.getActions());
+				actionHistory.setActions(actions);
+				AuditDetails auditDetails = AuditDetails.builder().createdBy(serviceResponse.getServices().get(0).getAuditDetails().getCreatedBy())
+						.createdTime(serviceResponse.getServices().get(0).getAuditDetails().getCreatedTime())
+						.lastModifiedBy(request.getServices().get(0).getAuditDetails().getLastModifiedBy())
+						.lastModifiedTime(request.getServices().get(0).getAuditDetails().getLastModifiedTime()).build();
+				request.getServices().get(0).setAuditDetails(auditDetails);
+				services.add(request.getServices().get(0));
+				actionHistoryList.add(actionHistory);
+
+			}
+		}
+		return ServiceResponse.builder().services(services).actionHistory(actionHistoryList).build();
 	}
 
 	/**
@@ -300,7 +331,7 @@ public class GrievanceService {
 			if(!StringUtils.isEmpty(actionInfo.getAction())) {
 				service.setStatus(StatusEnum.fromValue(actionStatusMap.get(actionInfo.getAction())));
 			}
-			String role = pGRUtils.getPrecedentRole(requestInfo.getUserInfo().getRoles().stream().map(Role::getName)
+			String role = pGRUtils.getPrecedentRole(requestInfo.getUserInfo().getRoles().stream().map(Role::getCode)
 					.collect(Collectors.toList()));
 			actionInfo.setUuid(UUID.randomUUID().toString()); actionInfo.setBusinessKey(service.getServiceRequestId()); 
 			actionInfo.setBy(auditDetails.getLastModifiedBy() + ":" + role); actionInfo.setWhen(auditDetails.getLastModifiedTime());
@@ -428,7 +459,7 @@ public class GrievanceService {
 	 */
 	public void enrichRequest(RequestInfo requestInfo, ServiceReqSearchCriteria serviceReqSearchCriteria) {
 		log.info("Enriching request for search");
-		String precedentRole = pGRUtils.getPrecedentRole(requestInfo.getUserInfo().getRoles().stream().map(Role::getName)
+		String precedentRole = pGRUtils.getPrecedentRole(requestInfo.getUserInfo().getRoles().stream().map(Role::getCode)
 				.collect(Collectors.toList()));
 		if (requestInfo.getUserInfo().getType().equalsIgnoreCase(PGRConstants.ROLE_CITIZEN)) {
 			serviceReqSearchCriteria.setAccountId(requestInfo.getUserInfo().getId().toString());
@@ -437,14 +468,14 @@ public class GrievanceService {
 			/**
 			 * GRO can search complaints belonging to only his tenant.
 			 */
-			if(precedentRole.equalsIgnoreCase(PGRConstants.ROLE_NAME_GRO)) {
+			if(precedentRole.equalsIgnoreCase(PGRConstants.ROLE_GRO)) {
 				serviceReqSearchCriteria.setTenantId(requestInfo.getUserInfo().getTenantId());
 			}
 			/**
 			 * DGRO belongs to a department and that department takes care of certain complaint types.
 			 * A DGRO can address/see only the complaints belonging to those complaint types and to only his tenant.
 			 */
-			else if (precedentRole.equalsIgnoreCase(PGRConstants.ROLE_NAME_DGRO)) { 
+			else if (precedentRole.equalsIgnoreCase(PGRConstants.ROLE_DGRO)) { 
 				Object response = fetchServiceDefs(requestInfo, serviceReqSearchCriteria.getTenantId(), 
 						getDepartmentCode(serviceReqSearchCriteria, requestInfo));
 				if (null == response) {
@@ -464,7 +495,7 @@ public class GrievanceService {
 			/**
 			 * An Employee can by default search only the complaints assigned to him.
 			 */
-			else if (precedentRole.equalsIgnoreCase(PGRConstants.ROLE_NAME_EMPLOYEE)) {
+			else if (precedentRole.equalsIgnoreCase(PGRConstants.ROLE_EMPLOYEE)) {
 				if (StringUtils.isEmpty(serviceReqSearchCriteria.getAssignedTo()) && CollectionUtils.isEmpty(serviceReqSearchCriteria.getServiceRequestId())) {
 					serviceReqSearchCriteria.setAssignedTo(requestInfo.getUserInfo().getId().toString());
 				}
@@ -472,7 +503,7 @@ public class GrievanceService {
 			/**
 			 * CSR can search complaints across the state.
 			 */
-			else if (precedentRole.equalsIgnoreCase(PGRConstants.ROLE_NAME_CSR)) {
+			else if (precedentRole.equalsIgnoreCase(PGRConstants.ROLE_CSR)) {
 				serviceReqSearchCriteria.setTenantId(serviceReqSearchCriteria.getTenantId().split("[.]")[0]); //csr can search his complaints across state.
 			}
 		}

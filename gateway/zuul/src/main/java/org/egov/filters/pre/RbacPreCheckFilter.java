@@ -4,8 +4,8 @@ import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashSet;
 
 import static org.egov.constants.RequestContextConstants.RBAC_BOOLEAN_FLAG_NAME;
@@ -21,6 +21,7 @@ public class RbacPreCheckFilter extends ZuulFilter {
     private HashSet<String> openEndpointsWhitelist;
     private HashSet<String> anonymousEndpointsWhitelist;
 
+    @Autowired
     public RbacPreCheckFilter(HashSet<String> openEndpointsWhitelist,
                               HashSet<String> anonymousEndpointsWhitelist) {
         this.openEndpointsWhitelist = openEndpointsWhitelist;
@@ -60,11 +61,7 @@ public class RbacPreCheckFilter extends ZuulFilter {
     }
 
     private String getRequestURI() {
-        return getRequest().getRequestURI();
+        return RequestContext.getCurrentContext().getRequest().getRequestURI();
     }
 
-    private HttpServletRequest getRequest() {
-        RequestContext ctx = RequestContext.getCurrentContext();
-        return ctx.getRequest();
-    }
 }

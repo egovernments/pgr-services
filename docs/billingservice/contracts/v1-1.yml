@@ -294,7 +294,6 @@ definitions:
         description: field for capturing any additional details.
       minimumAmountPayable:
         type: number
-        format: double
         description: Minimum bill amount to be paid.
       status:
         type: string
@@ -319,6 +318,9 @@ definitions:
       id:
         type: string
         description: primary key of a DemandDetails.
+      demandId:
+        type: string
+        description: foriegn key of a DemandDetails from demand.        
       taxHeadMasterCode:
         type: string
         description: Tax Head code.
@@ -330,7 +332,6 @@ definitions:
         description: demand amount.
       collectionAmount:
         type: number
-        format: double
         default: 0
         description: collection against taxAmount.
       additionalDetails:  
@@ -488,15 +489,10 @@ definitions:
       additionalDetails:  
         type: object
         description: field for capturing any additional details.
-      collectionMap:
-        type: object
-        properties:
-          default:
-            type: string
-        required:
-          - default
-        additionalProperties:
-          type: number
+      taxAndPayments:
+        type: array
+        items:
+          $ref: '#/definitions/taxAndPayment'
       billDetails:
         type: array
         items:
@@ -532,8 +528,8 @@ definitions:
         type: string
         description: Bill number.
       billDate:
-        type: string
-        format: date
+        type: number
+        format: int64
         description: Bill date.
       consumerCode:
         type: string
@@ -543,11 +539,9 @@ definitions:
         description: Type of the entity for which the bill is being created.
       minimumAmount:
         type: number
-        format: double
         description: Minimum bill amount to be paid.
       totalAmount:
         type: number
-        format: double
         description: Total bill amount to be paid.
       fromPeriod:
         type: number
@@ -559,7 +553,6 @@ definitions:
         description: ending date of the demand period referred by the bill detail.
       collectedAmount:
         type: number
-        format: double
         description: sum of the amount which has been collected for the demand.
       collectionModesNotAllowed:
         type: array
@@ -606,11 +599,9 @@ definitions:
         description: Order number used for apportioning amount in case of part payment.
       amount:
         type: number
-        format: double
         description: Credit account head amount to be paid.
       adjustedAmount:
         type: number
-        format: double
         description: Credit account head amount.
       isActualDemand:
         type: boolean
@@ -618,6 +609,9 @@ definitions:
       glcode:
         type: string
         description: field for capturing the glcode value.
+      taxHeadCode:
+        type: string
+        description: field for capturing the taxhead-code value.
       additionalDetails:  
         type: object
         description: field for capturing any additional details.        
@@ -768,3 +762,14 @@ definitions:
         items:
           $ref: '#/definitions/TaxPeriod'
     type: object
+  taxAndPayment:
+    properties:
+      businessService:
+        type: string
+        description: unique code of the business service
+      taxAmount:
+        type: string
+        description: amount to be paid by the payer
+      amountPaid:
+        type: string
+        description: amount paid by the payer

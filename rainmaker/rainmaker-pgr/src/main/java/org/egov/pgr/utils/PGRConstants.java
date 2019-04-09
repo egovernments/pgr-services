@@ -123,7 +123,6 @@ public class PGRConstants {
 	public static final String ROLE_NAME_DGRO = "Department Grievance Routing Officer";
 	public static final String ROLE_NAME_CSR = "Customer Support Representative";
 	
-
 	
 	private static Map<String, String> statusNotifKeyMap = prepareStatusNotifKeyMap();
 

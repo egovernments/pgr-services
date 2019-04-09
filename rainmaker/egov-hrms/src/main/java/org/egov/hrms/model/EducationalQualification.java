@@ -74,4 +74,7 @@ public class EducationalQualification {
 
 	private AuditDetails auditDetails;
 
+	private Boolean isActive;
+
+
 }

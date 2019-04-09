@@ -9,6 +9,7 @@ import org.egov.user.domain.model.NonLoggedInUserUpdatePasswordRequest;
 import org.egov.user.domain.model.User;
 import org.egov.user.domain.model.UserSearchCriteria;
 import org.egov.user.domain.model.enums.UserType;
+import org.egov.user.persistence.dto.FailedLoginAttempt;
 import org.egov.user.persistence.repository.FileStoreRepository;
 import org.egov.user.persistence.repository.OtpRepository;
 import org.egov.user.persistence.repository.UserRepository;
@@ -20,16 +21,21 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.egov.user.config.UserServiceConstants.USER_CLIENT_ID;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
@@ -43,15 +49,25 @@ public class UserService {
     private boolean isCitizenLoginOtpBased;
     private boolean isEmployeeLoginOtpBased;
     private FileStoreRepository fileRepository;
+    private TokenStore tokenStore;
 
     @Value("${egov.user.host}")
     private String userHost;
+
+    @Value("${account.unlock.cool.down.period.minutes}")
+    private Long accountUnlockCoolDownPeriod;
+
+    @Value("${max.invalid.login.attempts.period.minutes}")
+    private Long maxInvalidLoginAttemptsPeriod;
+
+    @Value("${max.invalid.login.attempts}")
+    private Long maxInvalidLoginAttempts;
 
     @Autowired
     private RestTemplate restTemplate;
 
     public UserService(UserRepository userRepository, OtpRepository otpRepository, FileStoreRepository fileRepository,
-                       PasswordEncoder passwordEncoder,
+                       PasswordEncoder passwordEncoder, TokenStore tokenStore,
                        @Value("${default.password.expiry.in.days}") int defaultPasswordExpiryInDays,
                        @Value("${citizen.login.password.otp.enabled}") boolean isCitizenLoginOtpBased,
                        @Value("${employee.login.password.otp.enabled}") boolean isEmployeeLoginOtpBased) {
@@ -62,6 +78,7 @@ public class UserService {
         this.isCitizenLoginOtpBased = isCitizenLoginOtpBased;
         this.isEmployeeLoginOtpBased = isEmployeeLoginOtpBased;
         this.fileRepository = fileRepository;
+        this.tokenStore = tokenStore;
     }
 
     /**
@@ -120,8 +137,10 @@ public class UserService {
      * @param searchCriteria
      * @return
      */
-    public List<org.egov.user.domain.model.User> searchUsers(UserSearchCriteria searchCriteria) {
-        searchCriteria.validate();
+    public List<org.egov.user.domain.model.User> searchUsers(UserSearchCriteria searchCriteria,
+                                                             boolean isInterServiceCall) {
+
+        searchCriteria.validate(isInterServiceCall);
 
         searchCriteria.setTenantId(getStateLevelTenantForCitizen(searchCriteria.getTenantId(), searchCriteria.getType()));
         List<org.egov.user.domain.model.User> list = userRepository.findAll(searchCriteria);
@@ -156,8 +175,6 @@ public class UserService {
                     .getType()).tenantId(user.getTenantId()).build());
     }
 
-    // Temporary validation to remove backward compatibility
-    @Deprecated
     private String getStateLevelTenantForCitizen(String tenantId, UserType userType){
         if (!isNull(userType) && userType.equals(UserType.CITIZEN) && !isEmpty(tenantId) && tenantId.contains("."))
             return tenantId.split("\\.")[0];
@@ -247,7 +264,7 @@ public class UserService {
      * @return
      */
     public Boolean validateOtp(User user) {
-        Otp otp = Otp.builder().otp(user.getOtpReference()).identity(user.getUsername()).tenantId(user.getTenantId())
+        Otp otp = Otp.builder().otp(user.getOtpReference()).identity(user.getMobileNumber()).tenantId(user.getTenantId())
                 .userType(user.getType()).build();
         RequestInfo requestInfo = RequestInfo.builder().action("validate").ts(new Date()).build();
         OtpValidateRequest otpValidationRequest = OtpValidateRequest.builder().requestInfo(requestInfo).otp(otp)
@@ -263,6 +280,7 @@ public class UserService {
      * @param user
      * @return
      */
+    // TODO Fix date formats
     public User updateWithoutOtpValidation(final User user) {
         final User existingUser = getUserByUuid(user.getUuid());
         user.setTenantId(getStateLevelTenantForCitizen(user.getTenantId(), user.getType()));
@@ -270,7 +288,32 @@ public class UserService {
         user.validateUserModification();
         user.setPassword(encryptPwd(user.getPassword()));
         userRepository.update(user, existingUser);
-        return getUserByUuid(user.getUuid());
+
+
+        // If user is being unlocked via update, reset failed login attempts
+        if(user.getAccountLocked()!=null && !user.getAccountLocked() && existingUser.getAccountLocked())
+            resetFailedLoginAttempts(user);
+
+        return  getUserByUuid(user.getUuid());
+    }
+
+    public void removeTokensByUser(User user){
+        Collection<OAuth2AccessToken> tokens =tokenStore.findTokensByClientIdAndUserName(USER_CLIENT_ID,
+                user.getUsername());
+
+        for(OAuth2AccessToken token : tokens){
+            if(token.getAdditionalInformation() != null && token.getAdditionalInformation().containsKey("UserRequest")){
+                if(token.getAdditionalInformation().get("UserRequest") instanceof org.egov.user.web.contract.auth.User) {
+                    org.egov.user.web.contract.auth.User userInfo =
+                            (org.egov.user.web.contract.auth.User) token.getAdditionalInformation().get(
+                                    "UserRequest");
+                    if(user.getUsername().equalsIgnoreCase(userInfo.getUserName()) && user.getTenantId().equalsIgnoreCase(userInfo.getTenantId())
+                            && user.getType().equals(UserType.fromValue(userInfo.getType())))
+                        tokenStore.removeAccessToken(token);
+                }
+            }
+        }
+
     }
 
     /**
@@ -342,6 +385,77 @@ public class UserService {
         validateOtp(user);
         user.updatePassword(encryptPwd(request.getNewPassword()));
         userRepository.update(user, user);
+    }
+
+
+    /**
+     * Deactivate failed login attempts for provided user
+     *
+     * @param user whose failed login attempts are to be reset
+     */
+    public void resetFailedLoginAttempts(User user){
+        if(user.getUuid() != null)
+            userRepository.resetFailedLoginAttemptsForUser(user.getUuid());
+    }
+
+    /**
+     * Checks if user is eligible for unlock
+     *  returns true,
+     *      - If configured cool down period has passed since last lock
+     *  else false
+     *
+     * @param user to be checked for eligibility for unlock
+     * @return if unlock able
+     */
+    public boolean isAccountUnlockAble(User user) {
+        if (user.getAccountLocked()){
+            boolean unlockAble =
+                    System.currentTimeMillis() - user.getAccountLockedDate() > TimeUnit.MINUTES.toMillis(accountUnlockCoolDownPeriod);
+
+            log.info("Account eligible for unlock - "+ unlockAble);
+            log.info("Current time {}, last lock time {} , cool down period {} ", System.currentTimeMillis(),
+                    user.getAccountLockedDate(), TimeUnit.MINUTES.toMillis(accountUnlockCoolDownPeriod));
+            return unlockAble;
+        }
+        else
+            return true;
+    }
+
+    /**
+     * Perform actions where a user login fails
+     *  - Fetch existing failed login attempts within configured time
+     *  period{@link UserService#maxInvalidLoginAttemptsPeriod}
+     *  - If failed login attempts exceeds configured {@link UserService#maxInvalidLoginAttempts}
+     *     - then lock account
+     *  - Add failed login attempt entry to repository
+     *
+     * @param user user whose failed login attempt to be handled
+     * @param ipAddress IP address of remote
+     */
+    public void handleFailedLogin(User user, String ipAddress){
+        if(!Objects.isNull(user.getUuid())) {
+        List<FailedLoginAttempt> failedLoginAttempts =
+                userRepository.fetchFailedAttemptsByUserAndTime(user.getUuid(),
+                        System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(maxInvalidLoginAttemptsPeriod));
+
+        if(failedLoginAttempts.size() + 1 >= maxInvalidLoginAttempts){
+            User userToBeUpdated = user.toBuilder()
+                    .accountLocked(true)
+                    .password(null)
+                    .accountLockedDate(System.currentTimeMillis())
+                    .build();
+
+            user = updateWithoutOtpValidation(userToBeUpdated);
+            removeTokensByUser(user);
+            log.info("Locked account with uuid {} for {} minutes as exceeded max allowed attempts of {} within {} " +
+                            "minutes",
+                    user.getUuid(), accountUnlockCoolDownPeriod, maxInvalidLoginAttempts, maxInvalidLoginAttemptsPeriod);
+            throw new OAuth2Exception("Account locked");
+        }
+
+        userRepository.insertFailedLoginAttempt(new FailedLoginAttempt(user.getUuid(), ipAddress,
+                System.currentTimeMillis(), true));
+        }
     }
 
 

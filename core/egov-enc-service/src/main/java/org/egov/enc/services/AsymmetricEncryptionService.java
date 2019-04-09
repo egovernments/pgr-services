@@ -24,7 +24,7 @@ public class AsymmetricEncryptionService implements EncryptionServiceInterface {
 
     public Ciphertext encrypt(Plaintext plaintext) throws InvalidKeySpecException, NoSuchAlgorithmException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchPaddingException, InvalidAlgorithmParameterException {
         AsymmetricKey asymmetricKey = keyStore.getAsymmetricKey(plaintext.getTenantId());
-        PublicKey publicKey = keyStore.generatePublicKey(asymmetricKey);
+        PublicKey publicKey = keyStore.getPublicKey(asymmetricKey);
 
         byte[] cipherBytes = AsymmetricEncryptionUtil.encrypt(plaintext.getPlaintext().getBytes(StandardCharsets.UTF_8), publicKey);
 
@@ -37,7 +37,7 @@ public class AsymmetricEncryptionService implements EncryptionServiceInterface {
 
     public Plaintext decrypt(Ciphertext ciphertext) throws InvalidKeySpecException, NoSuchAlgorithmException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchPaddingException, InvalidAlgorithmParameterException {
         AsymmetricKey asymmetricKey = keyStore.getAsymmetricKey(ciphertext.getKeyId());
-        PrivateKey privateKey = keyStore.generatePrivateKey(asymmetricKey);
+        PrivateKey privateKey = keyStore.getPrivateKey(asymmetricKey);
 
         byte[] plainBytes = AsymmetricEncryptionUtil.decrypt(Base64.getDecoder().decode(ciphertext.getCiphertext()), privateKey);
         String plain = new String(plainBytes, StandardCharsets.UTF_8);

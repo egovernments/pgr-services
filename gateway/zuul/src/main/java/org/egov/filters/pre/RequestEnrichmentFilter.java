@@ -15,11 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Optional;
 
+import static org.egov.Utils.Utils.isRequestBodyCompatible;
 import static org.egov.constants.RequestContextConstants.*;
 
 /**
@@ -79,7 +78,7 @@ public class RequestEnrichmentFilter extends ZuulFilter {
     }
 
     private void addUserInfoHeader(RequestContext ctx) {
-        if (isUserInfoPresent() && !isRequestBodyCompatible()) {
+        if (isUserInfoPresent() && !isRequestBodyCompatible(ctx.getRequest())) {
             User user = getUser();
             try {
                 ctx.addZuulRequestHeader(USER_INFO_HEADER_NAME, objectMapper.writeValueAsString(user));
@@ -101,7 +100,7 @@ public class RequestEnrichmentFilter extends ZuulFilter {
     }
 
     private void modifyRequestBody() {
-        if (!isRequestBodyCompatible()) {
+        if (!isRequestBodyCompatible(RequestContext.getCurrentContext().getRequest())) {
             return;
         }
         try {
@@ -110,29 +109,6 @@ public class RequestEnrichmentFilter extends ZuulFilter {
             logger.error(FAILED_TO_ENRICH_REQUEST_BODY_MESSAGE, e);
             throw new RuntimeException(e);
         }
-    }
-
-    private boolean isRequestBodyCompatible() {
-        return POST.equalsIgnoreCase(getRequestMethod())
-            && !getRequestURI().matches(FILESTORE_REGEX)
-            && getRequestContentType().contains(JSON_TYPE);
-    }
-
-    private HttpServletRequest getRequest() {
-        RequestContext ctx = RequestContext.getCurrentContext();
-        return ctx.getRequest();
-    }
-
-    private String getRequestMethod() {
-        return getRequest().getMethod();
-    }
-
-    private String getRequestContentType() {
-        return Optional.ofNullable(getRequest().getContentType()).orElse(EMPTY_STRING).toLowerCase();
-    }
-
-    private String getRequestURI() {
-        return getRequest().getRequestURI();
     }
 
     @SuppressWarnings("unchecked")

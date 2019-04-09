@@ -39,17 +39,23 @@ public class PaymentUpdateService {
 
 	private WorkflowIntegrator wfIntegrator;
 
-	@Autowired
+	private EnrichmentService enrichmentService;
+
 	private ObjectMapper mapper;
 
 	@Autowired
-	public PaymentUpdateService(TradeLicenseService tradeLicenseService, TLConfiguration config,
-			TLRepository repository, WorkflowIntegrator wfIntegrator) {
+	public PaymentUpdateService(TradeLicenseService tradeLicenseService, TLConfiguration config, TLRepository repository,
+								WorkflowIntegrator wfIntegrator, EnrichmentService enrichmentService, ObjectMapper mapper) {
 		this.tradeLicenseService = tradeLicenseService;
 		this.config = config;
 		this.repository = repository;
 		this.wfIntegrator = wfIntegrator;
+		this.enrichmentService = enrichmentService;
+		this.mapper = mapper;
 	}
+
+
+
 
 	final String tenantId = "tenantId";
 
@@ -100,6 +106,9 @@ public class PaymentUpdateService {
 
 				updateRequest.getLicenses()
 						.forEach(obj -> log.info(" the status of the application is : " + obj.getStatus()));
+
+				enrichmentService.postStatusEnrichment(updateRequest);
+
 				/*
 				 * calling repository to update the object in TL tables
 				 */

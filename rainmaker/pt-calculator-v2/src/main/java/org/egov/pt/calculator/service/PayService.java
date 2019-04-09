@@ -44,7 +44,6 @@ public class PayService {
 	 * 
 	 * If the demand details are not already present then new demand details will be added
 	 * 
-	 * @param demand
 	 * @param assessmentYear
 	 * @return
 	 */
@@ -112,9 +111,9 @@ public class PayService {
 		Map<String, Object> penalty = mDService.getApplicableMaster(assessmentYear, penaltyMasterList);
 		if (null == penalty) return penaltyAmt;
 
-		String[] time = ((String) penalty.get(CalculatorConstants.STARTING_DATE_APPLICABLES)).split("/");
+		String[] time = getStartTime(assessmentYear,penalty);
 		Calendar cal = Calendar.getInstance();
-		setDateToCalendar(assessmentYear, time, cal);
+		setDateToCalendar(time, cal);
 
 		if (cal.getTimeInMillis() < System.currentTimeMillis()) 
 			penaltyAmt = mDService.calculateApplicables(taxAmt, penalty);
@@ -137,9 +136,10 @@ public class PayService {
 		if (null == interestMap)
 			return interestAmt;
 
-		String[] time = ((String) interestMap.get(CalculatorConstants.STARTING_DATE_APPLICABLES)).split("/");
+		String[] time = getStartTime(assessmentYear,interestMap);
+
 		Calendar cal = Calendar.getInstance();
-		setDateToCalendar(assessmentYear, time, cal);
+		setDateToCalendar(time, cal);
 		long current = System.currentTimeMillis();
 		long interestStart = cal.getTimeInMillis();
 		long numberOfDaysInMillies = 0 < lastCollectedTime ? current - lastCollectedTime : current - interestStart;
@@ -243,6 +243,23 @@ public class PayService {
 		cal.set(year, month, day);
 	}
 
+
+	/**
+	 * Overloaded method
+	 * Sets the date in to calendar based on the month and date value present in the time array*
+	 * @param time
+	 * @param cal
+	 */
+	private void setDateToCalendar(String[] time, Calendar cal) {
+
+		cal.clear();
+		Integer day = Integer.valueOf(time[0]);
+		Integer month = Integer.valueOf(time[1])-1;
+		// One is subtracted because calender reads january as 0
+		Integer year = Integer.valueOf(time[2]);
+		cal.set(year, month, day);
+	}
+
 	/**
 	 * Decimal is ceiled for all the tax heads
 	 * 
@@ -250,7 +267,6 @@ public class PayService {
 	 * 
 	 * else if decimal is lesser than 0.5 lower bound is applied
 	 * 
-	 * @param estimates
 	 */
 	public TaxHeadEstimate roundOfDecimals(BigDecimal creditAmount, BigDecimal debitAmount) {
 
@@ -275,4 +291,27 @@ public class PayService {
 		else
 			return null;
 	}
+
+
+	/**
+	 * Fetch the fromFY and take the starting year of financialYear
+	 * calculate the difference between the start of assessment financial year and fromFY
+	 * Add the difference in year to the year in the starting day
+	 * eg: Assessment year = 2017-18 and interestMap fetched from master due to fallback have fromFY = 2015-16
+	 * and startingDay = 01/04/2016. Then diff = 2017-2015 = 2
+	 * Therefore the starting day will be modified from 01/04/2016 to 01/04/2018
+	 * @param assessmentYear Year of the assessment
+	 * @param interestMap The applicable master data
+	 * @return list of string with 0'th element as day, 1'st as month and 2'nd as year
+	 */
+	private String[] getStartTime(String assessmentYear,Map<String, Object> interestMap){
+		String financialYearOfApplicableEntry = ((String) interestMap.get(CalculatorConstants.FROMFY_FIELD_NAME)).split("-")[0];
+		Integer diffInYear = Integer.valueOf(assessmentYear.split("-")[0]) - Integer.valueOf(financialYearOfApplicableEntry);
+		String startDay = ((String) interestMap.get(CalculatorConstants.STARTING_DATE_APPLICABLES));
+		Integer yearOfStartDayInApplicableEntry = Integer.valueOf((startDay.split("/")[2]));
+		startDay = startDay.replace(String.valueOf(yearOfStartDayInApplicableEntry),String.valueOf(yearOfStartDayInApplicableEntry+diffInYear));
+		String[] time = startDay.split("/");
+		return time;
+	}
+
 }

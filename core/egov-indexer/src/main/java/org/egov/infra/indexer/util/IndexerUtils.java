@@ -498,8 +498,8 @@ public class IndexerUtils {
 			formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 			context.put("$", "@timestamp", formatter.format(date));
 		} catch (Exception e) {
-			log.info("Exception while adding timestamp: ", e);
-			log.info("Data: " + context.jsonString());
+			log.info("Exception while adding timestamp!");
+			log.debug("Data: " + context.jsonString());
 		}
 
 		return context;

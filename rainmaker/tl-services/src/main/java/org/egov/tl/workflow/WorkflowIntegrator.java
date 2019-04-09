@@ -95,7 +95,7 @@ public class WorkflowIntegrator {
 			obj.put(COMMENTKEY, license.getComment());
 			if (!StringUtils.isEmpty(license.getAssignee()))
 				obj.put(ASSIGNEEKEY, uuidmap);
-			obj.put(DOCUMENTSKEY, license.getWfDocumnets());
+			obj.put(DOCUMENTSKEY, license.getWfDocuments());
 			array.add(obj);
 		}
 

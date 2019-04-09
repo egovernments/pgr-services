@@ -43,14 +43,14 @@ ServiceMaps:
         - inJsonPath: $.@timestamp
           outJsonPath: $.Data.@timestamp
         externalUriMapping:
-        - path: http://egov-location:8080/egov-location/location/v11/boundarys/_search
+        - path: http://egov-location.egov:8080/egov-location/location/v11/boundarys/_search
           queryParam: hierarchyTypeCode=ADMIN,boundaryType=locality,codes=$.addressDetail.mohalla,tenantId=$.tenantId
           apiRequest: {"RequestInfo": {"apiId": "org.egov.pt","ver": "1.0","ts": 1502890899493,"action": "asd","did": "4354648646","key": "xyz","msgId": "654654", "requesterId": "61",
           "authToken": "02dbe5be-28df-4d82-954f-3d27c56cca7d","userInfo":{"id":73}}}
           uriResponseMapping:
           - inJsonPath: $.TenantBoundary[0].boundary[0].name
             outJsonPath: $.Data.addressDetail.locality
-        - path: http://egov-location:8080/egov-location/location/v11/boundarys/_search
+        - path: http://egov-location.egov:8080/egov-location/location/v11/boundarys/_search
           queryParam: hierarchyTypeCode=ADMIN,boundaryType=Block,codes=$.addressDetail.mohalla,tenantId=$.tenantId
           apiRequest: {"RequestInfo": {"apiId": "org.egov.pt","ver": "1.0","ts": 1502890899493,"action": "asd","did": "4354648646","key": "xyz","msgId": "654654", "requesterId": "61",
           "authToken": "02dbe5be-28df-4d82-954f-3d27c56cca7d","userInfo":{"id":73}}}
@@ -58,7 +58,7 @@ ServiceMaps:
           - inJsonPath: $.TenantBoundary[0].boundary[0]
             outJsonPath: $.Data.complaintWard
         mdmsMapping:
-        - path: http://egov-mdms-service:8080/egov-mdms-service/v1/_search
+        - path: http://egov-mdms-service.egov:8080/egov-mdms-service/v1/_search
           moduleName: common-masters
           masterName: Department
           tenantId: pb
@@ -69,7 +69,7 @@ ServiceMaps:
           uriResponseMapping:
           - inJsonPath: $.MdmsRes.common-masters.Department.*.name
             outJsonPath: $.Data.department
-        - path: http://egov-mdms-service:8080/egov-mdms-service/v1/_search
+        - path: http://egov-mdms-service.egov:8080/egov-mdms-service/v1/_search
           moduleName: RAINMAKER-PGR
           masterName: ServiceDefs
           tenantId: pb
@@ -80,7 +80,7 @@ ServiceMaps:
           uriResponseMapping:
           - inJsonPath: $.MdmsRes.RAINMAKER-PGR.ServiceDefs.*.slaHours
             outJsonPath: $.Data.slaHours
-        - path: http://egov-mdms-service:8080/egov-mdms-service/v1/_search
+        - path: http://egov-mdms-service.egov:8080/egov-mdms-service/v1/_search
           moduleName: tenant
           masterName: tenants
           tenantId: pb
@@ -133,28 +133,28 @@ ServiceMaps:
         - inJsonPath: $.@timestamp
           outJsonPath: $.Data.@timestamp
         externalUriMapping:
-        - path: http://hr-employee-v2:8080/hr-employee-v2/employees/_search
-          queryParam: tenantId=$.tenantId,id=$.assignee
+        - path: http://egov-hrms.egov:8080/egov-hrms/employees/_search
+          queryParam: tenantId=$.tenantId,ids=$.assignee
           apiRequest: {"RequestInfo": {"apiId": "org.egov.pt","ver": "1.0","ts": 1502890899493,"action": "asd","did": "4354648646","key": "xyz","msgId": "654654", "requesterId": "61",
           "authToken": "750d4aa9-2436-4bc4-a8f4-3796e3bfd465","userInfo":{"id":73}}}
           uriResponseMapping:
-          - inJsonPath: $.Employee[0].name
+          - inJsonPath: $.Employees[0].user.name
             outJsonPath: $.Data.assignee
-        - path: http://hr-employee-v2:8080/hr-employee-v2/employees/_search
-          queryParam: tenantId=$.tenantId,id=$.gro
+        - path: http://egov-hrms.egov:8080/egov-hrms/employees/_search
+          queryParam: tenantId=$.tenantId,ids=$.gro
           apiRequest: {"RequestInfo": {"apiId": "org.egov.pt","ver": "1.0","ts": 1502890899493,"action": "asd","did": "4354648646","key": "xyz","msgId": "654654", "requesterId": "61",
           "authToken": "750d4aa9-2436-4bc4-a8f4-3796e3bfd465","userInfo":{"id":73}}}
           uriResponseMapping:
-          - inJsonPath: $.Employee[0].name
+          - inJsonPath: $.Employees[0].user.name
             outJsonPath: $.Data.gro
-        - path: http://egov-location:8080/egov-location/location/v11/boundarys/_search
+        - path: http://egov-location.egov:8080/egov-location/location/v11/boundarys/_search
           queryParam: hierarchyTypeCode=ADMIN,boundaryType=locality,codes=$.addressDetail.mohalla,tenantId=$.tenantId
           apiRequest: {"RequestInfo": {"apiId": "org.egov.pt","ver": "1.0","ts": 1502890899493,"action": "asd","did": "4354648646","key": "xyz","msgId": "654654", "requesterId": "61",
           "authToken": "750d4aa9-2436-4bc4-a8f4-3796e3bfd465","userInfo":{"id":73}}}
           uriResponseMapping:
           - inJsonPath: $.TenantBoundary[0].boundary[0].name
             outJsonPath: $.Data.addressDetail.locality
-        - path: http://egov-location:8080/egov-location/location/v11/boundarys/_search
+        - path: http://egov-location.egov:8080/egov-location/location/v11/boundarys/_search
           queryParam: hierarchyTypeCode=ADMIN,boundaryType=Block,codes=$.addressDetail.mohalla,tenantId=$.tenantId
           apiRequest: {"RequestInfo": {"apiId": "org.egov.pt","ver": "1.0","ts": 1502890899493,"action": "asd","did": "4354648646","key": "xyz","msgId": "654654", "requesterId": "61",
           "authToken": "750d4aa9-2436-4bc4-a8f4-3796e3bfd465","userInfo":{"id":73}}}
@@ -162,7 +162,7 @@ ServiceMaps:
           - inJsonPath: $.TenantBoundary[0].boundary[0]
             outJsonPath: $.Data.complaintWard
         mdmsMapping:
-        - path: http://egov-mdms-service:8080/egov-mdms-service/v1/_search
+        - path: http://egov-mdms-service.egov:8080/egov-mdms-service/v1/_search
           moduleName: common-masters
           masterName: Department
           tenantId: pb
@@ -173,7 +173,7 @@ ServiceMaps:
           uriResponseMapping:
           - inJsonPath: $.MdmsRes.common-masters.Department.*.name
             outJsonPath: $.Data.department
-        - path: http://egov-mdms-service:8080/egov-mdms-service/v1/_search
+        - path: http://egov-mdms-service.egov:8080/egov-mdms-service/v1/_search
           moduleName: RAINMAKER-PGR
           masterName: ServiceDefs
           tenantId: pb
@@ -184,7 +184,7 @@ ServiceMaps:
           uriResponseMapping:
           - inJsonPath: $.MdmsRes.RAINMAKER-PGR.ServiceDefs.*.slaHours
             outJsonPath: $.Data.slaHours
-        - path: http://egov-mdms-service:8080/egov-mdms-service/v1/_search
+        - path: http://egov-mdms-service.egov:8080/egov-mdms-service/v1/_search
           moduleName: tenant
           masterName: tenants
           tenantId: pb
@@ -246,28 +246,28 @@ ServiceMaps:
         - inJsonPath: $.@timestamp
           outJsonPath: $.Data.@timestamp
         externalUriMapping:
-        - path: http://hr-employee-v2:8080/hr-employee-v2/employees/_search
+        - path: http://egov-hrms.egov:8080/egov-hrms/employees/_search
           queryParam: tenantId=$.tenantId,id=$.assignee
           apiRequest: {"RequestInfo": {"apiId": "org.egov.pt","ver": "1.0","ts": 1502890899493,"action": "asd","did": "4354648646","key": "xyz","msgId": "654654", "requesterId": "61",
           "authToken": "750d4aa9-2436-4bc4-a8f4-3796e3bfd465","userInfo":{"id":73}}}
           uriResponseMapping:
           - inJsonPath: $.Employee[0].name
             outJsonPath: $.Data.assignee
-        - path: http://hr-employee-v2:8080/hr-employee-v2/employees/_search
-          queryParam: tenantId=$.tenantId,id=$.gro
+        - path: http://egov-hrms.egov:8080/egov-hrms/employees/_search
+          queryParam: tenantId=$.tenantId,ids=$.assignee
           apiRequest: {"RequestInfo": {"apiId": "org.egov.pt","ver": "1.0","ts": 1502890899493,"action": "asd","did": "4354648646","key": "xyz","msgId": "654654", "requesterId": "61",
           "authToken": "750d4aa9-2436-4bc4-a8f4-3796e3bfd465","userInfo":{"id":73}}}
           uriResponseMapping:
-          - inJsonPath: $.Employee[0].name
+          - inJsonPath: $.Employees[0].user.name
+            outJsonPath: $.Data.assignee
+        - path: http://egov-hrms.egov:8080/egov-hrms/employees/_search
+          queryParam: tenantId=$.tenantId,ids=$.gro
+          apiRequest: {"RequestInfo": {"apiId": "org.egov.pt","ver": "1.0","ts": 1502890899493,"action": "asd","did": "4354648646","key": "xyz","msgId": "654654", "requesterId": "61",
+          "authToken": "750d4aa9-2436-4bc4-a8f4-3796e3bfd465","userInfo":{"id":73}}}
+          uriResponseMapping:
+          - inJsonPath: $.Employees[0].user.name
             outJsonPath: $.Data.gro
-        - path: http://egov-location:8080/egov-location/location/v11/boundarys/_search
-          queryParam: hierarchyTypeCode=ADMIN,boundaryType=locality,codes=$.addressDetail.mohalla,tenantId=$.tenantId
-          apiRequest: {"RequestInfo": {"apiId": "org.egov.pt","ver": "1.0","ts": 1502890899493,"action": "asd","did": "4354648646","key": "xyz","msgId": "654654", "requesterId": "61",
-          "authToken": "750d4aa9-2436-4bc4-a8f4-3796e3bfd465","userInfo":{"id":73}}}
-          uriResponseMapping:
-          - inJsonPath: $.TenantBoundary[0].boundary[0].name
-            outJsonPath: $.Data.addressDetail.locality
-        - path: http://egov-location:8080/egov-location/location/v11/boundarys/_search
+        - path: http://egov-location.egov:8080/egov-location/location/v11/boundarys/_search
           queryParam: hierarchyTypeCode=ADMIN,boundaryType=Block,codes=$.addressDetail.mohalla,tenantId=$.tenantId
           apiRequest: {"RequestInfo": {"apiId": "org.egov.pt","ver": "1.0","ts": 1502890899493,"action": "asd","did": "4354648646","key": "xyz","msgId": "654654", "requesterId": "61",
           "authToken": "750d4aa9-2436-4bc4-a8f4-3796e3bfd465","userInfo":{"id":73}}}
@@ -275,7 +275,7 @@ ServiceMaps:
           - inJsonPath: $.TenantBoundary[0].boundary[0]
             outJsonPath: $.Data.complaintWard
         mdmsMapping:
-        - path: http://egov-mdms-service:8080/egov-mdms-service/v1/_search
+        - path: http://egov-mdms-service.egov:8080/egov-mdms-service/v1/_search
           moduleName: common-masters
           masterName: Department
           tenantId: pb
@@ -286,7 +286,7 @@ ServiceMaps:
           uriResponseMapping:
           - inJsonPath: $.MdmsRes.common-masters.Department.*.name
             outJsonPath: $.Data.department
-        - path: http://egov-mdms-service:8080/egov-mdms-service/v1/_search
+        - path: http://egov-mdms-service.egov:8080/egov-mdms-service/v1/_search
           moduleName: RAINMAKER-PGR
           masterName: ServiceDefs
           tenantId: pb
@@ -297,7 +297,7 @@ ServiceMaps:
           uriResponseMapping:
           - inJsonPath: $.MdmsRes.RAINMAKER-PGR.ServiceDefs.*.slaHours
             outJsonPath: $.Data.slaHours
-        - path: http://egov-mdms-service:8080/egov-mdms-service/v1/_search
+        - path: http://egov-mdms-service.egov:8080/egov-mdms-service/v1/_search
           moduleName: tenant
           masterName: tenants
           tenantId: pb

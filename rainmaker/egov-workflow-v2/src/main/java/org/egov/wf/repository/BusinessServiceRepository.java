@@ -1,6 +1,7 @@
 package org.egov.wf.repository;
 
 import lombok.extern.slf4j.Slf4j;
+import org.egov.wf.config.WorkflowConfig;
 import org.egov.wf.repository.querybuilder.BusinessServiceQueryBuilder;
 import org.egov.wf.repository.rowmapper.BusinessServiceRowMapper;
 import org.egov.wf.web.models.*;
@@ -25,13 +26,16 @@ public class BusinessServiceRepository {
 
     private BusinessServiceRowMapper rowMapper;
 
+    private WorkflowConfig config;
+
 
     @Autowired
     public BusinessServiceRepository(BusinessServiceQueryBuilder queryBuilder, JdbcTemplate jdbcTemplate,
-                                     BusinessServiceRowMapper rowMapper) {
+                                     BusinessServiceRowMapper rowMapper, WorkflowConfig config) {
         this.queryBuilder = queryBuilder;
         this.jdbcTemplate = jdbcTemplate;
         this.rowMapper = rowMapper;
+        this.config = config;
     }
 
 
@@ -41,7 +45,15 @@ public class BusinessServiceRepository {
 
     public List<BusinessService> getBusinessServices(BusinessServiceSearchCriteria criteria){
         List<Object> preparedStmtList = new ArrayList<>();
-        String query = queryBuilder.getBusinessServices(criteria, preparedStmtList);
+        String query;
+        if(config.getIsStateLevel()){
+            BusinessServiceSearchCriteria stateLevelCriteria = new BusinessServiceSearchCriteria(criteria);
+            stateLevelCriteria.setTenantId(criteria.getTenantId().split("\\.")[0]);
+            query = queryBuilder.getBusinessServices(stateLevelCriteria, preparedStmtList);
+        }
+        else{
+            query = queryBuilder.getBusinessServices(criteria, preparedStmtList);
+        }
         log.info("Query BusinessServices: "+query);
         log.info("preparedStmtList: : "+preparedStmtList);
         return jdbcTemplate.query(query, preparedStmtList.toArray(), rowMapper);

@@ -1,7 +1,0 @@
-def build(path, ci_image) {
-    stage("Build") {
-        echo "Nothing to build in ${path}. Its just a single page application serving an html."
-    }
-}
-
-return this;

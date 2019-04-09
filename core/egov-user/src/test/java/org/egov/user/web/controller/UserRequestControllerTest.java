@@ -109,7 +109,6 @@ public class UserRequestControllerTest {
         c.set(2018, Calendar.FEBRUARY, 8, 11, 15, 36);
         Date pwdExpiryDate = c.getTime();
         Role role = Role.builder()
-                .id(12L)
                 .name("CITIZEN")
                 .description("Citizen role")
                 .build();

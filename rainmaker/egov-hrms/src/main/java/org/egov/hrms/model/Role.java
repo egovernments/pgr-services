@@ -65,5 +65,8 @@ public class Role {
 	@Size(max=256)
     private String description;
 
+	@Size(max = 256)
+	private String tenantId;
+
 
 }

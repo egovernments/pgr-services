@@ -43,6 +43,7 @@ public class UserRequest {
 	private String locale;
 	private UserType type;
 	private Boolean accountLocked;
+	private Long accountLockedDate;
 	private String fatherOrHusbandName;
 	private String signature;
 	private String bloodGroup;
@@ -53,6 +54,7 @@ public class UserRequest {
 	private String otpReference;
 	private Long lastModifiedBy;
 	private String tenantId;
+
 	private Set<RoleRequest> roles;
 	
 	private String uuid;
@@ -85,6 +87,7 @@ public class UserRequest {
 		this.locale = user.getLocale();
 		this.type = user.getType();
 		this.accountLocked = user.getAccountLocked();
+		this.accountLockedDate = user.getAccountLockedDate();
 		this.signature = user.getSignature();
 		this.bloodGroup = user.getBloodGroup() != null ? user.getBloodGroup().getValue() : null;
 		this.photo = user.getPhoto();
@@ -148,6 +151,7 @@ public class UserRequest {
 				.locale(this.locale)
 				.type(this.type)
 				.accountLocked(isAccountLocked(isCreate))
+				.accountLockedDate(this.accountLockedDate)
 				.signature(this.signature)
 				.photo(this.photo)
 				.identificationMark(this.identificationMark)

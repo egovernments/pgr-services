@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(of = {"code", "tenantId"})
 public class Role {
     @JsonProperty("id")
     private Long id;
@@ -20,15 +22,7 @@ public class Role {
     @JsonProperty("code")
     private String code;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @JsonProperty("tenantId")
+    private String tenantId;
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
 }

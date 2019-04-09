@@ -1,4 +1,4 @@
-package org.egov.access.domain.model;
+package org.egov.access.domain.model.authorize;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,12 +15,13 @@ public class AuthorizationRequest {
 
     @NotNull
     @Size(min = 1)
-    private Set<String> roleCodes;
+    private Set<Role> roles;
 
     @NotNull
     private String uri;
 
     @NotNull
-    private String tenantId;
+    @Size(min = 1)
+    private Set<String> tenantIds;
 
 }

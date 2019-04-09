@@ -70,4 +70,6 @@ public class DepartmentalTest {
 	
 	private AuditDetails auditDetails;
 
+	private Boolean isActive;
+
 }

@@ -1,5 +1,7 @@
 package org.egov;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.egov.filters.pre.AuthFilter;
 import org.egov.filters.pre.AuthPreCheckFilter;
 import org.egov.filters.pre.RbacFilter;
@@ -55,8 +57,13 @@ public class ZuulGatewayApplication {
     }
 
     @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    }
+
+    @Bean
     public RbacFilter rbacFilter() {
-        return new RbacFilter(restTemplate(), authorizationUrl);
+        return new RbacFilter(restTemplate(), authorizationUrl, objectMapper());
     }
     
     @Bean

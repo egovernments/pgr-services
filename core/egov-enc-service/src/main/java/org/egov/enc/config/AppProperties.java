@@ -49,7 +49,7 @@ public class AppProperties {
     @Value("${method.signature}")
     private String signatureMathod;
 
-    @Value("#{${type-to-method-map}}")
+    @Value("#{${type.to.method.map}}")
     private HashMap<String, String> typeToMethodMap;
 
 }

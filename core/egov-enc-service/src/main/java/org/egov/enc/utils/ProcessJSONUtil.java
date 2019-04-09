@@ -51,11 +51,11 @@ public class ProcessJSONUtil {
     }
 
     //Navigate through JSON Object
-    private Map processJSONMap(Map jsonMap, ModeEnum mode, MethodEnum method, String tenantId) throws Exception {
-        HashMap outputJSONMap = new HashMap();
+    private Map<String, Object> processJSONMap(Map jsonMap, ModeEnum mode, MethodEnum method, String tenantId) throws Exception {
+        HashMap<String, Object> outputJSONMap = new HashMap<>();
         Set<String> keySet = jsonMap.keySet();
         Iterator<String> keyNames = keySet.iterator();
-        for(int i = 0; keyNames.hasNext(); i++) {
+        while(keyNames.hasNext()) {
             String key = keyNames.next();
             if(jsonMap.get(key) instanceof List) {
                 outputJSONMap.put(key, processJSONList((List) jsonMap.get(key), mode, method, tenantId));
@@ -69,8 +69,8 @@ public class ProcessJSONUtil {
     }
 
     //Navigate through JSON Array
-    private List processJSONList(List jsonList, ModeEnum mode, MethodEnum method, String tenantId) throws Exception {
-        ArrayList outputJSONList = new ArrayList();
+    private List<Object> processJSONList(List jsonList, ModeEnum mode, MethodEnum method, String tenantId) throws Exception {
+        ArrayList<Object> outputJSONList = new ArrayList<>();
         for(int i = 0; i < jsonList.size(); i++) {
             if(jsonList.get(i) instanceof List) {
                 outputJSONList.add(i, processJSONList((List) jsonList.get(i), mode, method, tenantId));

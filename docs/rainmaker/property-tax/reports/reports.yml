@@ -1,6 +1,7 @@
 ReportDefinitions:
   - reportName: ReceiptRegister
     summary: Receipt Register
+    decrPathId: pt-receipt
     version: 1.0.0
     moduleName: rainmaker-pt
     sourceColumns:
@@ -99,8 +100,10 @@ ReportDefinitions:
         isMandatory: false
         searchClause: AND pt_addr.locality IN ($localityArray)
     additionalConfig:
-      pagination: true
-      rowCountPerPage: 20
+      tableConfig:
+        pagination: true
+        rowCountPerPage: 20
+      reportTitle: reports.pt.receiptRegister.title
     query: |
       -- Use CTE to force query plan, compute & use CTE later
       WITH receipt_breakup AS (
@@ -168,6 +171,8 @@ ReportDefinitions:
         wrapper: true
         isMandatory: false
         searchClause: AND usagecategorymajor = $usage
+    additionalConfig:
+      reportTitle: reports.pt.ulbWisePtCollection.title
     query: SELECT tenantid, COUNT(*) AS totalassessments, SUM(totalamount) AS totalamount, SUM(amount) AS totalamountpaid, (SUM(totalamount) - SUM(amount)) AS totalamountdue FROM eg_pt_propertydetail_v2 AS a LEFT OUTER JOIN (SELECT consumercode, totalamount, amount FROM egcl_receiptheader AS aa LEFT OUTER JOIN egcl_receiptinstrument AS bb ON aa.id = bb.receiptheader LEFT OUTER JOIN egcl_instrumentheader AS cc ON bb.instrumentheader = cc.id) AS b ON CONCAT(a.property, ':', a.assessmentnumber) = b.consumercode WHERE tenantid LIKE CONCAT(SPLIT_PART($tenantid, '.', 1), '%')
     groupby: GROUP BY tenantid
     orderby: ORDER BY totalamountpaid DESC NULLS LAST

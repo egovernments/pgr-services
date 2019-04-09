@@ -16,6 +16,8 @@ import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import redis.clients.jedis.JedisShardInfo;
 
+import static org.egov.user.config.UserServiceConstants.USER_CLIENT_ID;
+
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdapter {
@@ -45,7 +47,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 		final int accessTokenValidityInSeconds = accessTokenValidityInMinutes * 60;
 		final int refreshTokenValidityInSeconds = refreshTokenValidityInMinutes * 60;
-		clients.inMemory().withClient("egov-user-client").secret("egov-user-secret")
+		clients.inMemory().withClient(USER_CLIENT_ID).secret("egov-user-secret")
 				.authorizedGrantTypes("authorization_code", "refresh_token", "password")
 				.authorities("ROLE_APP", "ROLE_CITIZEN", "ROLE_ADMIN", "ROLE_EMPLOYEE").scopes("read", "write")
 				.refreshTokenValiditySeconds(refreshTokenValidityInSeconds)

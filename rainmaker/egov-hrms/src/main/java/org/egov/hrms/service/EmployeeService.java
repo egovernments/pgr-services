@@ -52,6 +52,7 @@ import org.egov.hrms.model.enums.UserType;
 import org.egov.hrms.producer.HRMSProducer;
 import org.egov.hrms.repository.EmployeeRepository;
 import org.egov.hrms.utils.ErrorConstants;
+import org.egov.hrms.utils.HRMSConstants;
 import org.egov.hrms.utils.HRMSUtils;
 import org.egov.hrms.utils.ResponseInfoFactory;
 import org.egov.hrms.web.contract.*;
@@ -138,33 +139,63 @@ public class EmployeeService {
 			criteria.setIsActive(true);
 		else
 			criteria.setIsActive(false);
-		if(!StringUtils.isEmpty(criteria.getPhone())) {
-			User user = User.builder().mobileNumber(criteria.getPhone()).build();
-			Employee employee = Employee.builder().user(user).tenantId(criteria.getTenantId()).build();
-			UserResponse userResponse = userService.getSingleUser(requestInfo, employee, "MobileNumber");
+        Map<String, User> mapOfUsers = new HashMap<String, User>();
+		if(!StringUtils.isEmpty(criteria.getPhone()) || !CollectionUtils.isEmpty(criteria.getRoles())) {
+            Map<String, Object> userSearchCriteria = new HashMap<>();
+            userSearchCriteria.put(HRMSConstants.HRMS_USER_SEARCH_CRITERA_TENANTID,criteria.getTenantId());
+            if(!StringUtils.isEmpty(criteria.getPhone()))
+                userSearchCriteria.put(HRMSConstants.HRMS_USER_SEARCH_CRITERA_MOBILENO,criteria.getPhone());
+            if( !CollectionUtils.isEmpty(criteria.getRoles()) )
+                userSearchCriteria.put(HRMSConstants.HRMS_USER_SEARCH_CRITERA_ROLECODES,criteria.getRoles());
+            UserResponse userResponse = userService.getUser(requestInfo, userSearchCriteria);
+            if(!CollectionUtils.isEmpty(userResponse.getUser())) {
+                 mapOfUsers.putAll(userResponse.getUser().stream()
+                        .collect(Collectors.toMap(User::getUuid, Function.identity())));
+            }
 			List<String> userUUIDs = userResponse.getUser().stream().map(User :: getUuid).collect(Collectors.toList());
-			criteria.setUuids(userUUIDs);
+            if(!CollectionUtils.isEmpty(criteria.getUuids()))
+                criteria.setUuids(criteria.getUuids().stream().filter(userUUIDs::contains).collect(Collectors.toList()));
+            else
+                criteria.setUuids(userUUIDs);
 		}
-		if(!CollectionUtils.isEmpty(criteria.getNames())) {
-			List<String> userUUIDs = new ArrayList<>();
-			for(String name: criteria.getNames()) {
-				User user = User.builder().name(name).build();
-				Employee employee = Employee.builder().user(user).tenantId(criteria.getTenantId()).build();
-				UserResponse userResponse = userService.getSingleUser(requestInfo, employee, "Name");
-				List<String> uuids = userResponse.getUser().stream().map(User :: getUuid).collect(Collectors.toList());
-				userUUIDs.addAll(uuids);
+		if(!((!CollectionUtils.isEmpty(criteria.getRoles()) || !StringUtils.isEmpty(criteria.getPhone())) && CollectionUtils.isEmpty(criteria.getUuids()))){
+			if(!CollectionUtils.isEmpty(criteria.getNames())) {
+				List<String> userUUIDs = new ArrayList<>();
+				for(String name: criteria.getNames()) {
+					Map<String, Object> userSearchCriteria = new HashMap<>();
+					userSearchCriteria.put(HRMSConstants.HRMS_USER_SEARCH_CRITERA_TENANTID,criteria.getTenantId());
+					userSearchCriteria.put(HRMSConstants.HRMS_USER_SEARCH_CRITERA_NAME,name);
+					UserResponse userResponse = userService.getUser(requestInfo, userSearchCriteria);
+					if(!CollectionUtils.isEmpty(userResponse.getUser())) {
+						mapOfUsers.putAll(userResponse.getUser().stream()
+								.collect(Collectors.toMap(User::getUuid, Function.identity())));
+					}
+					List<String> uuids = userResponse.getUser().stream().map(User :: getUuid).collect(Collectors.toList());
+					userUUIDs.addAll(uuids);
+				}
+				if(!CollectionUtils.isEmpty(criteria.getUuids()))
+					criteria.setUuids(criteria.getUuids().stream().filter(userUUIDs::contains).collect(Collectors.toList()));
+				else
+					criteria.setUuids(userUUIDs);
 			}
-			criteria.setUuids(userUUIDs);
 		}
-		List<Employee> employees = repository.fetchEmployees(criteria, requestInfo);
-		List<String> uuids = employees.stream().map(Employee :: getUuid).collect(Collectors.toList());
+        List <Employee> employees = new ArrayList<>();
+        if(!((!CollectionUtils.isEmpty(criteria.getRoles()) || !CollectionUtils.isEmpty(criteria.getNames()) || !StringUtils.isEmpty(criteria.getPhone())) && CollectionUtils.isEmpty(criteria.getUuids())))
+            employees = repository.fetchEmployees(criteria, requestInfo);
+        List<String> uuids = employees.stream().map(Employee :: getUuid).collect(Collectors.toList());
 		if(!CollectionUtils.isEmpty(uuids)){
-			UserResponse userResponse = userService.getUser(requestInfo, uuids);
+            Map<String, Object> UserSearchCriteria = new HashMap<>();
+            UserSearchCriteria.put(HRMSConstants.HRMS_USER_SEARCH_CRITERA_UUID,uuids);
+            if(mapOfUsers.isEmpty()){
+            UserResponse userResponse = userService.getUser(requestInfo, UserSearchCriteria);
 			if(!CollectionUtils.isEmpty(userResponse.getUser())) {
-				Map<String, User> mapOfUsers = userResponse.getUser().stream()
+				mapOfUsers = userResponse.getUser().stream()
 						.collect(Collectors.toMap(User :: getUuid, Function.identity()));
-				employees.stream().forEach(employee -> employee.setUser(mapOfUsers.get(employee.getUuid())));
-			}
+            }
+            }
+            for(Employee employee: employees){
+                employee.setUser(mapOfUsers.get(employee.getUuid()));
+            }
 		}
 		return EmployeeResponse.builder().responseInfo(factory.createResponseInfoFromRequestInfo(requestInfo, true))
 				.employees(employees).build();
@@ -228,6 +259,8 @@ public class EmployeeService {
 		employee.getJurisdictions().stream().forEach(jurisdiction -> {
 			jurisdiction.setId(UUID.randomUUID().toString());
 			jurisdiction.setAuditDetails(auditDetails);
+			if(null == jurisdiction.getIsActive())
+				jurisdiction.setIsActive(true);
 		});
 		employee.getAssignments().stream().forEach(assignment -> {
 			assignment.setId(UUID.randomUUID().toString());
@@ -238,18 +271,24 @@ public class EmployeeService {
 			employee.getServiceHistory().stream().forEach(serviceHistory -> {
 				serviceHistory.setId(UUID.randomUUID().toString());
 				serviceHistory.setAuditDetails(auditDetails);
+				if(null == serviceHistory.getIsCurrentPosition())
+					serviceHistory.setIsCurrentPosition(false);
 			});
 		}
 		if(!CollectionUtils.isEmpty(employee.getEducation())) {
 			employee.getEducation().stream().forEach(educationalQualification -> {
 				educationalQualification.setId(UUID.randomUUID().toString());
 				educationalQualification.setAuditDetails(auditDetails);
+				if(null == educationalQualification.getIsActive())
+					educationalQualification.setIsActive(true);
 			});
 		}
 		if(!CollectionUtils.isEmpty(employee.getTests())) {
 			employee.getTests().stream().forEach(departmentalTest -> {
 				departmentalTest.setId(UUID.randomUUID().toString());
 				departmentalTest.setAuditDetails(auditDetails);
+				if(null == departmentalTest.getIsActive())
+					departmentalTest.setIsActive(true);
 			});
 		}
 		if(!CollectionUtils.isEmpty(employee.getDocuments())) {
@@ -335,6 +374,8 @@ public class EmployeeService {
 
 		employee.getJurisdictions().stream().forEach(jurisdiction -> {
 
+			if(null == jurisdiction.getIsActive())
+				jurisdiction.setIsActive(true);
 			if(jurisdiction.getId()==null) {
 				jurisdiction.setId(UUID.randomUUID().toString());
 				jurisdiction.setAuditDetails(auditDetails);
@@ -365,6 +406,8 @@ public class EmployeeService {
 
 		if(employee.getServiceHistory()!=null){
 			employee.getServiceHistory().stream().forEach(serviceHistory -> {
+				if(null == serviceHistory.getIsCurrentPosition())
+					serviceHistory.setIsCurrentPosition(false);
 				if(serviceHistory.getId()==null) {
 					serviceHistory.setId(UUID.randomUUID().toString());
 					serviceHistory.setAuditDetails(auditDetails);
@@ -383,6 +426,8 @@ public class EmployeeService {
 
 		if(employee.getEducation() != null){
 			employee.getEducation().stream().forEach(educationalQualification -> {
+				if(null == educationalQualification.getIsActive())
+					educationalQualification.setIsActive(true);
 				if(educationalQualification.getId()==null) {
 					educationalQualification.setId(UUID.randomUUID().toString());
 					educationalQualification.setAuditDetails(auditDetails);
@@ -402,6 +447,9 @@ public class EmployeeService {
 
 		if(employee.getTests() != null){
 			employee.getTests().stream().forEach(departmentalTest -> {
+
+				if(null == departmentalTest.getIsActive())
+					departmentalTest.setIsActive(true);
 				if(departmentalTest.getId()==null) {
 					departmentalTest.setId(UUID.randomUUID().toString());
 					departmentalTest.setAuditDetails(auditDetails);

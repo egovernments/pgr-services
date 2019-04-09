@@ -142,16 +142,13 @@ public class TLRowMapper  implements ResultSetExtractor<List<TradeLicense>> {
 
             Double operationalArea = (Double) rs.getObject("operationalArea");
             Integer noOfEmployees = (Integer) rs.getObject("noOfEmployees");
-            Object obj = rs.getObject("additionaldetail");
             PGobject pgObj = (PGobject) rs.getObject("additionaldetail");
             try {
-                JsonNode additionalDetail = mapper.readTree(pgObj.getValue());
                 TradeLicenseDetail tradeLicenseDetail = TradeLicenseDetail.builder()
                         .surveyNo(rs.getString("surveyno"))
                         .channel(TradeLicenseDetail.ChannelEnum.fromValue(rs.getString("channel")))
                         .subOwnerShipCategory(rs.getString("subownershipcategory"))
                         .id(tradeLicenseDetailId)
-                        .additionalDetail(additionalDetail)
                         .address(address)
                         .auditDetails(auditdetails)
                         .structureType(rs.getString("structureType"))
@@ -163,6 +160,12 @@ public class TLRowMapper  implements ResultSetExtractor<List<TradeLicense>> {
                         .adhocPenaltyReason(rs.getString("adhocPenaltyReason"))
                         .institution(institution)
                         .build();
+
+                if(pgObj!=null){
+                    JsonNode additionalDetail = mapper.readTree(pgObj.getValue());
+                    tradeLicenseDetail.setAdditionalDetail(additionalDetail);
+                }
+
                 tradeLicense.setTradeLicenseDetail(tradeLicenseDetail);
             }
             catch (IOException e){
@@ -213,6 +216,7 @@ public class TLRowMapper  implements ResultSetExtractor<List<TradeLicense>> {
                     .isPrimaryOwner(isPrimaryOwner)
                     .ownerType(rs.getString("ownerType"))
                     .ownerShipPercentage(ownerShipPercentage)
+                    .relationship(OwnerInfo.RelationshipEnum.fromValue(rs.getString("relationship")))
                     .userActive(rs.getBoolean("useractive"))
                     .institutionId(rs.getString("institutionid"))
                     .build();

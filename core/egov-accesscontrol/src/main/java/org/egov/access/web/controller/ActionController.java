@@ -2,7 +2,7 @@ package org.egov.access.web.controller;
 
 import org.egov.access.domain.model.Action;
 import org.egov.access.domain.model.ActionValidation;
-import org.egov.access.domain.model.AuthorizationRequestWrapper;
+import org.egov.access.domain.model.authorize.AuthorizationRequestWrapper;
 import org.egov.access.domain.service.ActionService;
 import org.egov.access.util.AccessControlConstants;
 import org.egov.access.web.contract.action.*;

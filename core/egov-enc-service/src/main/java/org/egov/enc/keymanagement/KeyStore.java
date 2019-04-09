@@ -1,5 +1,6 @@
 package org.egov.enc.keymanagement;
 
+import lombok.Getter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.egov.enc.config.AppProperties;
 import org.egov.enc.models.AsymmetricKey;
@@ -22,7 +23,9 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
 
 
 
@@ -42,7 +45,7 @@ public class KeyStore implements ApplicationRunner {
     private AppProperties appProperties;
     @Autowired
     private KeyRepository keyRepository;
-
+    @Getter
     private ArrayList<String> tenantIds;
 
     private static ArrayList<SymmetricKey> symmetricKeys;
@@ -168,14 +171,14 @@ public class KeyStore implements ApplicationRunner {
 
 
     //Generate Secret Key to be used by AES from custom object SymmetricKey
-    public SecretKey generateSecretKey(SymmetricKey symmetricKey) {
+    public SecretKey getSecretKey(SymmetricKey symmetricKey) {
         String encodedKey = symmetricKey.getSecretKey();
         byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
         return new SecretKeySpec(decodedKey, "AES");
     }
 
     //Generate PublicKey to be used by RSA from custom object AsymmetricKey
-    public PublicKey generatePublicKey(AsymmetricKey asymmetricKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public PublicKey getPublicKey(AsymmetricKey asymmetricKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
         String encodedPublicKey = asymmetricKey.getPublicKey();
         byte[] decodedPublicKey = Base64.getDecoder().decode(encodedPublicKey);
 
@@ -185,7 +188,7 @@ public class KeyStore implements ApplicationRunner {
     }
 
     //Generate PrivateKey to be used by RSA from custom object AsymmetricKey
-    public PrivateKey generatePrivateKey(AsymmetricKey asymmetricKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public PrivateKey getPrivateKey(AsymmetricKey asymmetricKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
         String encodedPrivateKey = asymmetricKey.getPrivateKey();
         byte[] decodedPrivateKey = Base64.getDecoder().decode(encodedPrivateKey);
 
@@ -195,7 +198,7 @@ public class KeyStore implements ApplicationRunner {
     }
 
     //Generate Initial Vecctor to be used by AES from custom object SymmetricKey
-    public byte[] generateInitialVector(SymmetricKey symmetricKey) {
+    public byte[] getInitialVector(SymmetricKey symmetricKey) {
         return Base64.getDecoder().decode(symmetricKey.getInitialVector());
     }
 
@@ -225,8 +228,8 @@ public class KeyStore implements ApplicationRunner {
         refreshKeys();
     }
 
-    public Set<Integer> getKeyIds() {
-        Set<Integer> keyIds = new HashSet<>();
+    public ArrayList<Integer> getKeyIds() {
+        ArrayList<Integer> keyIds = new ArrayList<>();
         keyIds.addAll(symmetricKeyHashMap.keySet());
         keyIds.addAll(asymmetricKeyHashMap.keySet());
         return keyIds;

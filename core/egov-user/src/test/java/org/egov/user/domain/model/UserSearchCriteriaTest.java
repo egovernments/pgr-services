@@ -9,9 +9,10 @@ public class UserSearchCriteriaTest {
 	public void test_should_not_throw_exception_when_search_criteria_is_valid() {
 		final UserSearchCriteria searchCriteria = UserSearchCriteria.builder()
 				.tenantId("tenantId")
+				.userName("greenfish424")
 				.build();
 		
-		searchCriteria.validate();
+		searchCriteria.validate(true);
 	}
 
 	@Test(expected = InvalidUserSearchCriteriaException.class)
@@ -20,7 +21,7 @@ public class UserSearchCriteriaTest {
 				.tenantId(null)
 				.build();
 
-		searchCriteria.validate();
+		searchCriteria.validate(true);
 	}
 
 

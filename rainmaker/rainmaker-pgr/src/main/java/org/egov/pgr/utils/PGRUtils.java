@@ -451,10 +451,10 @@ public class PGRUtils {
 
 		Map<Integer, String> map = new TreeMap<>();
 
-		map.put(3, PGRConstants.ROLE_NAME_EMPLOYEE);
-		map.put(2, PGRConstants.ROLE_NAME_DGRO);
-		map.put(1, PGRConstants.ROLE_NAME_GRO);
-		map.put(0, PGRConstants.ROLE_NAME_CSR);
+		map.put(3, PGRConstants.ROLE_EMPLOYEE);
+		map.put(2, PGRConstants.ROLE_DGRO);
+		map.put(1, PGRConstants.ROLE_GRO);
+		map.put(0, PGRConstants.ROLE_CSR);
 
 		return map;
 	}
@@ -479,8 +479,8 @@ public class PGRUtils {
 	 * the method will return null
 	 */
 	public String getPrecedentRole(List<String> roles) {
-		if(roles.contains(PGRConstants.ROLE_NAME_CITIZEN)) {
-			return PGRConstants.ROLE_NAME_CITIZEN;
+		if(roles.contains(PGRConstants.ROLE_CITIZEN)) {
+			return PGRConstants.ROLE_CITIZEN;
 		}
 		for (Entry<Integer, String> entry : PGRUtils.getEmployeeRolesPrecedenceMap().entrySet()) {
 			String currentValue = entry.getValue();

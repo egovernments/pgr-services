@@ -16,7 +16,6 @@ public class RoleRequestTest {
         Date date = calendar.getTime();
 
         org.egov.user.domain.model.Role domainRole = org.egov.user.domain.model.Role.builder()
-                .id(1L)
                 .name("name of the roleRequest 1")
                 .code("code")
                 .description("description")
@@ -28,7 +27,6 @@ public class RoleRequestTest {
 
         RoleRequest roleRequest = new RoleRequest(domainRole);
 
-        assertThat(roleRequest.getId()).isEqualTo(1L);
         assertThat(roleRequest.getName()).isEqualTo("name of the roleRequest 1");
         assertThat(roleRequest.getCode()).isEqualTo("code");
     }

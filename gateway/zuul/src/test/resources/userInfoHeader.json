@@ -11,12 +11,14 @@
         {
             "id": 1,
             "name": "Employee",
-            "code": "EMPLOYEE"
+            "code": "EMPLOYEE",
+            "tenantId": "default"
         },
         {
             "id": 2,
             "name": "ULB Operator",
-            "code": "ULB"
+            "code": "ULB",
+            "tenantId": "default"
         }
     ]
 }

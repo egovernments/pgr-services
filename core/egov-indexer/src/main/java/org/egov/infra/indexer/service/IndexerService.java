@@ -75,6 +75,7 @@ public class IndexerService {
 			log.error("No mappings found for the service to which the following topic belongs: " + topic);
 		}
 	}
+	
 
 	/**
 	 * This method deals with 3 types of uses cases that indexer supports: 1. Index

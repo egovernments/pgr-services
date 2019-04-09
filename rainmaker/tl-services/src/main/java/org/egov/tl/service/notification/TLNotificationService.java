@@ -56,8 +56,9 @@ public class TLNotificationService {
     private void enrichSMSRequest(TradeLicenseRequest request,List<SMSRequest> smsRequests){
         String tenantId = request.getLicenses().get(0).getTenantId();
         String localizationMessages = util.getLocalizationMessages(tenantId,request.getRequestInfo());
-        request.getLicenses().forEach(license -> {
-            String message = util.getCustomizedMsg(license,localizationMessages);
+        for(TradeLicense license : request.getLicenses()){
+            String message = util.getCustomizedMsg(request.getRequestInfo(),license,localizationMessages);
+            if(message==null) continue;
 
             Map<String,String > mobileNumberToOwner = new HashMap<>();
 
@@ -66,7 +67,7 @@ public class TLNotificationService {
                     mobileNumberToOwner.put(owner.getMobileNumber(),owner.getName());
             });
             smsRequests.addAll(createSMSRequest(message,mobileNumberToOwner));
-        });
+        }
     }
 
 

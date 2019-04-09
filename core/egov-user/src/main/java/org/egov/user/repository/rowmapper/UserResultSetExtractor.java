@@ -51,6 +51,7 @@ public class UserResultSetExtractor implements ResultSetExtractor<List<User>> {
                         .createdDate(rs.getTimestamp("createddate")).guardian(rs.getString("guardian")).signature(rs.getString("signature"))
                         .accountLocked(rs.getBoolean("accountlocked")).photo(rs.getString("photo"))
                         .identificationMark(rs.getString("identificationmark")).uuid(rs.getString("uuid"))
+                        .accountLockedDate(rs.getLong("accountlockeddate"))
                         .build();
 
                 for (UserType type : UserType.values()) {
@@ -89,9 +90,10 @@ public class UserResultSetExtractor implements ResultSetExtractor<List<User>> {
             Address address = populateAddress(rs, user);
 
             if(!isNull(role))
-                user.addRolesItem(populateRole(rs));
+                user.addRolesItem(role);
+
             if(!isNull(address))
-                user.addAddressItem(populateAddress(rs, user));
+                user.addAddressItem(address);
 
         }
 
@@ -99,16 +101,14 @@ public class UserResultSetExtractor implements ResultSetExtractor<List<User>> {
     }
 
     private Role populateRole(ResultSet rs) throws SQLException {
-        long id = rs.getLong("role_id");
-        if(id == 0L){
+        String code= rs.getString("role_code");
+        if(code == null){
             return null;
         }
         return Role.builder()
-                .id(id)
                 .tenantId(rs.getString("role_tenantid"))
-                .code(rs.getString("role_code"))
-                .description(rs.getString("role_description"))
-                .name(rs.getString("role_name")).build();
+                .code(code)
+                .build();
     }
 
     private Address populateAddress(ResultSet rs, User user) throws SQLException {

@@ -1,4 +1,4 @@
-package org.egov.access.domain.model;
+package org.egov.access.domain.model.authorize;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

@@ -601,6 +601,13 @@
       "uniqueKeys": [
         "$.code"
       ]
+    },
+    "ApplicationType": {
+      "masterName": "ApplicationType",
+      "isStateLevel": true,
+      "uniqueKeys": [
+        "$.code"
+      ]
     }
   },
   "Workflow": {

@@ -22,7 +22,7 @@ public class SecureUser implements UserDetails {
 			throw new UsernameNotFoundException("UserRequest not found");
 		} else {
 			this.user = user;
-			user.getRoles().forEach(role -> this.authorities.add(new SimpleGrantedAuthority(role.getName())));
+			user.getRoles().forEach(role -> this.authorities.add(new SimpleGrantedAuthority(role.getCode())));
 		}
 	}
 
