@@ -173,9 +173,11 @@ serviceMaps:
    isTransaction: true
    queryMaps:
 
-       - query: UPDATE eg_wf_businessservice_v2 SET businessservice=?, business=?, geturi=?, posturi=?, lastmodifiedby=?, lastmodifiedtime=? WHERE uuid=?;
+       - query: UPDATE eg_wf_businessservice_v2 SET businessservicesla=?,businessservice=?, business=?, geturi=?, posturi=?, lastmodifiedby=?, lastmodifiedtime=? WHERE uuid=?;
          basePath: BusinessServices.*
          jsonMaps:
+          - jsonPath: $.BusinessServices.*.businessServiceSla
+
           - jsonPath: $.BusinessServices.*.businessService
 
           - jsonPath: $.BusinessServices.*.business
