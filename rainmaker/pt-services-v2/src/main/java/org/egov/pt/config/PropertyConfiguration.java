@@ -112,5 +112,15 @@ public class PropertyConfiguration {
     @Value("${pt.search.pagination.max.search.limit}")
     private Long maxSearchLimit;
 
+    //Localization
+    @Value("${egov.localization.host}")
+    private String localizationHost;
+
+    @Value("${egov.localization.context.path}")
+    private String localizationContextPath;
+
+    @Value("${egov.localization.search.endpoint}")
+    private String localizationSearchEndpoint;
+
 
 }

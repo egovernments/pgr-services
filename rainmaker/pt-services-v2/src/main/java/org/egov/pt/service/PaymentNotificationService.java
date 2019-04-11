@@ -9,6 +9,7 @@ import org.egov.pt.config.PropertyConfiguration;
 import org.egov.pt.producer.Producer;
 import org.egov.pt.repository.ServiceRequestRepository;
 import org.egov.pt.util.PTConstants;
+import org.egov.pt.util.PropertyUtil;
 import org.egov.pt.web.models.Property;
 import org.egov.pt.web.models.PropertyCriteria;
 import org.egov.pt.web.models.SMSRequest;
@@ -38,17 +39,11 @@ public class PaymentNotificationService {
     @Autowired
     private PropertyService propertyService;
 
-    @Value("${egov.localization.host}")
-    private String localizationHost;
-
-    @Value("${egov.localization.context.path}")
-    private String localizationContextPath;
-
-    @Value("${egov.localization.search.endpoint}")
-    private String localizationSearchEndpoint;
-
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private PropertyUtil util;
 
     /**
      * Generates message from the received object and sends SMSRequest to kafka queue
@@ -86,7 +81,7 @@ public class PaymentNotificationService {
         }
 
         try{
-            StringBuilder uri = getUri(valMap.get("tenantId"));
+            StringBuilder uri = util.getUri(valMap.get("tenantId"),requestInfo);
             LinkedHashMap responseMap = (LinkedHashMap)serviceRequestRepository.fetchResult(uri, requestInfo);
             String messagejson = new JSONObject(responseMap).toString();
             List<SMSRequest> smsRequests = new ArrayList<>();
@@ -260,22 +255,6 @@ public class PaymentNotificationService {
                  || topic.equalsIgnoreCase(propertyConfiguration.getPgTopic())) && !mobileNumbers.contains(valMap.get("mobileNumber")))
              mobileNumbers.add(valMap.get("mobileNumber"));
      }
-
-    /**
-     * Returns the uri for the localization call
-     * @param tenantId TenantId of the propertyRequest
-     * @return The uri for localization search call
-     */
-    private StringBuilder getUri(String tenantId){
-        if(propertyConfiguration.getIsStateLevel())
-            tenantId = tenantId.split("\\.")[0];
-        StringBuilder uri = new StringBuilder();
-        uri.append(localizationHost).append(localizationContextPath).append(localizationSearchEndpoint);
-        uri.append("?").append("locale=").append(PTConstants.NOTIFICATION_LOCALE)
-                .append("&tenantId=").append(tenantId)
-                .append("&module=").append(PTConstants.MODULE);
-        return uri;
-    }
 
 
     /**

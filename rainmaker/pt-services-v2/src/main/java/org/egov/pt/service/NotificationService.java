@@ -2,10 +2,13 @@ package org.egov.pt.service;
 
 import com.jayway.jsonpath.JsonPath;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.pt.config.PropertyConfiguration;
 import org.egov.pt.producer.Producer;
 import org.egov.pt.repository.ServiceRequestRepository;
 import org.egov.pt.util.PTConstants;
+import org.egov.pt.util.PropertyUtil;
 import org.egov.pt.web.models.Property;
 import org.egov.pt.web.models.PropertyDetail;
 import org.egov.pt.web.models.PropertyRequest;
@@ -18,6 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+
+import static org.egov.pt.util.PTConstants.NOTIFICATION_LOCALE;
+
 @Service
 @Slf4j
 public class NotificationService {
@@ -31,14 +37,8 @@ public class NotificationService {
     @Autowired
     private PropertyConfiguration propertyConfiguration;
 
-    @Value("${egov.localization.host}")
-    private String localizationHost;
-
-    @Value("${egov.localization.context.path}")
-    private String localizationContextPath;
-
-    @Value("${egov.localization.search.endpoint}")
-    private String localizationSearchEndpoint;
+    @Autowired
+    private PropertyUtil util;
 
     @Value("${notification.url}")
     private String notificationURL;
@@ -49,7 +49,7 @@ public class NotificationService {
      */
     public void process(PropertyRequest request,String topic){
         String tenantId = request.getProperties().get(0).getTenantId();
-        StringBuilder uri = getUri(tenantId);
+        StringBuilder uri = util.getUri(tenantId,request.getRequestInfo());
         try{
             String citizenMobileNumber = request.getRequestInfo().getUserInfo().getMobileNumber();
             LinkedHashMap responseMap = (LinkedHashMap)serviceRequestRepository.fetchResult(uri, request.getRequestInfo());
@@ -88,22 +88,6 @@ public class NotificationService {
         return customMessage;
     }
 
-
-    /**
-     * Returns the uri for the localization call
-     * @param tenantId TenantId of the propertyRequest
-     * @return The uri for localization search call
-     */
-    private StringBuilder getUri(String tenantId){
-        if(propertyConfiguration.getIsStateLevel())
-           tenantId = tenantId.split("\\.")[0];
-        StringBuilder uri = new StringBuilder();
-        uri.append(localizationHost).append(localizationContextPath).append(localizationSearchEndpoint);
-        uri.append("?").append("locale=").append(PTConstants.NOTIFICATION_LOCALE)
-        .append("&tenantId=").append(tenantId)
-        .append("&module=").append(PTConstants.MODULE);
-        return uri;
-    }
 
     /**
      * @param topic The kafka topic from which the json was received

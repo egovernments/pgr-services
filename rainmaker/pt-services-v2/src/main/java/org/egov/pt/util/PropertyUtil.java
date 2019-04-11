@@ -1,20 +1,29 @@
 package org.egov.pt.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.mdms.model.MasterDetail;
 import org.egov.mdms.model.MdmsCriteria;
 import org.egov.mdms.model.MdmsCriteriaReq;
 import org.egov.mdms.model.ModuleDetail;
+import org.egov.pt.config.PropertyConfiguration;
 import org.egov.pt.web.models.AuditDetails;
 import org.egov.pt.web.models.Property;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+
+import static org.egov.pt.util.PTConstants.NOTIFICATION_LOCALE;
 
 @Component
 public class PropertyUtil {
 
 
+
+    @Autowired
+    private PropertyConfiguration config;
 
 
     /**
@@ -58,6 +67,29 @@ public class PropertyUtil {
         requestProperties.forEach(property -> {
             property.getAddress().setId(propertyIdToAddressId.get(property.getPropertyId()));
         });
+    }
+
+
+    /**
+     * Returns the uri for the localization call
+     * @param tenantId TenantId of the propertyRequest
+     * @return The uri for localization search call
+     */
+    public StringBuilder getUri(String tenantId, RequestInfo requestInfo){
+        if(config.getIsStateLevel())
+            tenantId = tenantId.split("\\.")[0];
+
+        String locale = NOTIFICATION_LOCALE;
+        if(!StringUtils.isEmpty(requestInfo.getMsgId()) && requestInfo.getMsgId().split("|").length>=2)
+            locale = requestInfo.getMsgId().split("|")[1];
+
+        StringBuilder uri = new StringBuilder();
+        uri.append(config.getLocalizationHost())
+                .append(config.getLocalizationContextPath()).append(config.getLocalizationSearchEndpoint());
+        uri.append("?").append("locale=").append(locale)
+                .append("&tenantId=").append(tenantId)
+                .append("&module=").append(PTConstants.MODULE);
+        return uri;
     }
 
 
