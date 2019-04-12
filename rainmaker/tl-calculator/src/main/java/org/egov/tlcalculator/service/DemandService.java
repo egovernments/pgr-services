@@ -74,7 +74,7 @@ public class DemandService {
 
             //Collect required parameters for demand search
             String tenantId = calculations.get(0).getTenantId();
-            Set<String> applicationNumbers = calculations.stream().map(Calculation::getApplicationNumber).collect(Collectors.toSet());
+            Set<String> applicationNumbers = calculations.stream().map(calculation -> calculation.getTradeLicense().getApplicationNumber()).collect(Collectors.toSet());
             List<Demand> demands = searchDemand(tenantId,applicationNumbers,requestInfo);
             Set<String> applicationNumbersFromDemands = new HashSet<>();
             if(!CollectionUtils.isEmpty(demands))
