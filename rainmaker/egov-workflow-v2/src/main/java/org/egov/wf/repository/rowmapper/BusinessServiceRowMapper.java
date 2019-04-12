@@ -88,6 +88,7 @@ public class BusinessServiceRowMapper implements ResultSetExtractor<List<Busines
                 .isStartState(rs.getBoolean("isStartState"))
                 .isTerminateState(rs.getBoolean("isTerminateState"))
                 .docUploadRequired(rs.getBoolean("docuploadrequired"))
+                .isStateUpdatable(rs.getBoolean("isStateUpdatable"))
                 .businessServiceId(rs.getString("businessserviceid"))
                 .auditDetails(auditdetails)
                 .build();

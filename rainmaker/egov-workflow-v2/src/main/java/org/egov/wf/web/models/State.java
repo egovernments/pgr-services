@@ -68,6 +68,9 @@ public class State   {
         @JsonProperty("isTerminateState")
         private Boolean isTerminateState;
 
+        @JsonProperty("isStateUpdatable")
+        private Boolean isStateUpdatable;
+
         @JsonProperty("actions")
         @Valid
         private List<Action> actions;
