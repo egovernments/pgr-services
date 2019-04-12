@@ -82,7 +82,7 @@ public class DemandService {
 
             //If demand already exists add it updateCalculations else createCalculations
             for(Calculation calculation : calculations)
-            {      if(!applicationNumbersFromDemands.contains(calculation.getApplicationNumber()))
+            {      if(!applicationNumbersFromDemands.contains(calculation.getTradeLicense().getApplicationNumber()))
                         createCalculations.add(calculation);
                     else
                         updateCalculations.add(calculation);
