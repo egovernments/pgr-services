@@ -288,7 +288,7 @@ public class EstimationService {
 		// usage exemption
 		estimates.add(TaxHeadEstimate.builder().taxHeadCode(PT_UNIT_USAGE_EXEMPTION).estimateAmount(
 		        usageExemption.setScale(2, 2).negate()).build());
-		payableTax = payableTax.subtract(usageExemption);
+		payableTax = payableTax.add(usageExemption);
 
 		// owner exemption
 		BigDecimal userExemption = getExemption(detail.getOwners(), payableTax, assessmentYear, propertyBasedExemptionMasterMap);
@@ -583,7 +583,7 @@ public class EstimationService {
 			if (null != applicableOwnerType) {
 
 				BigDecimal currentExemption = mDataService.calculateApplicables(share,
-						applicableOwnerType.get(EXEMPTION_FIELD_NAME)).negate();
+						applicableOwnerType.get(EXEMPTION_FIELD_NAME));
 
 				userExemption = userExemption.add(currentExemption);
 			}

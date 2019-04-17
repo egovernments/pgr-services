@@ -309,7 +309,7 @@ public class PayService {
 			return TaxHeadEstimate.builder().estimateAmount(roundOffPos)
 					.taxHeadCode(CalculatorConstants.PT_ROUNDOFF).build();
 		else if (roundOffNeg.doubleValue() < 0)
-			return TaxHeadEstimate.builder().estimateAmount(roundOffNeg.negate())
+			return TaxHeadEstimate.builder().estimateAmount(roundOffNeg)
 					.taxHeadCode(CalculatorConstants.PT_ROUNDOFF).build();
 		else
 			return null;
