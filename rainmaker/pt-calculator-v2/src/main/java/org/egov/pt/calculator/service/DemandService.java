@@ -343,8 +343,8 @@ public class DemandService {
 		for (DemandDetail detail : demand.getDemandDetails()) {
 			
 			totalCollectedAmount = totalCollectedAmount.add(detail.getCollectionAmount());
-			if (detail.getTaxHeadMasterCode().equalsIgnoreCase(CalculatorConstants.PT_TAX))
-				collectedApplicableAmount = collectedApplicableAmount.add(collectedApplicableAmount.add(detail.getCollectionAmount()));
+			if (CalculatorConstants.TAXES_TO_BE_CONSIDERD.contains(detail.getTaxHeadMasterCode()))
+				collectedApplicableAmount = collectedApplicableAmount.add(detail.getCollectionAmount());
 			if (detail.getTaxHeadMasterCode().equalsIgnoreCase(CalculatorConstants.PT_TIME_INTEREST))
 				oldInterest = oldInterest.add(detail.getTaxAmount());
 		}
