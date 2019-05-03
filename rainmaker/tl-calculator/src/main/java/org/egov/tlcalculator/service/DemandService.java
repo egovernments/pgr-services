@@ -289,14 +289,21 @@ public class DemandService {
     private List<DemandDetail> getUpdatedDemandDetails(Calculation calculation, List<DemandDetail> demandDetails){
 
         List<DemandDetail> newDemandDetails = new ArrayList<>();
-        Map<String, DemandDetail> taxHeadToDemandDetail = new HashMap<>();
+        Map<String, List<DemandDetail>> taxHeadToDemandDetail = new HashMap<>();
 
         demandDetails.forEach(demandDetail -> {
-            taxHeadToDemandDetail.put(demandDetail.getTaxHeadMasterCode(), demandDetail);
+            if(!taxHeadToDemandDetail.containsKey(demandDetail.getTaxHeadMasterCode())){
+                List<DemandDetail> demandDetailList = new LinkedList<>();
+                demandDetailList.add(demandDetail);
+                taxHeadToDemandDetail.put(demandDetail.getTaxHeadMasterCode(),demandDetailList);
+            }
+            else
+              taxHeadToDemandDetail.get(demandDetail.getTaxHeadMasterCode()).add(demandDetail);
         });
 
         BigDecimal diffInTaxAmount;
-        DemandDetail demandDetail;
+        List<DemandDetail> demandDetailList;
+        BigDecimal total;
 
         for(TaxHeadEstimate taxHeadEstimate : calculation.getTaxHeadEstimates()){
             if(!taxHeadToDemandDetail.containsKey(taxHeadEstimate.getTaxHeadCode()))
@@ -308,8 +315,9 @@ public class DemandService {
                                 .collectionAmount(BigDecimal.ZERO)
                                 .build());
             else {
-                 demandDetail = taxHeadToDemandDetail.get(taxHeadEstimate.getTaxHeadCode());
-                 diffInTaxAmount = taxHeadEstimate.getEstimateAmount().subtract(demandDetail.getTaxAmount());
+                 demandDetailList = taxHeadToDemandDetail.get(taxHeadEstimate.getTaxHeadCode());
+                 total = demandDetailList.stream().map(DemandDetail::getTaxAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+                 diffInTaxAmount = taxHeadEstimate.getEstimateAmount().subtract(total);
                  if(diffInTaxAmount.compareTo(BigDecimal.ZERO)!=0) {
                      newDemandDetails.add(
                              DemandDetail.builder()
