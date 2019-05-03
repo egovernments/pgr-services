@@ -19,11 +19,14 @@ import org.egov.tlcalculator.web.models.tradelicense.TradeUnit;
 import org.egov.tlcalculator.web.models.tradelicense.EstimatesAndSlabs;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+
+import static org.egov.tracer.http.HttpUtils.isInterServiceCall;
 
 
 @Service
@@ -61,14 +64,25 @@ public class CalculationService {
      * @param calculationReq The calculationCriteria request
      * @return List of calculations for all applicationNumbers or tradeLicenses in calculationReq
      */
-   public List<Calculation> calculate(CalculationReq calculationReq){
+   public List<Calculation> calculate(CalculationReq calculationReq,HttpHeaders headers){
+
+       Boolean estimate = calculationReq.getEstimate();
+       if(!isInterServiceCall(headers)){
+           if(!estimate)
+               throw new CustomException("INVALID REQUEST","The estimate flag cannot be false");
+       }
+       else if (estimate==null)
+           estimate = false;
+
        String tenantId = calculationReq.getCalulationCriteria().get(0).getTenantId();
        Object mdmsData = mdmsService.mDMSCall(calculationReq.getRequestInfo(),tenantId);
        List<Calculation> calculations = getCalculation(calculationReq.getRequestInfo(),
                calculationReq.getCalulationCriteria(),mdmsData);
-       demandService.generateDemand(calculationReq.getRequestInfo(),calculations,mdmsData);
        CalculationRes calculationRes = CalculationRes.builder().calculations(calculations).build();
-       producer.push(config.getSaveTopic(),calculationRes);
+       if(!estimate){
+           demandService.generateDemand(calculationReq.getRequestInfo(),calculations,mdmsData);
+           producer.push(config.getSaveTopic(),calculationRes);
+       }
        return calculations;
    }
 

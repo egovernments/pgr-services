@@ -37,4 +37,8 @@ public class CalculationReq {
 	@Valid
 	private List<CalulationCriteria> calulationCriteria = null;
 
+	@NotNull
+	@JsonProperty("estimate")
+	private Boolean estimate;
+
 }
