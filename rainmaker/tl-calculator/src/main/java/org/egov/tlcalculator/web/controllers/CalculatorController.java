@@ -10,7 +10,6 @@ import org.egov.tlcalculator.web.models.*;
 import org.egov.tlcalculator.web.models.demand.BillResponse;
 import org.egov.tlcalculator.web.models.demand.GenerateBillCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -47,9 +46,9 @@ public class CalculatorController {
 	 * @return Calculation Response
 	 */
 	@RequestMapping(value = "/_calculate", method = RequestMethod.POST)
-	public ResponseEntity<CalculationRes> calculate(@Valid @RequestBody CalculationReq calculationReq,
-													@RequestHeader HttpHeaders headers) {
-		 List<Calculation> calculations = calculationService.calculate(calculationReq,headers);
+	public ResponseEntity<CalculationRes> calculate(@Valid @RequestBody CalculationReq calculationReq) {
+
+		 List<Calculation> calculations = calculationService.calculate(calculationReq);
 		 CalculationRes calculationRes = CalculationRes.builder().calculations(calculations).build();
 		 return new ResponseEntity<CalculationRes>(calculationRes,HttpStatus.OK);
 	}
