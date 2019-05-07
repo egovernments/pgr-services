@@ -93,8 +93,10 @@ public class TransactionValidator {
     }
 
     public boolean shouldGenerateReceipt(Transaction prevStatus, Transaction newStatus) {
-        if(prevStatus.getTxnStatus().equals(Transaction.TxnStatusEnum.SUCCESS) && !isEmpty(prevStatus.getReceipt()))
+        if(prevStatus.getTxnStatus().equals(Transaction.TxnStatusEnum.SUCCESS) && !isEmpty(prevStatus.getReceipt())) {
+            newStatus.setTxnStatusMsg(prevStatus.getTxnStatusMsg());
             return false;
+        }
 
         if (newStatus.getTxnStatus().equals(Transaction.TxnStatusEnum.SUCCESS)) {
             if (new BigDecimal(prevStatus.getTxnAmount()).compareTo(new BigDecimal(newStatus.getTxnAmount())) == 0) {

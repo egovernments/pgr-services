@@ -39,7 +39,7 @@ public class ReceiptVoucherListener {
     @Autowired
     private ReceiptService receiptService;
 
-    @KafkaListener(id = "${egov.collection.receipt.voucher.save.id}", topics = "${egov.collection.receipt.voucher.save.topic}", group = "${egov.collection.receipt.voucher.save.group}")
+    @KafkaListener(topics = "${egov.collection.receipt.voucher.save.topic}")
     public void process(ConsumerRecord<String, String> record) {
         ReceiptRequest request = null;
         LOGGER.info("key : " + record.key() + "\t\t" + "value : " + record.value());
@@ -49,11 +49,11 @@ public class ReceiptVoucherListener {
             if (request.getTenantId() == null) {
                 request.setTenantId(request.getReceipt().get(0).getTenantId());
             }
-            if (checkVoucherCreation(request)) {
+             //  if (checkVoucherCreation(request)) { TODO if block commented out for testing
 
                 voucherResponse = voucherService.createVoucher(request);
                 receiptService.updateReceipt(request, voucherResponse);
-            }
+           // }
         } catch (IOException e) {
             e.printStackTrace();
         }

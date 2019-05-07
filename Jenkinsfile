@@ -31,6 +31,12 @@ try {
           image_builder.publish(service_name, commit_id)
           image_builder.clean(service_name, commit_id)
         }
+        // cleanup all files and directories in target directories, but only if the CLEANUP build parameter is set to 'true'
+        post {
+            cleanup {
+                deleteDir()
+            }
+        }
     }
 } catch (e) {
     node{

@@ -10,6 +10,11 @@ echo "sub_filter  '<head>' '" >> /etc/nginx/conf.d/sub_filter.conf
   if [[ -n "$TELEMETRY_JS_URL" ]]; then
     echo "<script src="$TELEMETRY_JS_URL" type="text/javascript"></script>" >> /etc/nginx/conf.d/sub_filter.conf
   fi
+  
+  if [[ -n "$CHATBOT_USERINFO_GEN_JS_URL" ]]; then
+    echo "<script src="$CHATBOT_USERINFO_GEN_JS_URL" type="text/javascript"></script>" >> /etc/nginx/conf.d/sub_filter.conf
+  fi
+  
 echo "<"/"head>';" >> /etc/nginx/conf.d/sub_filter.conf
 echo "sub_filter_once on;" >> /etc/nginx/conf.d/sub_filter.conf
 fi
