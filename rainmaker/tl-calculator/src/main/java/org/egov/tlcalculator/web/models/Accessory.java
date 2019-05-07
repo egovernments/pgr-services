@@ -45,7 +45,7 @@ public class Accessory   {
 
         @Min(value = 0)
         @JsonProperty("count")
-        private Integer count = 1;
+        private Integer count;
 
         @JsonProperty("auditDetails")
         private AuditDetails auditDetails = null;

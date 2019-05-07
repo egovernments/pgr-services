@@ -311,8 +311,10 @@ public class CalculationService {
                   throw new CustomException("BILLINGSLAB ERROR","No BillingSlab Found for the given accessory");
              System.out.println("Accessory: "+accessory.getAccessoryCategory()+ " rate: "+billingSlabs.get(0).getRate());
              billingSlabIds.add(billingSlabs.get(0).getId()+"|"+i+"|"+accessory.getId());
-             if(billingSlabs.get(0).getType().equals(BillingSlab.TypeEnum.FLAT))
-                 accessoryFees.add(billingSlabs.get(0).getRate().multiply(new BigDecimal(accessory.getCount())));
+             if(billingSlabs.get(0).getType().equals(BillingSlab.TypeEnum.FLAT)){
+                 BigDecimal count = accessory.getCount()==null ? BigDecimal.ONE : new BigDecimal(accessory.getCount());
+                 accessoryFees.add(billingSlabs.get(0).getRate().multiply(count));
+             }
             //     accessoryTotalFee = accessoryTotalFee.add(billingSlabs.get(0).getRate());
 
              if(billingSlabs.get(0).getType().equals(BillingSlab.TypeEnum.RATE)){
