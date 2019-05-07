@@ -662,5 +662,21 @@
         "$.code"
       ]
     }
+  },
+  "firenoc": {
+    "BuildingType": {
+      "masterName": "BuildingType",
+      "isStateLevel": true,
+      "uniqueKeys": [
+        "$.code"
+      ]
+    },
+    "ApplicationType":{
+      "masterName": "ApplicationType",
+      "isStateLevel": true,
+      "uniqueKeys": [
+        "$.code"
+      ]
+    }
   }
 }
