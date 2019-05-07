@@ -303,8 +303,6 @@ public class CalculationService {
               }
               // Call the Search
               String query = queryBuilder.getSearchQuery(searchCriteria, preparedStmtList);
-               log.info("query "+query);
-               log.info("preparedStmtList "+preparedStmtList.toString());
               List<BillingSlab> billingSlabs = repository.getDataFromDB(query, preparedStmtList);
 
               if(billingSlabs.size()>1)
@@ -314,7 +312,7 @@ public class CalculationService {
              System.out.println("Accessory: "+accessory.getAccessoryCategory()+ " rate: "+billingSlabs.get(0).getRate());
              billingSlabIds.add(billingSlabs.get(0).getId()+"|"+i+"|"+accessory.getId());
              if(billingSlabs.get(0).getType().equals(BillingSlab.TypeEnum.FLAT))
-                 accessoryFees.add(billingSlabs.get(0).getRate());
+                 accessoryFees.add(billingSlabs.get(0).getRate().multiply(new BigDecimal(accessory.getCount())));
             //     accessoryTotalFee = accessoryTotalFee.add(billingSlabs.get(0).getRate());
 
              if(billingSlabs.get(0).getType().equals(BillingSlab.TypeEnum.RATE)){
