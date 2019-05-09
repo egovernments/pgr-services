@@ -34,7 +34,7 @@ public class CalculationQueryBuilder {
         builder.append(" AND tp.consumercode=? ");
         preparedStmtList.add(criteria.getAplicationNumber());
 
-        builder.append("ORDER BY tp.lastmodifiedtime,acc.lastmodifiedtime DESC LIMIT 1");
+        builder.append("ORDER BY tp.lastmodifiedtime DESC,acc.lastmodifiedtime DESC LIMIT 1");
 
         return builder.toString();
     }
