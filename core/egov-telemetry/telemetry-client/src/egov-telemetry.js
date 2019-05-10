@@ -128,7 +128,7 @@ window.addEventListener("popstate", function(event) {
     }
     var fullURL = arguments[2];
 
-    urlChanged("http://" + window.location.host + fullURL);
+    urlChanged(window.location.protocol + "//" + window.location.host + fullURL);
 
     return pushState.apply(history, arguments);
   };
