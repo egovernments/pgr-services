@@ -30,6 +30,7 @@ import org.egov.receipt.consumer.model.RequestInfo;
 import org.egov.receipt.consumer.model.Scheme;
 import org.egov.receipt.consumer.model.TaxHeadMaster;
 import org.egov.receipt.consumer.model.Voucher;
+import org.egov.receipt.consumer.model.VoucherIntegrationLogTO;
 import org.egov.receipt.consumer.model.VoucherRequest;
 import org.egov.receipt.consumer.model.VoucherResponse;
 import org.egov.receipt.consumer.model.VoucherSearchRequest;
@@ -70,8 +71,12 @@ public class VoucherServiceImpl implements VoucherService {
 	private static final String RECEIPT_VIEW_SOURCEPATH = "/services/collection/receipts/receipt-viewReceipts.action?selectedReceipts=";
 	private static final String COLLECTION_MODULE_NAME = "Collections";
 	LinkedHashMap<String, BigDecimal> amountMapwithGlcode;
+	private VoucherIntegrationLogTO voucherIntegrationLogTO;
 
 	@Override
+	/**
+	 * This method is use to create the voucher specifically for receipt request.
+	 */
 	public VoucherResponse createReceiptVoucher(ReceiptReq receiptRequest) throws Exception {
 		Receipt receipt = receiptRequest.getReceipt().get(0);
 		String tenantId = receipt.getTenantId();
@@ -90,7 +95,10 @@ public class VoucherServiceImpl implements VoucherService {
 			LOGGER.info("invoking rest call for creating voucher : URL :" + voucher_create_url);
 		return restTemplate.postForObject(voucher_create_url, voucherRequest, VoucherResponse.class);
 	}
-
+	
+	/**
+	 * Function which is used to check whether the voucher creation is set to true or false in business mapping file.
+	 */
 	@Override
 	public boolean isVoucherCreationEnabled(ReceiptReq req) throws Exception {
 		Receipt receipt = req.getReceipt().get(0);
@@ -101,7 +109,14 @@ public class VoucherServiceImpl implements VoucherService {
 		return serviceByCode != null && !serviceByCode.isEmpty() ? serviceByCode.get(0).isVoucherCreationEnabled()
 				: false;
 	}
-
+	
+	/**
+	 * 
+	 * @param receipt
+	 * @return
+	 * @throws VoucherCustomException
+	 * Function which is used to get the AccountCodeContract based on the Account code from running Instrument Service. By which we can get the mapped glcode for Account code.
+	 */
 	private InstrumentAccountCodeContract getInstrumentAccountCode(Receipt receipt) throws VoucherCustomException {
 		InstrumentAccountCodeSearchContract iAccCodeSearchContract = new InstrumentAccountCodeSearchContract();
 		InstrumentTypeContract instrumentType = new InstrumentTypeContract();
@@ -129,9 +144,14 @@ public class VoucherServiceImpl implements VoucherService {
 				return instrumentAccountCodes.get(0);
 			}
 		}
+		voucherIntegrationLogTO.setStatus("FAILED");
+		voucherIntegrationLogTO.setDescription("ERROR : Account code mapping is missing for Instrument Type " + name);
 		throw new VoucherCustomException("ERROR -> Account code mapping is missing for Instrument Type " + name);
 	}
-
+	
+	/**
+	 * Function is for cancelling the voucher based on voucher number
+	 */
 	@Override
 	public VoucherResponse cancelReceiptVoucher(ReceiptReq receiptRequest) throws VoucherCustomException {
 		Receipt receipt = receiptRequest.getReceipt().get(0);
@@ -144,12 +164,20 @@ public class VoucherServiceImpl implements VoucherService {
 				LOGGER.info("invoking rest call for cancelling voucher : URL :" + voucher_cancel_url);
 			return restTemplate.postForObject(voucher_cancel_url, vSearchReq, VoucherResponse.class);
 		} catch (Exception e) {
+			voucherIntegrationLogTO.setStatus("FAILED");
+			voucherIntegrationLogTO.setDescription("ERROR occured while cancelling voucher in VoucherServiceImpl.cancelVoucher method");
 			throw new VoucherCustomException(
 					"ERROR occured while cancelling voucher in VoucherServiceImpl.cancelVoucher method "
 							+ e.getMessage());
 		}
 	}
-
+	
+	/**
+	 * 
+	 * @param receiptRequest
+	 * @return
+	 * This function is use to set the voucher search params and return the setted request
+	 */
 	private VoucherSearchRequest getVoucherSearchReq(ReceiptReq receiptRequest) {
 		VoucherSearchRequest vSearchReq = new VoucherSearchRequest();
 		Receipt receipt = receiptRequest.getReceipt().get(0);
@@ -163,7 +191,10 @@ public class VoucherServiceImpl implements VoucherService {
 		vSearchReq.setRequestInfo(requestInfo);
 		return vSearchReq;
 	}
-
+	
+	/**
+	 * Function is used to check that whether the voucher is present/exist in Finance setup or not.
+	 */
 	@Override
 	public boolean isVoucherExists(ReceiptReq receiptRequest) throws VoucherCustomException {
 		Receipt receipt = receiptRequest.getReceipt().get(0);
@@ -174,6 +205,8 @@ public class VoucherServiceImpl implements VoucherService {
 		try {
 			response = restTemplate.postForObject(voucher_search_url, vSearchReq, VoucherResponse.class);
 		} catch (Exception e) {
+			voucherIntegrationLogTO.setStatus("WARNING");
+			voucherIntegrationLogTO.setDescription("ERROR occured while calling " + voucher_search_url + " to check the existence of voucher");
 			throw new VoucherCustomException(
 					"ERROR occured while calling " + voucher_search_url + " to check the existence of voucher");
 		}
@@ -184,6 +217,14 @@ public class VoucherServiceImpl implements VoucherService {
 		return isExist;
 	}
 
+	/**
+	 * 
+	 * @param voucher
+	 * @param receipt
+	 * @param tenantId
+	 * @throws Exception
+	 * Function is use to set the specific details of voucher which is mendatory to create the voucher.
+	 */
 	private void setVoucherDetails(Voucher voucher, Receipt receipt, String tenantId) throws Exception {
 		BillDetail billDetail = receipt.getBill().get(0).getBillDetails().get(0);
 		String bsCode = billDetail.getBusinessService();
@@ -262,7 +303,13 @@ public class VoucherServiceImpl implements VoucherService {
 			});
 		}
 	}
-
+	
+	/**
+	 * 
+	 * @param tenantId
+	 * @return
+	 * Function is used to check the config value for manual receipt date consideration.
+	 */
 	private boolean isManualReceiptDateEnabled(String tenantId) {
 		RequestInfo requestInfo = new RequestInfo();
 		try {
@@ -279,6 +326,13 @@ public class VoucherServiceImpl implements VoucherService {
 		return false;
 	}
 
+	/**
+	 * 
+	 * @param voucher
+	 * @param receipt
+	 * @throws VoucherCustomException
+	 * 
+	 */
 	private void setNetReceiptAmount(Voucher voucher, Receipt receipt) throws VoucherCustomException {
 		InstrumentAccountCodeContract instrumentAccountCode = this.getInstrumentAccountCode(receipt);
 		String glcode = instrumentAccountCode.getAccountCode().getGlcode();
@@ -288,8 +342,11 @@ public class VoucherServiceImpl implements VoucherService {
 
 	private List<BusinessService> getBusinessServiceByCode(String tenantId, String bsCode) throws Exception {
 		List<BusinessService> propertyTaxBusinessService = microServiceUtil.getBusinessService(tenantId, bsCode);
-		if (propertyTaxBusinessService.isEmpty())
+		if (propertyTaxBusinessService.isEmpty()){
+			voucherIntegrationLogTO.setStatus("FAILED");
+			voucherIntegrationLogTO.setDescription("ERROR : No Business Service Found for Code : " + bsCode);
 			throw new VoucherCustomException("ERROR -> No Business Service Found for Code : " + bsCode);
+		}
 		List<BusinessService> collect = propertyTaxBusinessService.stream().filter(bs -> bs.getCode().equals(bsCode))
 				.collect(Collectors.toList());
 		return collect;

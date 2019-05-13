@@ -82,6 +82,13 @@ public class InstrumentService {
 	@Autowired
 	private FinancialStatusService financialStatusService;
 
+	/**
+	 * 
+	 * @param receiptRequest
+	 * @param voucherResponse
+	 * @return
+	 * Function is used to create the instrument for created voucher.
+	 */
 	public InstrumentResponse createInstrument(ReceiptReq receiptRequest, VoucherResponse voucherResponse) {
 		
 		try {
@@ -119,6 +126,11 @@ public class InstrumentService {
 		instrumentContract.setInstrumentVouchers(Collections.singletonList(ivContract));
 	}
 
+	/**
+	 * 
+	 * @param receipt
+	 * Function is used to cancel the instruments
+	 */
 	public void cancelInstrument(Receipt receipt) {
 		InstrumentRequest request = new InstrumentRequest();
 		this.setInstrumentRequest(request, receipt);

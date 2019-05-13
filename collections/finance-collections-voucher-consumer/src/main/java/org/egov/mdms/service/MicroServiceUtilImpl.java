@@ -14,6 +14,7 @@ import org.egov.receipt.consumer.model.MdmsCriteriaReq;
 import org.egov.receipt.consumer.model.ModuleDetail;
 import org.egov.receipt.consumer.model.RequestInfo;
 import org.egov.receipt.consumer.model.TaxHeadMaster;
+import org.egov.receipt.consumer.model.VoucherIntegrationLogTO;
 import org.egov.receipt.custom.exception.VoucherCustomException;
 import org.egov.reciept.consumer.config.PropertiesManager;
 import org.slf4j.Logger;
@@ -47,6 +48,8 @@ public class MicroServiceUtilImpl implements MicroServiceUtil{
 	private RestTemplate restTemplate;
 	@Autowired
 	private ObjectMapper mapper;
+	@Autowired
+	private VoucherIntegrationLogTO voucherIntegrationLogTO;
 	
 	@Override
 	public List<BusinessService> getBusinessService(String tenantId, String code) throws VoucherCustomException{
@@ -63,8 +66,9 @@ public class MicroServiceUtilImpl implements MicroServiceUtil{
 					LOGGER.info("List of business services ::: "+list);
 			}			
 		} catch (Exception e) {
-			LOGGER.error("ERROR while parsing the mdms BusinessServiceMapping data in MicroServiceUtil.getPropertyTaxBusinessService()",e.getMessage());
-			throw new VoucherCustomException("ERROR while parsing the mdms BusinessServiceMapping data in MicroServiceUtil.getPropertyTaxBusinessService()");
+			voucherIntegrationLogTO.setStatus("FAILED");
+			voucherIntegrationLogTO.setDescription("Error while parsing mdms data.Check the business/account head mapping json file.");
+			throw new VoucherCustomException("ERROR","Error while parsing mdms data","check the business/account head mapping json file.");
 		}
 		return list;
 	}
@@ -83,9 +87,9 @@ public class MicroServiceUtilImpl implements MicroServiceUtil{
 					LOGGER.info("List of TaxHeadMaster data : "+list);
 			}			
 		} catch (Exception e) {
-			if(LOGGER.isErrorEnabled())
-				LOGGER.error("ERROR while parsing the mdms TaxHeadMaster data in MicroServiceUtil.getTaxHeadMasters()",e.getMessage());
-			throw new VoucherCustomException("ERROR while parsing the mdms TaxHeadMaster data in MicroServiceUtil.getTaxHeadMasters()");
+			voucherIntegrationLogTO.setStatus("FAILED");
+			voucherIntegrationLogTO.setDescription("Error while parsing mdms data.Check the business/account head mapping json file.");
+			throw new VoucherCustomException("ERROR","Error while parsing mdms data","check the business/account head mapping json file.");
 		}
 		return list;
 	}
@@ -126,7 +130,9 @@ public class MicroServiceUtilImpl implements MicroServiceUtil{
             Map postForObject = restTemplate.postForObject(mdmsUrl, mdmsrequest, Map.class);
             return postForObject;
         } catch (Exception e) {
-           throw new VoucherCustomException("Error Occured While calling the URL : "+mdmsUrl);
+        	voucherIntegrationLogTO.setStatus("FAILED");
+			voucherIntegrationLogTO.setDescription("Error occured while calling the URL : "+mdmsUrl);
+			throw new VoucherCustomException("Error Occured While calling the URL : "+mdmsUrl);
         }
 	}
 }

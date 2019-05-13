@@ -66,6 +66,13 @@ public class ReceiptService {
     @Autowired
     private PropertiesManager propertiesManager;
 
+    /**
+     * 
+     * @param receiptRequest
+     * @param voucherResponse
+     * @return
+     * Function is used to send the update of receipt with voucher number to collection service.
+     */
     public ReceiptResponse updateReceipt(ReceiptReq receiptRequest, VoucherResponse voucherResponse) {
 
         RequestInfo requestInfo = new RequestInfo();
