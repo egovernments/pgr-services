@@ -677,6 +677,14 @@
       "uniqueKeys": [
         "$.code"
       ]
+    },
+    "FireStations":{
+      "masterName": "FireStations",
+      "isStateLevel": true,
+      "uniqueKeys": [
+        "$.code"
+      ]
     }
+
   }
 }
