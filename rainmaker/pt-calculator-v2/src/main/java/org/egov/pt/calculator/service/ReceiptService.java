@@ -38,6 +38,22 @@ public class ReceiptService {
 	private static final String CONSUMERCODEQUERYFORCURRENTFINANCIALYEAR = "SELECT CONCAT(propertyid,':',assessmentnumber) "
 			+ "FROM eg_pt_assessment where assessmentyear=? AND propertyId=?";
 
+
+	/**
+	 * Gets all receipts corresponding to the given demand
+	 * @param assessmentYear
+	 * @param demand
+	 * @param requestInfoWrapper
+	 * @return
+	 */
+	public List<Receipt> getReceiptsFromConsumerCode(String assessmentYear, Demand demand, RequestInfoWrapper requestInfoWrapper) {
+		List<String> consumercodes =  getCosumerCodesForDemandFromCurrentFinancialYear (assessmentYear, demand.getConsumerCode().split(":")[0]);
+		List<Receipt> receipts = getReceipts(demand.getTenantId(), consumercodes, requestInfoWrapper);
+		return receipts;
+	}
+
+
+
 	/**
 	 * searches the latest collected date of the particular demand 
 	 * 

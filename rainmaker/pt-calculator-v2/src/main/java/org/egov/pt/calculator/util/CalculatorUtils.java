@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.mdms.model.MasterDetail;
 import org.egov.mdms.model.MdmsCriteria;
@@ -151,11 +152,20 @@ public class CalculatorUtils {
 	 */
 	public StringBuilder getDemandSearchUrl(GetBillCriteria getBillCriteria) {
 
-		return new StringBuilder().append(configurations.getBillingServiceHost())
+		if(CollectionUtils.isEmpty(getBillCriteria.getConsumerCodes()))
+			return new StringBuilder().append(configurations.getBillingServiceHost())
+					.append(configurations.getDemandSearchEndPoint()).append(CalculatorConstants.URL_PARAMS_SEPARATER)
+					.append(CalculatorConstants.TENANT_ID_FIELD_FOR_SEARCH_URL).append(getBillCriteria.getTenantId())
+					.append(CalculatorConstants.SEPARATER)
+					.append(CalculatorConstants.CONSUMER_CODE_SEARCH_FIELD_NAME).append(getBillCriteria.getPropertyId()+ CalculatorConstants.PT_CONSUMER_CODE_SEPARATOR +getBillCriteria.getAssessmentNumber());
+
+		else return new StringBuilder().append(configurations.getBillingServiceHost())
 				.append(configurations.getDemandSearchEndPoint()).append(CalculatorConstants.URL_PARAMS_SEPARATER)
 				.append(CalculatorConstants.TENANT_ID_FIELD_FOR_SEARCH_URL).append(getBillCriteria.getTenantId())
 				.append(CalculatorConstants.SEPARATER)
-				.append(CalculatorConstants.CONSUMER_CODE_SEARCH_FIELD_NAME).append(getBillCriteria.getPropertyId()+ CalculatorConstants.PT_CONSUMER_CODE_SEPARATOR +getBillCriteria.getAssessmentNumber());
+				.append(CalculatorConstants.CONSUMER_CODE_SEARCH_FIELD_NAME).append(StringUtils.join(getBillCriteria.getConsumerCodes(),","));
+
+
 	}
 
 	/**

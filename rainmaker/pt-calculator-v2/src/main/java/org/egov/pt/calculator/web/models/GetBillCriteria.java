@@ -1,6 +1,7 @@
 package org.egov.pt.calculator.web.models;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
@@ -16,13 +17,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class GetBillCriteria {
 	
-	@NotNull
 	private String assessmentNumber;
 	
 	@Default
 	private BigDecimal amountExpected = BigDecimal.ZERO;
 	
-	@NotNull
 	private String propertyId;
 	
 	private String assessmentYear;
@@ -31,5 +30,7 @@ public class GetBillCriteria {
 	private String tenantId;
 	
 	private String billId;
+
+	private List<String> consumerCodes;
 	
 }
