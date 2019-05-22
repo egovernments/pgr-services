@@ -173,8 +173,10 @@ public class NotificationService {
      * @return Customized message for update by employee
      */
     private String getCustomizedUpdateMessageEmployee(Property property,String message){
+        PropertyDetail propertyDetail = property.getPropertyDetails().get(0);
         message = message.replace("<insert Property Tax Assessment ID>",property.getPropertyId());
-        message = message.replace("<insert inactive URL for Citizen Web application>.",notificationURL);
+        message = message.replace("<FY>",propertyDetail.getFinancialYear());
+      //message = message.replace("<insert inactive URL for Citizen Web application>.",notificationURL);
         return message;
     }
 
