@@ -310,7 +310,7 @@ public class EstimationService {
 
 		// get applicable rebate and penalty
 		Map<String, BigDecimal> rebatePenaltyMap = payService.applyPenaltyRebateAndInterest(payableTax, BigDecimal.ZERO,
-				0L, assessmentYear, timeBasedExemeptionMasterMap);
+				 assessmentYear, timeBasedExemeptionMasterMap,null);
 
 		if (null != rebatePenaltyMap) {
 

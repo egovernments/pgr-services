@@ -6,11 +6,14 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.contract.response.ResponseInfo;
 import org.egov.pt.calculator.repository.Repository;
 import org.egov.pt.calculator.util.CalculatorConstants;
 import org.egov.pt.calculator.util.CalculatorUtils;
 import org.egov.pt.calculator.util.Configurations;
+import org.egov.pt.calculator.validator.CalculationValidator;
 import org.egov.pt.calculator.web.models.*;
+import org.egov.pt.calculator.web.models.collections.Receipt;
 import org.egov.pt.calculator.web.models.demand.*;
 import org.egov.pt.calculator.web.models.property.OwnerInfo;
 import org.egov.pt.calculator.web.models.property.Property;
@@ -64,6 +67,9 @@ public class DemandService {
 	
 	@Autowired
 	private ReceiptService rcptService;
+
+	@Autowired
+	private CalculationValidator validator;
 
 	/**
 	 * Generates and persists the demand to billing service for the given property
@@ -149,11 +155,15 @@ public class DemandService {
 	public BillResponse getBill(GetBillCriteria getBillCriteria, RequestInfoWrapper requestInfoWrapper) {
 
 		if(getBillCriteria.getAmountExpected() == null) getBillCriteria.setAmountExpected(BigDecimal.ZERO);
+		validator.validateGetBillCriteria(getBillCriteria);
 		RequestInfo requestInfo = requestInfoWrapper.getRequestInfo();
 		Map<String, Map<String, List<Object>>> propertyBasedExemptionMasterMap = new HashMap<>();
 		Map<String, JSONArray> timeBasedExmeptionMasterMap = new HashMap<>();
 		mstrDataService.setPropertyMasterValues(requestInfo, getBillCriteria.getTenantId(),
 				propertyBasedExemptionMasterMap, timeBasedExmeptionMasterMap);
+
+		if(CollectionUtils.isEmpty(getBillCriteria.getConsumerCodes()))
+			getBillCriteria.setConsumerCodes(Collections.singletonList(getBillCriteria.getPropertyId()+ CalculatorConstants.PT_CONSUMER_CODE_SEPARATOR +getBillCriteria.getAssessmentNumber()));
 
 		DemandResponse res = mapper.convertValue(
 				repository.fetchResult(utils.getDemandSearchUrl(getBillCriteria), requestInfoWrapper),
@@ -163,42 +173,61 @@ public class DemandService {
 			map.put(CalculatorConstants.EMPTY_DEMAND_ERROR_CODE, CalculatorConstants.EMPTY_DEMAND_ERROR_MESSAGE);
 			throw new CustomException(map);
 		}
-		Demand demand = res.getDemands().get(0);
-		
-		if (demand.getStatus() != null
-				&& CalculatorConstants.DEMAND_CANCELLED_STATUS.equalsIgnoreCase(demand.getStatus().toString()))
-			throw new CustomException(CalculatorConstants.EG_PT_INVALID_DEMAND_ERROR,
-					CalculatorConstants.EG_PT_INVALID_DEMAND_ERROR_MSG);
 
-		applytimeBasedApplicables(demand, requestInfoWrapper, timeBasedExmeptionMasterMap);
-		
-/*		Map<String, Boolean> isTaxHeadDebitMap = mstrDataService
-				.getTaxHeadMasterMap(requestInfoWrapper.getRequestInfo(), getBillCriteria.getTenantId()).stream()
-				.collect(Collectors.toMap(TaxHeadMaster::getCode, TaxHeadMaster::getIsDebit));
 
-		BigDecimal totalTax = BigDecimal.ZERO;
+		/**
+		 * Loop through the consumerCodes and re-calculate the time based applicables
+		 */
 
-		for (DemandDetail detail : demand.getDemandDetails()) {
+		Map<String,Demand> consumerCodeToDemandMap = res.getDemands().stream()
+				.collect(Collectors.toMap(Demand::getConsumerCode,Function.identity()));
 
-			if (!isTaxHeadDebitMap.get(detail.getTaxHeadMasterCode()))
-				totalTax = totalTax.add(detail.getTaxAmount());
-			else
-				totalTax = totalTax.subtract(detail.getTaxAmount());
+		List<Demand> demandsToBeUpdated = new LinkedList<>();
+
+		for(String consumerCode : getBillCriteria.getConsumerCodes()){
+            Demand demand = consumerCodeToDemandMap.get(consumerCode);
+            if(demand==null)
+				throw new CustomException(CalculatorConstants.EMPTY_DEMAND_ERROR_CODE, "No demand found for the consumerCode: "+consumerCode);
+
+			if (demand.getStatus() != null
+					&& CalculatorConstants.DEMAND_CANCELLED_STATUS.equalsIgnoreCase(demand.getStatus().toString()))
+				throw new CustomException(CalculatorConstants.EG_PT_INVALID_DEMAND_ERROR,
+						CalculatorConstants.EG_PT_INVALID_DEMAND_ERROR_MSG);
+
+			applytimeBasedApplicables(demand, requestInfoWrapper, timeBasedExmeptionMasterMap);
+
+			roundOffDecimalForDemand(demand, requestInfoWrapper);
+
+			demandsToBeUpdated.add(demand);
+
 		}
 
-		if (BigDecimal.ZERO.compareTo(getBillCriteria.getAmountExpected()) < 0
-				&& getBillCriteria.getAmountExpected().compareTo(totalTax) < 0)
-			demand.getDemandDetails().forEach(detail -> {
-				if (detail.getTaxHeadMasterCode().equalsIgnoreCase(CalculatorConstants.PT_TIME_REBATE))
-					detail.setTaxAmount(BigDecimal.ZERO);
-			});
-	*/	
-		roundOffDecimalForDemand(demand, requestInfoWrapper);
-		DemandRequest request = DemandRequest.builder().demands(Arrays.asList(demand)).requestInfo(requestInfo).build();
+
+		/**
+		 * Call demand update in bulk to update the interest or penalty
+		 */
+		DemandRequest request = DemandRequest.builder().demands(demandsToBeUpdated).requestInfo(requestInfo).build();
 		StringBuilder updateDemandUrl = utils.getUpdateDemandUrl();
 		repository.fetchResult(updateDemandUrl, request);
-		StringBuilder billGenUrl = utils.getBillGenUrl(getBillCriteria.getTenantId(), demand.getId(), demand.getConsumerCode());
-		return mapper.convertValue(repository.fetchResult(billGenUrl, requestInfoWrapper), BillResponse.class);
+
+
+		/**
+		 * Loop through the demands and call generateBill for each demand.
+		 * Group the Bills and return the bill responsew
+		 */
+		List<Bill> bills = new LinkedList<>();
+		BillResponse billResponse;
+		ResponseInfo responseInfo = null;
+		StringBuilder billGenUrl;
+
+		for(Demand demand : res.getDemands()){
+			billGenUrl = utils.getBillGenUrl(getBillCriteria.getTenantId(), demand.getId(), demand.getConsumerCode());
+			billResponse = mapper.convertValue(repository.fetchResult(billGenUrl, requestInfoWrapper), BillResponse.class);
+			responseInfo = billResponse.getResposneInfo();
+			bills.addAll(billResponse.getBill());
+		}
+
+		return BillResponse.builder().resposneInfo(responseInfo).bill(bills).build();
 	}
 
 	/**
@@ -332,7 +361,7 @@ public class DemandService {
 		/*
 		 * method to get the latest collected time from the receipt service
 		 */
-		Long lastCollectedTime = rcptService.getInterestLatestCollectedTime(taxPeriod.getFinancialYear(), demand,
+		List<Receipt> receipts = rcptService.getReceiptsFromConsumerCode(taxPeriod.getFinancialYear(), demand,
 				requestInfoWrapper);
 
 		BigDecimal taxAmtForApplicableGeneration = utils.getTaxAmtFromDemandForApplicablesGeneration(demand);
@@ -356,16 +385,13 @@ public class DemandService {
 		List<DemandDetail> details = demand.getDemandDetails();
 		
 		Map<String, BigDecimal> rebatePenaltyEstimates = payService.applyPenaltyRebateAndInterest(taxAmtForApplicableGeneration,
-				collectedApplicableAmount, lastCollectedTime, taxPeriod.getFinancialYear(), timeBasedExmeptionMasterMap);
+				collectedApplicableAmount, taxPeriod.getFinancialYear(), timeBasedExmeptionMasterMap,receipts);
 		
 		if(null == rebatePenaltyEstimates) return isCurrentDemand;
 		
 		BigDecimal rebate = rebatePenaltyEstimates.get(PT_TIME_REBATE);
 		BigDecimal penalty = rebatePenaltyEstimates.get(CalculatorConstants.PT_TIME_PENALTY);
 		BigDecimal interest = rebatePenaltyEstimates.get(CalculatorConstants.PT_TIME_INTEREST);
-		
-		if (lastCollectedTime > 0)
-			interest = oldInterest.add(rebatePenaltyEstimates.get(CalculatorConstants.PT_TIME_INTEREST));
 
 		DemandDetailAndCollection latestRebateDetail,latestPenaltyDemandDetail,latestInterestDemandDetail;
 		if(rebate.compareTo(BigDecimal.ZERO)!=0){

@@ -11,6 +11,7 @@ import static org.egov.pt.calculator.util.CalculatorConstants.PT_TYPE_VACANT_LAN
 import java.util.HashMap;
 import java.util.Map;
 
+import org.egov.pt.calculator.web.models.GetBillCriteria;
 import org.egov.pt.calculator.web.models.property.PropertyDetail;
 import org.egov.tracer.model.CustomException;
 import org.springframework.stereotype.Service;
@@ -41,5 +42,17 @@ public class CalculationValidator {
 
         if (!CollectionUtils.isEmpty(error))
             throw new CustomException(error);
+	}
+
+	/**
+	 * Validates the GetBillCriteria
+	 * @param getBillCriteria The Bill generation criteria
+	 */
+	public void validateGetBillCriteria(GetBillCriteria getBillCriteria){
+		if(CollectionUtils.isEmpty(getBillCriteria.getConsumerCodes())){
+			if(getBillCriteria.getPropertyId()==null || getBillCriteria.getAssessmentNumber()==null)
+				throw new CustomException("INVALID GETBILLCRITERIA","PropertyId or assessmentNumber cannot be null");
+		}
+
 	}
 }
