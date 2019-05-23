@@ -22,6 +22,9 @@ import org.springframework.stereotype.Component;
 import lombok.Getter;
 import org.springframework.util.CollectionUtils;
 
+import static org.egov.pt.calculator.util.CalculatorConstants.RECEIPT_STATUS_APPROVED;
+import static org.egov.pt.calculator.util.CalculatorConstants.STATUS_FIELD_FOR_SEARCH_URL;
+
 @Component
 @Getter
 public class CalculatorUtils {
@@ -141,7 +144,9 @@ public class CalculatorUtils {
 				.append(configurations.getReceiptSearchEndpoint()).append(CalculatorConstants.URL_PARAMS_SEPARATER)
 				.append(CalculatorConstants.TENANT_ID_FIELD_FOR_SEARCH_URL).append(tenantId)
 				.append(CalculatorConstants.SEPARATER).append(CalculatorConstants.CONSUMER_CODE_SEARCH_FIELD_NAME)
-				.append(consumerCodes.toString().replace("[", "").replace("]", ""));
+				.append(consumerCodes.toString().replace("[", "").replace("]", ""))
+				.append(CalculatorConstants.SEPARATER).append(STATUS_FIELD_FOR_SEARCH_URL)
+				.append(RECEIPT_STATUS_APPROVED);
 	}
 
 	/**
