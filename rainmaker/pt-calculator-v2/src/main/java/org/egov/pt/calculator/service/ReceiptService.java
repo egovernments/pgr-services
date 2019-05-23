@@ -1,5 +1,6 @@
 package org.egov.pt.calculator.service;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.egov.pt.calculator.repository.Repository;
@@ -48,8 +49,9 @@ public class ReceiptService {
 	 */
 	public List<Receipt> getReceiptsFromConsumerCode(String assessmentYear, Demand demand, RequestInfoWrapper requestInfoWrapper) {
 		List<String> consumercodes =  getCosumerCodesForDemandFromCurrentFinancialYear (assessmentYear, demand.getConsumerCode().split(":")[0]);
-		List<Receipt> receipts = getReceipts(demand.getTenantId(), consumercodes, requestInfoWrapper);
-
+		List<Receipt> receipts = new LinkedList<>();
+		if(!CollectionUtils.isEmpty(consumercodes))
+			receipts = getReceipts(demand.getTenantId(), consumercodes, requestInfoWrapper);
 		return receipts;
 	}
 
