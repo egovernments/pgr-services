@@ -174,6 +174,8 @@ public class CalculatorConstants {
 	
 	public static final String BUSINESSSERVICE_FIELD_FOR_SEARCH_URL = "businessService=";
 
+	public static final String STATUS_FIELD_FOR_SEARCH_URL = "status=";
+
 	public static final String SERVICE_FIELD_VALUE_PT = "PT";
 
 	public static final String URL_PARAMS_SEPARATER = "?";
