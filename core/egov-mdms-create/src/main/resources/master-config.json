@@ -724,6 +724,13 @@
         "$.billingservicecode",
          "$.taxhead"
       ]
+    },
+    "InstrumentGLcodeMapping": {
+      "masterName": "InstrumentGLcodeMapping",
+      "isStateLevel": true,
+      "uniqueKeys": [
+        "$.instrumenttype"
+      ]
     }
   }
 }
