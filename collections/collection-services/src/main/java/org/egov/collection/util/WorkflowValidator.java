@@ -100,8 +100,7 @@ public class WorkflowValidator {
 
         for(ReceiptWorkflow current : receiptWorkflows){
             if(!receiptsByReceiptNumber.containsKey(current.getReceiptNumber())){
-                log.error("Receipt not found with receipt number {} & consumer code {} or not in editable status ", current.getReceiptNumber(),
-                        current.getConsumerCode());
+                log.error("Receipt not found with receipt number {} or not in editable status ", current.getReceiptNumber());
                 errorMap.put("RECEIPT_WORKFLOW_INVALID_RECEIPT",
                         "Receipt not found in the system or not in editable state, "+current.getReceiptNumber());
             } else {

@@ -50,9 +50,9 @@ public enum ReceiptStatus {
     APPROVED("Approved", Category.OPEN),
     APPROVALPENDING("Approval Pending",Category.OPEN),
     TOBESUBMITTED("To be Submitted", Category.OPEN),
-    REJECTED("Rejected", Category.CLOSED),
-    CANCELLED("Cancelled",Category.CLOSED),
-    REMITTED("Remitted", Category.CLOSED),
+	REMITTED("Remitted", Category.OPEN),
+	REJECTED("Rejected", Category.CLOSED),
+	CANCELLED("Cancelled",Category.CLOSED),
 	DISHONOURED("Dishonoured", Category.CLOSED);
 
     
