@@ -1,0 +1,119 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Fire NOC Object Definitions
+  description: This will have fire noc related entity details.
+  contact:
+    name: eGov
+    email: info@egovernments.org
+host: phoenix-qa.egovernments.org
+basePath: /firennoc/v1/definitions
+paths: {}
+definitions:
+  BuildingDetails:
+    type: object
+    description: It will contains building details
+    properties:
+      tenantId:
+        type: string
+        description: Unique Identifier of ULB
+        maxLength: 128
+        minLength: 2
+      name:
+        type: string
+        description: name of the building
+      usageType:
+        type: string
+        description: building usage type
+      noOfFloors:
+        type: number
+      noOfBasements:
+        type: number
+      plotsize:
+        type: number
+      builtupArea:
+        type: number
+      heightOfBuilding:
+        type: number
+      additonalUnitTypes:
+        type: object
+      applicationDocuments:
+        description: 1. List of all the required documents. 2. Application can be submitted without required document 3. Once all the document submitted then only application submition process will be completed. 4. Mandatry application documents for a noc type and noc subtype are defined under ApplicationDocument master which is defined under MDMS.
+        type: array
+        items:
+          $ref: '#/definitions/Document'
+    required:
+      - tenantId
+      - name
+      - usageType
+      - noOfloors
+      - noOfBasements
+  PropertyDetails:
+    type: object
+    description: It will have fire noc related entities
+    properties:
+      noOfBuildings:
+        type: string
+        description: it might be single or multiple
+      propertyId:
+        type: string
+      firestationId:
+        type: string
+      buildingDetails:
+        type: array
+        items:
+          $ref: '#/definitions/BuildingDetails'
+      address:
+        $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-1-1.yml#/definitions/Address'
+    required:
+      - noOfBuildings
+      - propertyId
+      - firestationId
+      - buildingDetails
+  Document:
+    type: object
+    description: A Object holds the basic data for a NOC
+    properties:
+      tenantId:
+        type: string
+        description: Unique Identifier of ULB
+        maxLength: 128
+        minLength: 2
+      documentType:
+        type: string
+        minLength: 2
+        maxLength: 64
+        description: '1.Unique document type code from common master. 2. This is defined under mdms common master. 3. Object defination is defined under ''https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-1-1.yml#/definitions/DocumentType'''
+      documentSubType:
+        type: string
+        minLength: 2
+        maxLength: 64
+        description: 'It will be aadhar card, pancard and voter id'
+      fileStoreId:
+        type: string
+        minLength: 2
+        maxLength: 64
+        description: Unique file store id of uploaded document.
+      documentUid:
+        type: string
+        minLength: 2
+        maxLength: 64
+        description: 'document number(eg.Pan number, aadhar number).'
+      auditDetails:
+        $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-0-0.yml#/definitions/AuditDetails'
+    required:
+      - tenantId
+      - documentType
+      - fileStoreId
+  BuildingType:
+    type: object
+    description: This is mdms defination for BuildingType object
+    properties:
+      code:
+        type: string
+        description: Unique value for each entry in mdms data
+      UoMs:
+        description: List of UoMs based building type
+        type: array
+        items:
+          type: string
