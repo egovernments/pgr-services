@@ -14,10 +14,8 @@ import org.egov.egf.instrument.domain.model.Instrument;
 import org.egov.egf.instrument.domain.model.InstrumentSearch;
 import org.egov.egf.instrument.domain.model.InstrumentType;
 import org.egov.egf.instrument.domain.model.InstrumentTypeSearch;
-import org.egov.egf.instrument.domain.model.SurrenderReason;
 import org.egov.egf.instrument.domain.repository.InstrumentRepository;
 import org.egov.egf.instrument.domain.repository.InstrumentTypeRepository;
-import org.egov.egf.instrument.domain.repository.SurrenderReasonRepository;
 import org.egov.egf.instrument.web.requests.InstrumentRequest;
 import org.egov.egf.master.web.contract.FinancialStatusContract;
 import org.egov.egf.master.web.repository.BankAccountContractRepository;
@@ -45,8 +43,6 @@ public class InstrumentService {
 
     private SmartValidator validator;
 
-    private SurrenderReasonRepository surrenderReasonRepository;
-
     private BankContractRepository bankContractRepository;
 
     private FinancialStatusContractRepository financialStatusContractRepository;
@@ -56,14 +52,12 @@ public class InstrumentService {
     private InstrumentTypeRepository instrumentTypeRepository;
 
     @Autowired
-    public InstrumentService(SmartValidator validator, InstrumentRepository instrumentRepository,
-            SurrenderReasonRepository surrenderReasonRepository, BankContractRepository bankContractRepository,
+    public InstrumentService(SmartValidator validator, InstrumentRepository instrumentRepository, BankContractRepository bankContractRepository,
             FinancialStatusContractRepository financialStatusContractRepository,
             BankAccountContractRepository bankAccountContractRepository,
             InstrumentTypeRepository instrumentTypeRepository) {
         this.validator = validator;
         this.instrumentRepository = instrumentRepository;
-        this.surrenderReasonRepository = surrenderReasonRepository;
         this.bankContractRepository = bankContractRepository;
         this.financialStatusContractRepository = financialStatusContractRepository;
         this.bankAccountContractRepository = bankAccountContractRepository;
@@ -261,16 +255,19 @@ public class InstrumentService {
                     instrument.setBankAccount(bankAccount);
                 }*/
                 bankAccountContractRepository.getClass();
-                if (instrument.getFinancialStatus() != null) {
-                    instrument.getFinancialStatus().setTenantId(instrument.getTenantId());
-                    FinancialStatusContract financialStatus = financialStatusContractRepository
-                            .findById(instrument.getFinancialStatus(), requestInfo);
-                    if (financialStatus == null)
-                        throw new InvalidDataException("financialStatus", "financialStatus.invalid",
-                                " Invalid financialStatus");
-                    instrument.setFinancialStatus(financialStatus);
-                }
-                if (instrument.getSurrenderReason() != null) {
+//                if (instrument.getFinancialStatus() != null) {
+//                    instrument.getFinancialStatus().setTenantId(instrument.getTenantId());
+//                    FinancialStatusContract financialStatus = financialStatusContractRepository
+//                            .findById(instrument.getFinancialStatus(), requestInfo);
+//                    if (financialStatus == null)
+//                        throw new InvalidDataException("financialStatus", "financialStatus.invalid",
+//                                " Invalid financialStatus");
+//                    instrument.setFinancialStatus(financialStatus);
+//                }
+                
+                //Reason for instrument surrender is not initiated by collection service so that for now we are commenting out the validation from this service.
+                
+                /* if (instrument.getSurrenderReason() != null) {
                     instrument.getSurrenderReason().setTenantId(instrument.getTenantId());
                     SurrenderReason surrenderReason = surrenderReasonRepository
                             .findById(instrument.getSurrenderReason());
@@ -278,7 +275,7 @@ public class InstrumentService {
                         throw new InvalidDataException("surrenderReason", "surrenderReason.invalid",
                                 " Invalid surrenderReason");
                     instrument.setSurrenderReason(surrenderReason);
-                }
+                } */
 
             }
 
