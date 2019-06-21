@@ -23,7 +23,7 @@
     "lodash": "^4.17.4",
     "material-ui": "^0.18.1",
     "material-ui-upload": "^1.1.2",
-    "moment": "^2.19.1",
+    "moment": "^2.19.3",
     "pdfmake": "^0.1.27",
     "pdfobject": "^2.0.201604172",
     "prop-types": "^15.5.10",
