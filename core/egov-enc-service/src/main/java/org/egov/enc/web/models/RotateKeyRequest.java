@@ -2,9 +2,8 @@ package org.egov.enc.web.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-import org.egov.enc.models.MethodEnum;
 
-import java.util.ArrayList;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -13,6 +12,7 @@ import java.util.ArrayList;
 @Builder
 public class RotateKeyRequest {
 
+    @NotNull
     @JsonProperty("tenantId")
     private String tenantId;
 

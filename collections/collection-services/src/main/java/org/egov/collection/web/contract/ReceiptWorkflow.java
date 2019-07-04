@@ -13,14 +13,14 @@ public class ReceiptWorkflow {
 
     @NotNull
     @Length(min = 1)
-    private String consumerCode;
-
-    @NotNull
-    @Length(min = 1)
     private String receiptNumber;
 
     @NotNull
     private ReceiptAction action;
+
+    @NotNull
+    @Length(min = 1)
+    private String tenantId;
 
     private String reason;
     private JsonNode additionalDetails;

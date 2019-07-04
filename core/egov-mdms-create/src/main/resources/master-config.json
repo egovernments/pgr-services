@@ -389,6 +389,14 @@
       "uniqueKeys": [
         "$.code"
       ]
+    },
+    "citymodule": {
+      "masterName": "citymodule",
+      "isStateLevel": true,
+      "moduleDefinition": null,
+      "uniqueKeys": [
+        "$.code"
+      ]
     }
   },
   "works": {
@@ -684,7 +692,22 @@
       "uniqueKeys": [
         "$.code"
       ]
+    },
+    "FireNocStateConstats": {
+      "masterName": "FireNocStateConstats",
+      "isStateLevel": true,
+      "uniqueKeys": [
+        "$.code"
+      ]
+    },
+    "UOMs": {
+      "masterName": "UOMs",
+      "isStateLevel": true,
+      "uniqueKeys": [
+        "$.code"
+      ]
     }
+
   },
   "BillingService": {
     "TaxPeriod": {

@@ -42,18 +42,13 @@ public class BulkIndexer {
 			log.debug("Record being indexed: " + indexJson);
 			final HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
-
 			final HttpEntity<String> entity = new HttpEntity<>(indexJson, headers);
 			Object response = restTemplate.postForObject(url.toString(), entity, Map.class);
 			if (url.contains("_bulk")) {
 				if (JsonPath.read(mapper.writeValueAsString(response), "$.errors").equals(true)) {
 					log.info("Indexing FAILED!!!!");
 					log.info("Response from ES: " + response);
-				} else {
-					log.info("Indexing SUCCESSFULL!");
 				}
-			} else {
-				log.info("Indexing SUCCESSFULL!");
 			}
 		} catch (final ResourceAccessException e) {
 			log.error("ES is DOWN, Pausing kafka listener.......");

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.reverseOrder;
 import static java.util.Collections.singleton;
@@ -56,8 +57,12 @@ public class WorkflowService {
     @Transactional
     public List<Receipt> performWorkflow(ReceiptWorkflowRequest receiptWorkflowRequest){
 
+        // Basic validations
+
         ReceiptWorkflow.ReceiptAction action = receiptWorkflowRequest.getReceiptWorkflow().get(0).getAction();
-        Set<String> consumerCodes = new HashSet<>();
+        String tenantId = receiptWorkflowRequest.getReceiptWorkflow().get(0).getTenantId();
+
+        Set<String> receiptNumbers = new HashSet<>();
         Map<String, ReceiptWorkflow> workflowRequestByReceiptNumber = new HashMap<>();
 
         for(ReceiptWorkflow workflow : receiptWorkflowRequest.getReceiptWorkflow()){
@@ -65,21 +70,39 @@ public class WorkflowService {
                 throw new CustomException("RECEIPT_WORKFLOW_SINGLE_ACTION_ALLOWED", "All workflow requests should be " +
                         "of the same action");
 
-            consumerCodes.add(workflow.getConsumerCode());
+            if(!workflow.getTenantId().equalsIgnoreCase(tenantId))
+                throw new CustomException("CROSS_TENANT_OP_NOT_ALLOWED", "All requests should act on a single tenant ");
+
+            receiptNumbers.add(workflow.getReceiptNumber());
             workflowRequestByReceiptNumber.put(workflow.getReceiptNumber(), workflow);
         }
+
+        // Fetch consumer codes of receipts
+
+        List<Receipt> receipts = collectionRepository.fetchReceipts(ReceiptSearchCriteria.builder()
+                                                .receiptNumbers(receiptNumbers)
+                                                .tenantId(tenantId)
+                                                .build());
+
+        Set<String> consumerCodes = receipts.stream()
+                .map(Receipt::getConsumerCode)
+                .collect(Collectors.toSet());
+
 
         List<Receipt> processedReceipts = new ArrayList<>();
 
         switch (action){
             case CANCEL:
-                processedReceipts = cancel(workflowRequestByReceiptNumber, consumerCodes, receiptWorkflowRequest.getRequestInfo());
+                processedReceipts = cancel(workflowRequestByReceiptNumber, consumerCodes,
+                        receiptWorkflowRequest.getRequestInfo(), tenantId);
                 break;
             case DISHONOUR:
-                processedReceipts = dishonour(workflowRequestByReceiptNumber, consumerCodes, receiptWorkflowRequest.getRequestInfo());
+                processedReceipts = dishonour(workflowRequestByReceiptNumber, consumerCodes,
+                        receiptWorkflowRequest.getRequestInfo(), tenantId);
                 break;
             case REMIT:
-                processedReceipts = remit(workflowRequestByReceiptNumber, consumerCodes, receiptWorkflowRequest.getRequestInfo());
+                processedReceipts = remit(workflowRequestByReceiptNumber, consumerCodes,
+                        receiptWorkflowRequest.getRequestInfo(), tenantId);
                 break;
         }
 
@@ -101,14 +124,16 @@ public class WorkflowService {
      * @param workflowRequestByReceiptNumber map workflow request to receipt number
      * @param consumerCodes Consumer codes of all the requests
      * @param requestInfo request info of the incoming request
+     * @param tenantId
      * @return updated receipts
      */
     private List<Receipt> cancel(Map<String, ReceiptWorkflow> workflowRequestByReceiptNumber, Set<String> consumerCodes,
-                                 RequestInfo requestInfo){
+                                 RequestInfo requestInfo, String tenantId){
         ReceiptSearchCriteria receiptSearchCriteria = ReceiptSearchCriteria
                 .builder()
                 .consumerCode(consumerCodes)
                 .status(singleton(ReceiptStatus.APPROVED.toString()))
+                .tenantId(tenantId)
                 .build();
 
         List<Receipt> receipts = collectionRepository.fetchReceipts(receiptSearchCriteria);
@@ -150,10 +175,11 @@ public class WorkflowService {
      * @param workflowRequestByReceiptNumber map workflow request to receipt number
      * @param consumerCodes Consumer codes of all the requests
      * @param requestInfo request info of the incoming request
+     * @param tenantId
      * @return updated receipts
      */
     private List<Receipt> dishonour(Map<String, ReceiptWorkflow> workflowRequestByReceiptNumber, Set<String> consumerCodes,
-                                    RequestInfo requestInfo){
+                                    RequestInfo requestInfo, String tenantId){
         Set<String> status = new HashSet<>();
         status.add(ReceiptStatus.APPROVED.toString());
         status.add(ReceiptStatus.REMITTED.toString());
@@ -167,6 +193,7 @@ public class WorkflowService {
                 .consumerCode(consumerCodes)
                 .instrumentType(instrumentTypes)
                 .status(status)
+                .tenantId(tenantId)
                 .build();
 
         List<Receipt> receipts = collectionRepository.fetchReceipts(receiptSearchCriteria);
@@ -207,10 +234,11 @@ public class WorkflowService {
      * @param workflowRequestByReceiptNumber map workflow request to receipt number
      * @param consumerCodes Consumer codes of all the requests
      * @param requestInfo request info of the incoming request
+     * @param tenantId
      * @return updated receipts
      */
     private List<Receipt> remit(Map<String, ReceiptWorkflow> workflowRequestByReceiptNumber, Set<String> consumerCodes,
-                                RequestInfo requestInfo){
+                                RequestInfo requestInfo, String tenantId){
 
         Set<String> instrumentTypes = new HashSet<>();
         instrumentTypes.add(CASH.toString());
@@ -222,6 +250,7 @@ public class WorkflowService {
                 .consumerCode(consumerCodes)
                 .status(singleton(ReceiptStatus.APPROVED.toString()))
                 .instrumentType(instrumentTypes)
+                .tenantId(tenantId)
                 .build();
 
         List<Receipt> receipts = collectionRepository.fetchReceipts(receiptSearchCriteria);

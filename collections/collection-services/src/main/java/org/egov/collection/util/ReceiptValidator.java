@@ -1,48 +1,6 @@
 package org.egov.collection.util;
 
-import static java.util.Collections.singletonList;
-import static java.util.Objects.isNull;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.egov.collection.config.CollectionServiceConstants.BUSINESSDETAILS_EXCEPTION_DESC;
-import static org.egov.collection.config.CollectionServiceConstants.BUSINESSDETAILS_EXCEPTION_MSG;
-import static org.egov.collection.config.CollectionServiceConstants.BUSINESS_CODE_REQUIRED_CODE;
-import static org.egov.collection.config.CollectionServiceConstants.BUSINESS_CODE_REQUIRED_MESSAGE;
-import static org.egov.collection.config.CollectionServiceConstants.CHEQUE_DD_DATE_WITH_FUTURE_DATE_MESSAGE;
-import static org.egov.collection.config.CollectionServiceConstants.CHEQUE_DD_DATE_WITH_MANUAL_RECEIPT_DATE_MESSAGE;
-import static org.egov.collection.config.CollectionServiceConstants.CHEQUE_DD_DATE_WITH_RECEIPT_DATE_MESSAGE;
-import static org.egov.collection.config.CollectionServiceConstants.COA_MISSING_MESSAGE;
-import static org.egov.collection.config.CollectionServiceConstants.FROM_DATE_GREATER_CODE;
-import static org.egov.collection.config.CollectionServiceConstants.FROM_DATE_GREATER_MESSAGE;
-import static org.egov.collection.config.CollectionServiceConstants.INSTRUMENT_DATE_DAYS;
-import static org.egov.collection.config.CollectionServiceConstants.INVALID_LEGACY_RECEIPT_REQUEST;
-import static org.egov.collection.config.CollectionServiceConstants.PAID_BY_MISSING_CODE;
-import static org.egov.collection.config.CollectionServiceConstants.PAID_BY_MISSING_MESSAGE;
-import static org.egov.collection.config.CollectionServiceConstants.PURPOSE_MISSING_MESSAGE;
-import static org.egov.collection.config.CollectionServiceConstants.RCPTDATE_FIELD_NAME;
-import static org.egov.collection.config.CollectionServiceConstants.RCPTDATE_MISSING_CODE;
-import static org.egov.collection.config.CollectionServiceConstants.RCPTDATE_MISSING_MESSAGE;
-import static org.egov.collection.config.CollectionServiceConstants.RCPTNO_FIELD_NAME;
-import static org.egov.collection.config.CollectionServiceConstants.RCPTNO_MISSING_CODE;
-import static org.egov.collection.config.CollectionServiceConstants.RCPTNO_MISSING_MESSAGE;
-import static org.egov.collection.config.CollectionServiceConstants.RECEIPT_CHEQUE_OR_DD_DATE;
-import static org.egov.collection.config.CollectionServiceConstants.RECEIPT_CHEQUE_OR_DD_DATE_MESSAGE;
-import static org.egov.collection.config.CollectionServiceConstants.TENANT_ID_REQUIRED_CODE;
-import static org.egov.collection.config.CollectionServiceConstants.TENANT_ID_REQUIRED_MESSAGE;
-import static org.egov.collection.model.enums.ReceiptStatus.APPROVALPENDING;
-import static org.egov.collection.model.enums.ReceiptStatus.APPROVED;
-import static org.egov.collection.util.Utils.jsonMerge;
-import static org.springframework.util.StringUtils.isEmpty;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.collection.model.Instrument;
 import org.egov.collection.model.LegacyReceiptHeader;
@@ -53,14 +11,7 @@ import org.egov.collection.model.enums.ReceiptStatus;
 import org.egov.collection.repository.BusinessDetailsRepository;
 import org.egov.collection.repository.CollectionRepository;
 import org.egov.collection.service.WorkflowService;
-import org.egov.collection.web.contract.Bill;
-import org.egov.collection.web.contract.BillAccountDetail;
-import org.egov.collection.web.contract.BillDetail;
-import org.egov.collection.web.contract.BusinessDetailsResponse;
-import org.egov.collection.web.contract.LegacyReceiptReq;
-import org.egov.collection.web.contract.Receipt;
-import org.egov.collection.web.contract.ReceiptReq;
-import org.egov.collection.web.contract.TaxAndPayment;
+import org.egov.collection.web.contract.*;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.Error;
 import org.egov.common.contract.response.ErrorField;
@@ -71,7 +22,19 @@ import org.joda.time.Days;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import lombok.extern.slf4j.Slf4j;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Collections.singletonList;
+import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.egov.collection.config.CollectionServiceConstants.*;
+import static org.egov.collection.model.enums.ReceiptStatus.APPROVALPENDING;
+import static org.egov.collection.model.enums.ReceiptStatus.APPROVED;
+import static org.egov.collection.util.Utils.jsonMerge;
+import static org.springframework.util.StringUtils.isEmpty;
 
 @Slf4j
 @Component
@@ -192,9 +155,11 @@ public class ReceiptValidator {
 					bill.getBillDetails().stream().map(BillDetail::getReceiptNumber).collect(Collectors.toSet())));
 		}
 		
-		List<Receipt> receiptsFromDb = collectionRepository
-				.fetchReceipts(ReceiptSearchCriteria.builder().receiptNumbers(receiptNumbers)
-						.status(ReceiptStatus.statusesByCategory(ReceiptStatus.Category.OPEN)).build());
+		List<Receipt> receiptsFromDb = collectionRepository.fetchReceipts(ReceiptSearchCriteria
+						.builder()
+						.receiptNumbers(receiptNumbers)
+						.status(ReceiptStatus.statusesByCategory(ReceiptStatus.Category.OPEN))
+						.build());
 		
 		Map<String, List<Receipt>> receiptsByReceiptNumber = receiptsFromDb.stream()
 				.collect(Collectors.groupingBy(Receipt::getReceiptNumber));

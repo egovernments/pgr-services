@@ -73,23 +73,23 @@ public class IndexerApplicationRunnerImpl implements ApplicationRunner {
 					URL yamlFile = new URL(yamlLocation);
 					try {
 						service = mapper.readValue(new InputStreamReader(yamlFile.openStream()), Services.class);
+						for (Mapping mapping : (service.getServiceMaps().getMappings())) {
+							 mappingsMap.put(mapping.getTopic(), mapping);
+							if (!CollectionUtils.isEmpty(topicsMap.get(mapping.getConfigKey().toString()))) {
+								List<String> topics = topicsMap.get(mapping.getConfigKey().toString());
+								topics.add(mapping.getTopic());
+								topicsMap.put(mapping.getConfigKey().toString(), topics);
+							} else {
+								List<String> topics = new ArrayList<String>();
+								topics.add(mapping.getTopic());
+								topicsMap.put(mapping.getConfigKey().toString(), topics);
+							}
+						}
 					} catch (Exception e) {
 						logger.error("Exception while fetching service map for: " + yamlLocation + " = ", e);
 						continue;
 					}
 					logger.info("Parsed: " + service);
-					for (Mapping mapping : (service.getServiceMaps().getMappings())) {
-						 mappingsMap.put(mapping.getTopic(), mapping);
-						if (!CollectionUtils.isEmpty(topicsMap.get(mapping.getConfigKey().toString()))) {
-							List<String> topics = topicsMap.get(mapping.getConfigKey().toString());
-							topics.add(mapping.getTopic());
-							topicsMap.put(mapping.getConfigKey().toString(), topics);
-						} else {
-							List<String> topics = new ArrayList<String>();
-							topics.add(mapping.getTopic());
-							topicsMap.put(mapping.getConfigKey().toString(), topics);
-						}
-					}
 
 				} else if (yamlLocation.startsWith("file://")) {
 					logger.info("Reading....: " + yamlLocation);
@@ -97,23 +97,23 @@ public class IndexerApplicationRunnerImpl implements ApplicationRunner {
 					File file = resource.getFile();
 					try {
 						service = mapper.readValue(file, Services.class);
+						for (Mapping mapping : (service.getServiceMaps().getMappings())) {
+							mappingsMap.put(mapping.getTopic(), mapping);
+							if (!CollectionUtils.isEmpty(topicsMap.get(mapping.getConfigKey().toString()))) {
+								List<String> topics = topicsMap.get(mapping.getConfigKey().toString());
+								topics.add(mapping.getTopic());
+								topicsMap.put(mapping.getConfigKey().toString(), topics);
+							} else {
+								List<String> topics = new ArrayList<String>();
+								topics.add(mapping.getTopic());
+								topicsMap.put(mapping.getConfigKey().toString(), topics);
+							}
+						}
 					} catch (Exception e) {
 						logger.error("Exception while fetching service map for: " + yamlLocation);
 						continue;
 					}
 					logger.info("Parsed to object: " + service);
-					for (Mapping mapping : (service.getServiceMaps().getMappings())) {
-						mappingsMap.put(mapping.getTopic(), mapping);
-						if (!CollectionUtils.isEmpty(topicsMap.get(mapping.getConfigKey().toString()))) {
-							List<String> topics = topicsMap.get(mapping.getConfigKey().toString());
-							topics.add(mapping.getTopic());
-							topicsMap.put(mapping.getConfigKey().toString(), topics);
-						} else {
-							List<String> topics = new ArrayList<String>();
-							topics.add(mapping.getTopic());
-							topicsMap.put(mapping.getConfigKey().toString(), topics);
-						}
-					}
 				}
 			}
 		} catch (Exception e) {

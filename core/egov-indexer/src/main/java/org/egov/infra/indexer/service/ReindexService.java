@@ -53,9 +53,6 @@ public class ReindexService {
 	@Autowired
 	private IndexerProducer indexerProducer;
 
-	@Autowired
-	private IndexerService indexerService;
-
 	@Value("${egov.core.reindex.topic.name}")
 	private String reindexTopic;
 

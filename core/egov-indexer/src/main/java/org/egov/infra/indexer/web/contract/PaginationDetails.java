@@ -27,4 +27,7 @@ public class PaginationDetails {
 	@JsonProperty("maxPageSize")
 	public Integer maxPageSize;
 
+	@JsonProperty("startingOffset")
+	public Integer startingOffset = 0;
+
 }

@@ -31,7 +31,6 @@ import org.egov.egf.master.web.repository.BankAccountContractRepository;
 import org.egov.egf.master.web.repository.BankContractRepository;
 import org.egov.egf.master.web.repository.FinancialStatusContractRepository;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -75,7 +74,7 @@ public class InstrumentServiceTest {
 
     @Before
     public void setup() {
-        instrumentService = new InstrumentService(validator, instrumentRepository, surrenderReasonRepository,
+        instrumentService = new InstrumentService(validator, instrumentRepository,
                 bankContractRepository, financialStatusContractRepository, bankAccountContractRepository,
                 instrumentTypeRepository);
     }
@@ -829,7 +828,7 @@ public class InstrumentServiceTest {
         assertEquals(expextedResult, actualResult.get(0).getFinancialStatus());
     }
 
-    @Test(expected = InvalidDataException.class)
+    @Test
     public final void test_fetch_surrenderreason_null() {
 
         List<Instrument> instruments = getInstrumentss();

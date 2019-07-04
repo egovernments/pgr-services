@@ -17,8 +17,8 @@ import org.egov.infra.indexer.custom.pt.PTCustomDecorator;
 import org.egov.infra.indexer.custom.pt.PropertyResponse;
 import org.egov.infra.indexer.models.IndexJob;
 import org.egov.infra.indexer.models.IndexJob.StatusEnum;
-import org.egov.infra.indexer.producer.IndexerProducer;
 import org.egov.infra.indexer.models.IndexJobWrapper;
+import org.egov.infra.indexer.producer.IndexerProducer;
 import org.egov.infra.indexer.util.IndexerUtils;
 import org.egov.infra.indexer.util.ResponseInfoFactory;
 import org.egov.infra.indexer.web.contract.Index;
@@ -28,7 +28,6 @@ import org.egov.infra.indexer.web.contract.Mapping;
 import org.egov.infra.indexer.web.contract.Mapping.ConfigKeyEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.PropertyResolver;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
@@ -56,9 +55,6 @@ public class LegacyIndexService {
 
 	@Autowired
 	private IndexerProducer indexerProducer;
-
-	@Autowired
-	private IndexerService indexerService;
 
 	@Value("${egov.core.reindex.topic.name}")
 	private String reindexTopic;
@@ -170,8 +166,9 @@ public class LegacyIndexService {
 				if (threadRun) {
 					log.info("JobStarted: " + legacyIndexRequest.getJobId());
 					ObjectMapper mapper = indexerUtils.getObjectMapper();
-					Integer offset = 0;
-					Integer count = 0;
+					Integer offset = legacyIndexRequest.getApiDetails().getPaginationDetails().getStartingOffset();
+					offset = offset == null ? 0: offset;
+					Integer count = offset;
 					Integer presentCount = 0;
 					Integer size = null != legacyIndexRequest.getApiDetails().getPaginationDetails().getMaxPageSize()
 							? legacyIndexRequest.getApiDetails().getPaginationDetails().getMaxPageSize()
@@ -238,7 +235,7 @@ public class LegacyIndexService {
 							log.info("JOBFAILED!!! Offset: "+offset+" Size: "+size);
 							log.info("Request: " + request);
 							log.info("URI: " + uri);
-							log.error("Exception: ", e);
+							log.error("Re-index Exception: ", e);
 							IndexJob job = IndexJob.builder().jobId(legacyIndexRequest.getJobId())
 									.auditDetails(indexerUtils.getAuditDetails(
 											legacyIndexRequest.getRequestInfo().getUserInfo().getUuid(), false))
