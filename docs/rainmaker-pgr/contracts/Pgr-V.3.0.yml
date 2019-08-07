@@ -29,7 +29,7 @@ paths:
           required: false
           type: string
           format: varchar
-        - name: serviceCode
+        - name: serviceCodes
           in: query
           description: Allows search for service type - comma separated list.
           type: array
@@ -55,6 +55,25 @@ paths:
           required: false
           type: integer
           format: int64
+        - name: serviceRequestId
+          in: query
+          description: Allows search based on the service request id.
+          type: array
+          items:
+            type: string
+          format: varchar
+        - name: assignedTo
+          in: query
+          description: Attribute to searh complaints based on who the complaint is assigned to.
+          required: false
+          type: string
+          format: varchar
+        - name: accountId
+          in: query
+          description: Attribute to search complaints based on accountId.
+          required: false
+          type: string
+          format: varchar
       responses:
         200:
           description: Successful response sorted by reverse chrnological order of creation
@@ -68,6 +87,78 @@ paths:
        - Service Request
 
 ###########################################################################
+
+  /requests/_count:
+    post:
+      summary: Get service requests
+      description: |
+        Gets the list of service requests for a particular ULB based on search criteria.
+        - name: group
+          in: query
+          description: Attribute of service config, it indicate the "Department" for which service type is defined.
+          required: false
+          type: string
+          format: varchar
+        - name: serviceCodes
+          in: query
+          description: Allows search for service type - comma separated list.
+          type: array
+          items:
+            type: string
+          format: varchar
+        - name: startDate
+          in: query
+          description: Earliest epoch time to include in search - request created time |
+          required: false
+          type: integer
+          format: int64
+        - name: endDate
+          in: query
+          description: Latest epoch time to include in search -  request created time |
+           If search is on start date then end date is mandatory, if end date is null then server will take current date as end date.
+          required: false
+          type: integer
+          format: int64
+        - name: lastUpdatedSince
+          in: query
+          description: searches all requests that have been modified/created since last modified epoch time as provided here
+          required: false
+          type: integer
+          format: int64
+        - name: serviceRequestId
+          in: query
+          description: Allows search based on the service request id.
+          type: array
+          items:
+            type: string
+          format: varchar
+        - name: assignedTo
+          in: query
+          description: Attribute to searh complaints based on who the complaint is assigned to.
+          required: false
+          type: string
+          format: varchar
+        - name: accountId
+          in: query
+          description: Attribute to search complaints based on accountId.
+          required: false
+          type: string
+          format: varchar
+      responses:
+        200:
+          description: Successful response sorted by reverse chrnological order of creation
+          schema:
+            $ref: "#/definitions/ServiceResponse"
+        '400':
+          description: Invalid input.
+          schema:
+            $ref: 'https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-1-0.yml#/definitions/ErrorRes'
+      tags:
+       - Service Request
+
+###########################################################################
+
+
   /requests/_create:
     post:
       summary: Create service requests
@@ -124,64 +215,6 @@ paths:
 
 definitions:
 
-  ServiceDef:
-    type: object
-    description: |
-      
-      This will be the MDMS data.
-      
-      Defines the structure of a service provided by the administration. This is based on Open311 standard, but extends it in follwoing important ways -
-
-      1. metadata is changed from boolean to strign and represents a valid swgger 2.0 definition url of the metadata definition. If this is null then it is assumed taht service does not have any metadata, else the metadata is defined in the OpenAPI definition. This allows for a well structured powerful metadata definition.
-
-      2. Due to this ServiceRequest object has been enhanced to include metadata values (aka attribute value in Open311) as an JSON object.
-    properties:
-      tenantId:
-        type: string
-        description: The unique identifier for Service - this is equivalent to jurisdiction_id in Open311. As the platform intends to be multi tenanted - this is always required
-        minLength: 2
-        maxLength: 50
-      serviceCode:
-        type: string
-        description: The unique identifier for Service
-        minLength: 2
-        maxLength: 64
-      serviceName:
-        type: string
-        description: Service name.
-        minLength: 2
-        maxLength: 100
-      description:
-        type: string
-        description: Services description.
-        minLength: 2
-        maxLength: 500
-      metadata:
-        type: string
-        description: Schema url to valid OpenAPI swagger difinition. As described in the definition above these are the additional service specific attributes defined as a swagger definition
-      type:
-        type: string
-        description: realtime (Currently we only support real time srevices)
-        enum:
-          - realtime
-          - batch
-          - blackbox
-      keywords:
-        type: string
-        description: tags for this service, we can provide multiple keywords as dot(.) seprated.
-      group:
-        type: string
-        description: This field we will use to capture department.
-      slaHours:
-        type: number
-        description: Service Level Agreement in hours for Service.
-    required:
-      - tenantId
-      - serviceName
-      - serviceCode
-      
-########################################################################################      
-      
   Service:
     type: object
     description: |
@@ -210,28 +243,14 @@ definitions:
         description: A full description of the request provided by the user
         minLength: 2
         maxLength: 250
-
-      lat:
-        type: integer
-        description: Latitude of the location.
-      long:
-        type: integer
-        description: Longitude of location.
-      address:
-        type: string
-        description: Human readable address or description of location.
-        minLength: 2
-        maxLength: 256
+      addressDetail:
+        $ref: "https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-1-0.yml#/definitions/Address"
+      citizen:
+        $ref: "https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-1-0.yml#/definitions/UserInfo"
       addressId:
         type: string
         description:
           The internal address ID used by a tenant master address repository or other addressing system - for eGov it can be boundary id in the boundary service
-
-      email:
-        type: string
-        description: The email address of the person submitting the request.
-        minLength: 5
-        maxLength: 50
       deviceId:
         type: string
         description:
@@ -241,24 +260,10 @@ definitions:
         description: userid of the user requesting the srervice - in our case it may be same as phone as we are using mobile number as the userid
         minLength: 2
         maxLength: 64
-      firstName:
-        type: string
-        description: The given name of the person submitting the request.
-        minLength: 2
-        maxLength: 32
-      lastName:
-        type: string
-        description: The family name of the person submitting the request.
-        minLength: 2
-        maxLength: 32
       phone:
         type: string
         description: The phone number of the person submitting the request.
         maxLength: 12
-      attributes:
-        type: object
-        description: This is the json object that will carry the actual input (whereever the metadata requries input). Structure should be same as the schema definition provided in the metadata of the service (schema compliance check to be performed at client/server)
-      
       status:
         type: string
         description: The current status of the service request.
@@ -279,12 +284,6 @@ definitions:
           - whatsapp
           - csc
           - web
-
-      expectedTime:
-        type: integer
-        format: int64
-        description: epoch of the time object is last modified.
-        x-format: 'dd/mm/yyyy HH-MM-SS'
         
       feedback:
         type: string
@@ -294,11 +293,6 @@ definitions:
       rating:
         type: string
         description: Rating about service from 1 to 5.
-      landmark:
-        type: string
-        description: land mark close to the adress
-        minLength: 2
-        maxLength: 50
       
       auditDetails:
         $ref: "https://raw.githubusercontent.com/egovernments/egov-services/master/docs/common/contracts/v1-1-0.yml#/definitions/AuditDetails"
