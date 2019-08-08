@@ -45,7 +45,7 @@ public class CustomAsyncFilter extends ZuulFilter {
 			CustomAsyncRequest customAsyncRequest = CustomAsyncRequest.builder().request(jsonToMap(readRequestBody(request)))
 					.response(jsonToMap(readResponseBody(ctx))).sourceUri(request.getRequestURI())
 					.queryParamMap(ctx.getRequestQueryParams()).build();
-			System.out.println("CustomAsyncFilter Topic:" + topic);
+			log.info("CustomAsyncFilter Topic:" + topic);
 			kafkaTemplate.send(topic, customAsyncRequest);
 		} catch (Exception ex) {
 			ex.printStackTrace();

@@ -9,10 +9,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostFilterRequest {
+public class PreHookFilterRequest {
 
 	private String Request;
-	
-	private String Response;
 
 }

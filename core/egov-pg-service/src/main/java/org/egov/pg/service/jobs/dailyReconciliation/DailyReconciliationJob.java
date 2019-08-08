@@ -28,7 +28,11 @@ public class DailyReconciliationJob implements Job {
     private static final RequestInfo requestInfo;
 
     static {
-        User userInfo = User.builder().uuid("DAILY_RECONC_JOB").roles(Collections.emptyList()).id(0L).build();
+        User userInfo = User.builder()
+                .uuid("DAILY_RECONC_JOB")
+                .type("SYSTEM")
+                .roles(Collections.emptyList()).id(0L).build();
+
         requestInfo = new RequestInfo("", "", 0L, "", "", "", "", "", "", userInfo);
     }
 

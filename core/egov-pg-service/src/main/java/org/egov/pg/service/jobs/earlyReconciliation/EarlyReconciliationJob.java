@@ -29,7 +29,11 @@ public class EarlyReconciliationJob implements Job {
     private static final RequestInfo requestInfo;
 
     static {
-        User userInfo = User.builder().uuid("EARLY_RECONC_JOB").roles(Collections.emptyList()).id(0L).build();
+        User userInfo = User.builder()
+                .uuid("EARLY_RECONC_JOB")
+                .type("SYSTEM")
+                .roles(Collections.emptyList()).id(0L).build();
+
         requestInfo = new RequestInfo("", "", 0L, "", "", "", "", "", "", userInfo);
     }
 
